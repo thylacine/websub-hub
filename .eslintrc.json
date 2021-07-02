@@ -1,0 +1,82 @@
+{
+  "env": {
+    "browser": false,
+    "es6": true,
+    "node": true
+  },
+  "extends": [
+    "eslint:recommended",
+    "plugin:node/recommended",
+    "plugin:security/recommended",
+    "plugin:sonarjs/recommended"
+  ],
+  "parserOptions": {
+    "ecmaVersion": 2018
+  },
+  "plugins": [
+    "node",
+    "security",
+    "sonarjs"
+  ],
+  "rules": {
+    "array-element-newline": [
+      "error",
+      "consistent"
+    ],
+    "arrow-parens": [
+      "error",
+      "always"
+    ],
+    "arrow-spacing": [
+      "error",
+      {
+        "after": true,
+        "before": true
+      }
+    ],
+    "block-scoped-var": "error",
+    "block-spacing": "error",
+    "brace-style": "error",
+    "callback-return": "error",
+    "camelcase": "error",
+    "class-methods-use-this": "error",
+    "comma-dangle": [
+      "error",
+      "always-multiline"
+    ],
+    "comma-spacing": [
+      "error",
+      {
+        "after": true,
+        "before": false
+      }
+    ],
+    "comma-style": [
+      "error",
+      "last"
+    ],
+    "sonarjs/cognitive-complexity": "warn",
+    "sonarjs/no-duplicate-string": "warn",
+    "keyword-spacing": "error",
+    "linebreak-style": [
+      "error",
+      "unix"
+    ],
+    "no-unused-vars": [
+      "error", {
+        "varsIgnorePattern": "^_"
+      }
+    ],
+    "object-curly-spacing": [
+      "error",
+      "always"
+    ],
+    "prefer-const": "error",
+    "quotes": [
+      "error",
+      "single"
+    ],
+    "strict": "error",
+    "vars-on-top": "error"
+  }
+}
