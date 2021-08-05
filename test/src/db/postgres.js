@@ -70,6 +70,13 @@ describe('DatabasePostgres', function () {
     sinon.restore();
   });
 
+  it('covers listener', function () {
+    const listenerOptions = new Config('test');
+    listenerOptions.db.cacheEnabled = true;
+    const listenerDb = new DB(stubLogger, listenerOptions, pgpStub);
+    assert(listenerDb);
+  });
+
   // Ensure all interface methods are implemented
   describe('Implementation', function () {
     it('implements interface', async function () {
@@ -104,6 +111,11 @@ describe('DatabasePostgres', function () {
         db.pgpInitOptions.query(event);
         assert(db.logger.debug.called);
       });
+      it('covers NOTIFY', function () {
+        const event = { query: 'NOTIFY thing' };
+        db.pgpInitOptions.query(event);
+        assert(!db.logger.debug.called);
+      });
     }); // query
     describe('receive', function () {
       it('covers', function () {
@@ -133,6 +145,35 @@ describe('DatabasePostgres', function () {
         assert(db.logger.debug.called);
         assert.deepStrictEqual(data, expectedData);
       });
+      it('covers NOTIFY', function () {
+        const data = [
+          {
+            column_one: 'one', // eslint-disable-line camelcase
+            column_two: 2, // eslint-disable-line camelcase
+          },
+          {
+            column_one: 'foo', // eslint-disable-line camelcase
+            column_two: 4, // eslint-disable-line camelcase
+          },
+        ];
+        const result = {
+          command: 'NOTIFY',
+        };
+        const event = {};
+        const expectedData = [
+          {
+            columnOne: 'one',
+            columnTwo: 2,
+          },
+          {
+            columnOne: 'foo',
+            columnTwo: 4,
+          },
+        ];
+        db.pgpInitOptions.receive(data, result, event)
+        assert(!db.logger.debug.called);
+        assert.deepStrictEqual(data, expectedData);
+      });
     }); // receive
   }); // pgpInitOptions
 
@@ -156,6 +197,9 @@ describe('DatabasePostgres', function () {
   }); // _initTables
 
   describe('initialize', function () {
+    after(function () {
+      delete db.listener;
+    });
     it('passes supported version', async function () {
       const version = { major: 1, minor: 0, patch: 0 };
       sinon.stub(db.db, 'one').resolves(version);
@@ -187,6 +231,15 @@ describe('DatabasePostgres', function () {
       sinon.stub(db, '_currentSchema').resolves(db.schemaVersionsSupported.max);
       sinon.stub(db.db, 'one').resolves(db.schemaVersionsSupported.max);
       await db.initialize();
+    });
+    it('covers listener', async function() {
+      db.listener = {
+        start: sinon.stub(),
+      };
+      const version = { major: 1, minor: 0, patch: 0 };
+      sinon.stub(db.db, 'one').resolves(version);
+      await db.initialize(false);
+      assert(db.listener.start.called);
     });
   }); // initialize
 
@@ -228,6 +281,9 @@ describe('DatabasePostgres', function () {
   }); // _queryFileHelper
 
   describe('_closeConnection', function () {
+    after(function () {
+      delete db.listener;
+    });
     it('success', async function () {
       sinon.stub(db._pgp, 'end');
       await db._closeConnection();
@@ -242,6 +298,14 @@ describe('DatabasePostgres', function () {
       } catch (e) {
         assert.deepStrictEqual(e, expected);
       }
+    });
+    it('covers listener', async function () {
+      db.listener = {
+        stop: sinon.stub(),
+      };
+      sinon.stub(db._pgp, 'end');
+      await db._closeConnection();
+      assert(db._pgp.end.called);
     });
   }); // _closeConnection
 
@@ -267,6 +331,84 @@ describe('DatabasePostgres', function () {
       }
     });
   }); // _purgeTables
+
+  describe('_topicChanged', function () {
+    beforeEach(function () {
+      db.cache = new Map();
+      sinon.stub(db.cache, 'delete');
+    });
+    after(function () {
+      delete db.cache;
+    });
+    it('covers', function () {
+      db._topicChanged('topic-id');
+      assert(db.cache.delete.called);
+    });
+    it('ignores ping', function () {
+      db._topicChanged('ping');
+      assert(!db.cache.delete.called);
+    });
+  }); // _topicChanged
+
+  describe('_listenerEstablished', function () {
+    it('creates cache', function () {
+      delete db.cache;
+      db._listenerEstablished();
+      assert(db.cache instanceof Map);
+    });
+  }); // _listenerEstablished
+
+  describe('_listenerLost', function () {
+    it('removes cache', function () {
+      db.cache = new Map();
+      db._listenerLost();
+      assert(!db.cache);
+    });
+  }); // _listenerLost
+
+  describe('_cacheGet', function () {
+    let key;
+    beforeEach(function () {
+      key = 'key';
+    });
+    it('nothing if no cache', function () {
+      delete db.cache;
+      const result = db._cacheGet(key);
+      assert.strictEqual(result, undefined);
+    });
+    it('nothing if no entry', function () {
+      db.cache = new Map();
+      const result = db._cacheGet(key);
+      assert.strictEqual(result, undefined);
+    });
+    it('returns cached entry', function () {
+      db.cache = new Map();
+      const expected = {
+        foo: 'bar',
+      };
+      db._cacheSet(key, expected);
+      const result = db._cacheGet(key);
+      assert.deepStrictEqual(result, expected);
+    });
+  }); // _cacheGet
+
+  describe('_cacheSet', function () {
+    let key;
+    beforeEach(function () {
+      key = 'key';
+    });
+    it('covers no cache', function () {
+      delete db.cache;
+      db._cacheSet(key, 'data');
+    });
+    it('covers cache', function () {
+      db.cache = new Map();
+      const expected = 'blah';
+      db._cacheSet(key, expected);
+      const result = db._cacheGet(key);
+      assert.deepStrictEqual(result, expected);
+    });
+  }); // _cacheSet
 
   describe('context', function () {
     it('covers', async function () {
@@ -1024,8 +1166,15 @@ describe('DatabasePostgres', function () {
   }); // topicGetByUrl
 
   describe('topicGetContentById', function () {
+    let topic;
+    beforeEach(function () {
+      delete db.cache;
+      topic = {
+        id: topicId,
+      };
+    });
     it('success', async function() {
-      const expected = { id: topicId };
+      const expected = topic;
       sinon.stub(db.db, 'oneOrNone').resolves(expected);
       const result = await db.topicGetContentById(dbCtx, topicId);
       assert.deepStrictEqual(result, expected);
@@ -1045,6 +1194,23 @@ describe('DatabasePostgres', function () {
       } catch (e) {
         assert.deepStrictEqual(e, expected);
       }
+    });
+    it('caches success', async function () {
+      db.cache = new Map();
+      const expected = topic;
+      sinon.stub(db.db, 'oneOrNone').resolves(expected);
+      const result = await db.topicGetContentById(dbCtx, topicId);
+      assert.deepStrictEqual(result, expected);
+    });
+    it('covers cached entry', async function() {
+      let result;
+      db.cache = new Map();
+      const expected = topic;
+      sinon.stub(db.db, 'oneOrNone').resolves(expected);
+      result = await db.topicGetContentById(dbCtx, topicId);
+      assert.deepStrictEqual(result, expected);
+      result = await db.topicGetContentById(dbCtx, topicId);
+      assert.deepStrictEqual(result, expected);
     });
   }); // topicGetContentById
 
@@ -1185,7 +1351,7 @@ describe('DatabasePostgres', function () {
       }
     });
 
-  });
+  }); // topicUpdate
 
   describe('verificationClaim', function () {
     it('success', async function() {

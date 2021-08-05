@@ -8,5 +8,6 @@ module.exports = {
   },
   db: {
     queryLogLevel: 'debug',
+    cacheEnabled: false,
   },
 };
