@@ -69,7 +69,7 @@ describe('Database Integration', function () {
         // eslint-disable-next-line security/detect-non-literal-require
         DB = require(i.module);
         db = new DB(stubLogger, i.config);
-        await db.schemaCheck();
+        await db.initialize();
         await db._purgeTables(true);
       });
       after(async function () {

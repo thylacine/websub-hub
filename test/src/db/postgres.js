@@ -155,17 +155,17 @@ describe('DatabasePostgres', function () {
     });
   }); // _initTables
 
-  describe('schemaCheck', function () {
+  describe('initialize', function () {
     it('passes supported version', async function () {
       const version = { major: 1, minor: 0, patch: 0 };
       sinon.stub(db.db, 'one').resolves(version);
-      await db.schemaCheck(false);
+      await db.initialize(false);
     });
     it('fails low version', async function () {
       const version = { major: 0, minor: 0, patch: 0 };
       sinon.stub(db.db, 'one').resolves(version);
       try {
-        await db.schemaCheck(false);
+        await db.initialize(false);
         assert.fail(noExpectedException);
       } catch (e) {
         assert(e instanceof DBErrors.MigrationNeeded);
@@ -175,7 +175,7 @@ describe('DatabasePostgres', function () {
       const version = { major: 100, minor: 100, patch: 100 };
       sinon.stub(db.db, 'one').resolves(version);
       try {
-        await db.schemaCheck(false);
+        await db.initialize(false);
         assert.fail(noExpectedException);
       } catch (e) {
         assert(e instanceof DBErrors.MigrationNeeded);
@@ -186,9 +186,9 @@ describe('DatabasePostgres', function () {
       sinon.stub(db.db, 'multiResult');
       sinon.stub(db, '_currentSchema').resolves(db.schemaVersionsSupported.max);
       sinon.stub(db.db, 'one').resolves(db.schemaVersionsSupported.max);
-      await db.schemaCheck();
+      await db.initialize();
     });
-  }); // schemaCheck
+  }); // initialize
 
   describe('healthCheck', function () {
     beforeEach(function () {

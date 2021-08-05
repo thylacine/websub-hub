@@ -83,14 +83,14 @@ class Database {
 
 
   /**
-   * Validate schema compatibility.
-   * Ensure this is called immediately after instantiating a DB instance,
-   * as some engines also finish initialization and validation here, which
-   * was easier than wrangling async calls in constructor.
-   * In light of this behavior, this method could be named better.
-   */
-   async schemaCheck() {
-    const _scope = _fileScope('schemaCheck');
+   * Perform tasks needed to prepare database for use.  Ensure this is called
+   * after construction, and before any other database activity.
+   * At the minimum, this will validate a compatible schema is present and usable.
+   * Some engines will also perform other initializations or async actions which
+   * are easier handled outside the constructor.
+  */
+   async initialize() {
+    const _scope = _fileScope('initialize');
 
     const currentSchema = await this._currentSchema();
     const current = svh.schemaVersionObjectToNumber(currentSchema);

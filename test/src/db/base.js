@@ -108,7 +108,7 @@ describe('DatabaseBase', function () {
     });
   }); // _ensureTypes
 
-  describe('schemaCheck', function () {
+  describe('initialize', function () {
     let currentSchema;
     beforeEach(function () {
       currentSchema = {
@@ -123,7 +123,7 @@ describe('DatabaseBase', function () {
       sinon.stub(db, '_currentSchema').resolves(currentSchema);
     });
     it('covers success', async function () {
-      await db.schemaCheck();
+      await db.initialize();
     });
     it('covers failure', async function() {
       db.schemaVersionsSupported = {
@@ -139,13 +139,13 @@ describe('DatabaseBase', function () {
         },
       };
       try {
-        await db.schemaCheck();
+        await db.initialize();
         assert.fail('did not get expected exception');
       } catch (e) {
         assert(e instanceof DBErrors.MigrationNeeded);
       }
     });
-  }); // schemaCheck
+  }); // initialize
 
   describe('_topicDefaults', function () {
     let topic;

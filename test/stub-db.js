@@ -13,7 +13,7 @@ const stubFns = [
   'authenticationGet',
   'authenticationUpsert',
   'healthCheck',
-  'schemaCheck',
+  'initialize',
   'subscriptionsByTopicId',
   'subscriptionCountByTopicUrl',
   'subscriptionDelete',

@@ -100,13 +100,13 @@ class DatabasePostgres extends Database {
   }
 
 
-  async schemaCheck(applyMigrations = true) {
-    const _scope = _fileScope('schemaCheck');
+  async initialize(applyMigrations = true) {
+    const _scope = _fileScope('initialize');
     this.logger.debug(_scope, 'called', { applyMigrations });
     if (applyMigrations) {
       await this._initTables();
     }
-    await super.schemaCheck();
+    await super.initialize();
   }
 
 
