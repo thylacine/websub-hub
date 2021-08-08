@@ -84,7 +84,7 @@ const topicLeaseDefaults = () => {
  * @param {Number} jitter
  * @returns {Number}
  */
-  const attemptRetrySeconds = (attempt, retryBackoffSeconds = [60, 120, 360, 1440, 7200, 43200, 86400], jitter = 0.618) => {
+const attemptRetrySeconds = (attempt, retryBackoffSeconds = [60, 120, 360, 1440, 7200, 43200, 86400], jitter = 0.618) => {
   const maxAttempt = retryBackoffSeconds.length - 1;
   if (typeof attempt !== 'number' || attempt < 0) {
     attempt = 0;
@@ -103,7 +103,7 @@ const topicLeaseDefaults = () => {
  * @param {Array} array
  * @param {Number} per
  */
- const arrayChunk = (array, per = 1) => {
+const arrayChunk = (array, per = 1) => {
   const nChunks = Math.ceil(array.length / per);
   return Array.from(Array(nChunks), (_, i) => array.slice(i * per, (i + 1) * per));
 }
@@ -114,7 +114,7 @@ const topicLeaseDefaults = () => {
  * @param {Array} dst
  * @param {Array} src
  */
- const stackSafePush = (dst, src) => {
+const stackSafePush = (dst, src) => {
   const jsEngineMaxArguments = 2**16; // Current as of Node 12
   arrayChunk(src, jsEngineMaxArguments).forEach((items) => {
     Array.prototype.push.apply(dst, items);

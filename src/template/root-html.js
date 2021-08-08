@@ -83,7 +83,7 @@ function usageSection(isPublicHub, hubURL) {
           </li>
         </ul>
       </div>`
-  : `
+    : `
       <h2>Private Hub</h2>
       <p>
         This hub only serves specific topics.

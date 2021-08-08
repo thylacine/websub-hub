@@ -103,7 +103,7 @@ class Authenticator {
     const authData = req.getHeader(Enum.Header.Authorization);
     if (authData
     &&  await this.isValidAuthorization(authData, ctx)) {
-        return true;
+      return true;
     }
     return this.requestBasic(res);
   }

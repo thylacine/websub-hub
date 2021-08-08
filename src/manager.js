@@ -40,7 +40,7 @@ class Manager {
    * @param {http.ServerResponse} res
    * @param {object} ctx
    */
-   async getHealthcheck(res, ctx) {
+  async getHealthcheck(res, ctx) {
     const _scope = _fileScope('getHealthcheck');
     const health = 'happy';
 

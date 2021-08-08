@@ -117,8 +117,7 @@ class LinkHelper {
                 .map(([name, value]) => ({ name, value })),
             };
             links.push(link);
-        });
-
+          });
       });
       feedParser.on('readable', () => {
         let _item;
@@ -147,8 +146,8 @@ class LinkHelper {
           const link = {
             target: attributes.href,
             attributes: Object.entries(attributes)
-            .filter(([name]) => name !== 'href')
-            .map(([name, value]) => ({ name, value })),
+              .filter(([name]) => name !== 'href')
+              .map(([name, value]) => ({ name, value })),
           };
           links.push(link);
         }
@@ -158,6 +157,7 @@ class LinkHelper {
     parser.end();
     return links;
   }
+
 
   /**
    * Attempt to resolve a relative target URI

@@ -30,7 +30,7 @@ const dateOrNot = (date, otherwise) => {
  * @param {Number} seconds
  * @returns {String}
  */
- const secondsToPeriod = (seconds) => {
+const secondsToPeriod = (seconds) => {
   let value = seconds;
   const result = [];
 
@@ -212,7 +212,7 @@ function htmlHeader(pageTitle, navLinks = []) {
         <ol>
           ${navLinks.map((l) => renderNavLink(l)).join('\n')}
         </ol>`
-    : '') + `
+      : '') + `
       </nav>
     </header>
     <main>`;

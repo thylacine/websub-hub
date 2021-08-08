@@ -66,7 +66,7 @@ class Service extends Dingus {
    * @param {Object} ctx 
    * @param {String} newPath
   */
-   async handlerRedirect(req, res, ctx, newPath) {
+  async handlerRedirect(req, res, ctx, newPath) {
     const _scope = _fileScope('handlerRedirect');
     this.logger.debug(_scope, 'called', { req: common.requestLogData(req), ctx });
 
@@ -185,8 +185,9 @@ class Service extends Dingus {
     await this.manager.getTopicDetails(res, ctx);
   }
 
+
   /**
-   * Same as super.ingestBody, but if no body was send, do not parse (and
+   * Same as super.ingestBody, but if no body was sent, do not parse (and
    * thus avoid possible unsupported media type error).
    * @param {http.ClientRequest} req
    * @param {http.ServerResponse} res
@@ -206,7 +207,7 @@ class Service extends Dingus {
    * @param {http.ServerResponse} res
    * @param {Object} ctx
    */
-   async handlerUpdateTopic(req, res, ctx) {
+  async handlerUpdateTopic(req, res, ctx) {
     const _scope = _fileScope('handlerUpdateTopic');
     this.logger.debug(_scope, 'called', { req: common.requestLogData(req), ctx });
 
@@ -226,17 +227,17 @@ class Service extends Dingus {
    * @param {Object} ctx
    */
   async handlerUpdateSubscription(req, res, ctx) {
-  const _scope = _fileScope('handlerUpdateSubscription');
-  this.logger.debug(_scope, 'called', { req: common.requestLogData(req), ctx });
+    const _scope = _fileScope('handlerUpdateSubscription');
+    this.logger.debug(_scope, 'called', { req: common.requestLogData(req), ctx });
 
-  this.setResponseType(this.responseTypes, req, res, ctx);
+    this.setResponseType(this.responseTypes, req, res, ctx);
 
-  await this.authenticator.required(req, res, ctx);
+    await this.authenticator.required(req, res, ctx);
 
-  await this.maybeIngestBody(req, res, ctx);
-  ctx.method = req.method;
-  await this.manager.updateSubscription(res, ctx);
-}
+    await this.maybeIngestBody(req, res, ctx);
+    ctx.method = req.method;
+    await this.manager.updateSubscription(res, ctx);
+  }
   
 
   /**
@@ -254,7 +255,7 @@ class Service extends Dingus {
     this.setResponseType(this.responseTypes, req, res, ctx);
 
     await this.serveFile(req, res, ctx, this.staticPath, file || ctx.params.file);
-    this.logger.info(_scope, 'finished', { ctx });
+    this.logger.info(_scope, 'finished', { ctx: { ...ctx, responseBody: common.logTruncate((ctx.responseBody || '').toString(), 100) } });
   }
 
 

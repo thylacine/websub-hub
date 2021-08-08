@@ -739,7 +739,7 @@ class DatabasePostgres extends Database {
     let topics;
     try {
       topics = await dbCtx.manyOrNone(this.statement.topicGetInfoAll);
-      } catch (e) {
+    } catch (e) {
       this.logger.error(_scope, 'failed', { error: e, topics });
       throw e;
     }

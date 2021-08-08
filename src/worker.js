@@ -95,7 +95,7 @@ class Worker {
         isSettled = true;
         rejected = rej;
         throw rej;
-    });
+      });
 
     Object.defineProperties(promise, {
       isSettled: { get: () => isSettled },
