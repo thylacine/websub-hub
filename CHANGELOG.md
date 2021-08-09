@@ -4,7 +4,7 @@ Releases and notable changes to this project are documented here.
 
 ## [Unreleased]
 
-## [v1.1.0] - 
+## [v1.1.0] - 2021-08-08
 
 ### Added
 
