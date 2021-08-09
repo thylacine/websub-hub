@@ -30,7 +30,7 @@ const dateOrNot = (date, otherwise) => {
  * @param {Number} seconds
  * @returns {String}
  */
- const secondsToPeriod = (seconds) => {
+const secondsToPeriod = (seconds) => {
   let value = seconds;
   const result = [];
 
@@ -212,7 +212,7 @@ function htmlHeader(pageTitle, navLinks = []) {
         <ol>
           ${navLinks.map((l) => renderNavLink(l)).join('\n')}
         </ol>`
-    : '') + `
+      : '') + `
       </nav>
     </header>
     <main>`;
@@ -227,13 +227,15 @@ function htmlFooter() {
   return `    </main>
     <footer>
       <ol>
-        <a href="https://git.squeep.com/?p=websub-hub;a=tree">Development Repository</a>
-      </ol>
-      <ol>
-        <a href="https://squeep.com/">A Squeep Infrastructure Component</a>
-      </ol>
-      <ol>
-        &copy;<time datetime="2021">&#8559;&#8559;&#8553;&#8553;&#8544;</time>
+        <li>
+          <a href="https://git.squeep.com/?p=websub-hub;a=tree">Development Repository</a>
+        </li>
+        <li>
+          <a href="https://squeep.com/">A Squeep Infrastructure Component</a>
+        </li>
+        <li>
+          &copy;<time datetime="2021">&#8559;&#8559;&#8553;&#8553;&#8544;</time>
+        </li>
       </ol>
     </footer>`;
 }

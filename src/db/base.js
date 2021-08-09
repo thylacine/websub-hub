@@ -76,21 +76,21 @@ class Database {
    * @param {String} method
    * @param {arguments} args
    */
-   _notImplemented(method, args) {
+  _notImplemented(method, args) {
     this.logger.error(_fileScope(method), 'abstract method called', Array.from(args));
     throw new DBErrors.NotImplemented(method);
   }
 
 
   /**
-   * Validate schema compatibility.
-   * Ensure this is called immediately after instantiating a DB instance,
-   * as some engines also finish initialization and validation here, which
-   * was easier than wrangling async calls in constructor.
-   * In light of this behavior, this method could be named better.
-   */
-   async schemaCheck() {
-    const _scope = _fileScope('schemaCheck');
+   * Perform tasks needed to prepare database for use.  Ensure this is called
+   * after construction, and before any other database activity.
+   * At the minimum, this will validate a compatible schema is present and usable.
+   * Some engines will also perform other initializations or async actions which
+   * are easier handled outside the constructor.
+  */
+  async initialize() {
+    const _scope = _fileScope('initialize');
 
     const currentSchema = await this._currentSchema();
     const current = svh.schemaVersionObjectToNumber(currentSchema);
@@ -416,7 +416,7 @@ class Database {
    * @param {String} callback
    * @param {*} topicId
    */
-   async subscriptionGet(dbCtx, callback, topicId) {
+  async subscriptionGet(dbCtx, callback, topicId) {
     this._notImplemented('subscriptionGet', arguments);
   }
 
@@ -442,7 +442,7 @@ class Database {
    * @param {String=} data.httpRemoteAddr
    * @param {String=} data.httpFrom
    */
-   async subscriptionUpsert(dbCtx, data) {
+  async subscriptionUpsert(dbCtx, data) {
     this._notImplemented('subscriptionUpsert', arguments);
   }
 
@@ -520,7 +520,7 @@ class Database {
    * @param {*} topicId
    * @returns {Boolean}
    */
-   async topicFetchRequested(dbCtx, topicId) {
+  async topicFetchRequested(dbCtx, topicId) {
     this._notImplemented('topicPublish', arguments);
   }
 
@@ -679,7 +679,7 @@ class Database {
    * @param {Boolean} claim
    * @returns {*} verificationId
    */
-   async verificationInsert(dbCtx, verification) {
+  async verificationInsert(dbCtx, verification) {
     this._notImplemented('verificationInsert', arguments);
   }
 
@@ -704,9 +704,9 @@ class Database {
    * @param {String} data.reason
    * @param {Boolean} data.isPublisherValidated
    */
-   async verificationUpdate(dbCtx, verificationId, data) {
+  async verificationUpdate(dbCtx, verificationId, data) {
     this._notImplemented('verificationUpdate', arguments);
-   }
+  }
 
 
   /**

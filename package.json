@@ -1,6 +1,6 @@
 {
   "name": "websub-hub",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "A WebSub Hub server implementation.",
   "main": "server.js",
   "scripts": {
@@ -32,7 +32,7 @@
     "coverage-check"
   ],
   "dependencies": {
-    "@squeep/api-dingus": "git+https://git.squeep.com/squeep-api-dingus/#v1.0.0",
+    "@squeep/api-dingus": "git+https://git.squeep.com/squeep-api-dingus/#v1.1.0",
     "@squeep/web-linking": "git+https://git.squeep.com/squeep-web-linking/#v1.0.0",
     "argon2": "^0.28.2",
     "axios": "^0.21.1",

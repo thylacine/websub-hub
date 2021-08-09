@@ -5,7 +5,7 @@ html {
 body {
 	background-color: #fff;
 	font-family: Helvetica, Verdana, sans-serif;
-	margin: 1em;
+	margin: 0 1em 0 1em;
 	min-height: 100vh;
 	display: flex;
 	flex-direction: column;
@@ -23,12 +23,13 @@ header nav ol li a {
 	text-align: center;
 }
 h1 {
-	margin-top: 1.3em;
-	margin-bottom: 2.5em;
+	margin-top: 1em;
+	margin-bottom: 1.25em;
 	text-align: center;
 }
 h2 {
 	background-color: #ddd;
+	padding: .25em 0 .1em 0.25em;
 }
 main {
 	flex-grow: 1;
@@ -60,9 +61,8 @@ footer {
 	width: 100%;
 	border-top: 4px dotted #666;
 }
-footer nav ol {
+footer ol {
 	list-style-type: none;
-	margin: 0;
+	margin: .5em;
 	padding: 0;
-	border: 1px solid #000;
 }

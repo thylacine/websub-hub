@@ -19,7 +19,7 @@ const ADDR = process.env.LISTEN_ADDR || '127.0.0.1';
     config = new Config(process.env.NODE_ENV);
     logger = new Logger(config);
     db = new DB(logger, config);
-    await db.schemaCheck();
+    await db.initialize();
     service = new Service(logger, db, config);
 
     http.createServer((req, res) => {

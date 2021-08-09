@@ -22,6 +22,12 @@ const defaultOptions = {
   db: {
     connectionString: '', // e.g. sqlite://path/to/dbfile.sqlite
     queryLogLevel: undefined, // Set to log queries
+    cacheEnabled: true, // Cache some db responses. (Postgres only)
+    listener: { // Settings for the cache-invalidator connection. (Postgres only)
+      // pingDelayMs: 5000, // Connection keep-alive/health-check.
+      // reconnectDelayMs: 6000, // Wait time before attempting reconnection.
+      // reconnectTimes: 10, // Retries limit.
+    },
   },
 
   // Logging options

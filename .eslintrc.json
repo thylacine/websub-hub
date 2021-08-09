@@ -55,6 +55,13 @@
       "error",
       "last"
     ],
+    "indent": [
+      "warn",
+      2,
+      {
+        "SwitchCase": 1
+      }
+    ],
     "sonarjs/cognitive-complexity": "warn",
     "sonarjs/no-duplicate-string": "warn",
     "keyword-spacing": "error",

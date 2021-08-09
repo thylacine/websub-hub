@@ -44,6 +44,7 @@ async function readPassword(prompt) {
 }
 
 (async () => {
+  await db.initialize();
   const password = await readPassword('password: ');
   const credential = await argon2.hash(password, { type: argon2.argon2id });
   console.log(`\t${identifier}:${credential}`);
