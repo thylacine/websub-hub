@@ -4,6 +4,12 @@ Releases and notable changes to this project are documented here.
 
 ## [Unreleased]
 
+## [v1.1.1] - 2021-08-09
+
+### Fixed
+
+- Parsing of topic content-types which include encoding.
+
 ## [v1.1.0] - 2021-08-08
 
 ### Added

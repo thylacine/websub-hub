@@ -41,39 +41,45 @@ class LinkHelper {
     // Add Link headers first, as they take priority over link elements in body.
     const linkHeader = getHeader(headers, Enum.Header.Link);
     const links = [];
-    try {
-      links.push(...parseLinkHeader(linkHeader));
-    } catch (e) {
-      if (e instanceof ParseSyntaxError) {
-        this.logger.debug(_scope, 'failed to parse link header, bad syntax', { error: e, linkHeader });
-      } else {
-        this.logger.error(_scope, 'failed to parse link header', { error: e, linkHeader });
+    if (linkHeader) {
+      try {
+        links.push(...parseLinkHeader(linkHeader));
+      } catch (e) {
+        if (e instanceof ParseSyntaxError) {
+          this.logger.debug(_scope, 'failed to parse link header, bad syntax', { error: e, linkHeader });
+        } else {
+          this.logger.error(_scope, 'failed to parse link header', { error: e, linkHeader });
+        }
       }
     }
-
     const contentType = getHeader(headers, Enum.Header.ContentType);
-    let bodyLinks = [];
-    switch (contentType) {
-      case Enum.ContentType.ApplicationAtom:
-      case Enum.ContentType.ApplicationRDF:
-      case Enum.ContentType.ApplicationRSS:
-      case Enum.ContentType.ApplicationXML:
-      case Enum.ContentType.TextXML: {
-        bodyLinks = await this.linksFromFeedBody(url, body);
-        break;
+    if (contentType) {
+      const [contentTypeBase, _contentTypeEncoding] = contentType.split(/; +/);
+      let bodyLinks = [];
+      switch (contentTypeBase) {
+        case Enum.ContentType.ApplicationAtom:
+        case Enum.ContentType.ApplicationRDF:
+        case Enum.ContentType.ApplicationRSS:
+        case Enum.ContentType.ApplicationXML:
+        case Enum.ContentType.TextXML: {
+          bodyLinks = await this.linksFromFeedBody(url, body);
+          break;
+        }
+
+        case Enum.ContentType.TextHTML:
+          bodyLinks = this.linksFromHTMLBody(body);
+          break;
+
+        default:
+          this.logger.debug(_scope, 'no parser for content type', { contentType });
       }
-
-      case Enum.ContentType.TextHTML:
-        bodyLinks = this.linksFromHTMLBody(body);
-        break;
-
-      default:
-        this.logger.debug(_scope, 'no parser for content type', { contentType });
+      links.push(...bodyLinks);
     }
-    links.push(...bodyLinks);
 
     // Fetch all hub relation targets from headers, resolving relative URIs.
     const hubs = LinkHelper.locateHubTargets(links).map((link) => this.absoluteURI(link, url));
+
+    this.logger.debug(_scope, 'valid hubs for url', { url, hubs });
 
     return hubs.includes(this.selfUrl);
   }
