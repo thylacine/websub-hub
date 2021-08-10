@@ -112,7 +112,11 @@ class LinkHelper {
       });
       feedParser.on('meta', (meta) => {
         this.logger.debug(_scope, 'FeedParser meta', { meta });
-        const feedLinks = meta['atom:link'] || [];
+        let feedLinks = meta['atom:link'] || [];
+        if (!Array.isArray(feedLinks)) {
+          // Parsing RSS seems to return a single entry for this rather than a list.
+          feedLinks = [feedLinks];
+        }
         feedLinks
           .map((l) => l['@'])
           .forEach((l) => {
