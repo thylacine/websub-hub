@@ -228,7 +228,7 @@ function htmlFooter() {
     <footer>
       <ol>
         <li>
-          <a href="https://git.squeep.com/?p=websub-hub;a=tree">Development Repository</a>
+          <a href="https://git.squeep.com/?p=websub-hub;a=tree">Development Repository</a> / <a href="https://github.com/thylacine/websub-hub/">GitHub mirror</a>
         </li>
         <li>
           <a href="https://squeep.com/">A Squeep Infrastructure Component</a>
