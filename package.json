@@ -1,6 +1,6 @@
 {
   "name": "websub-hub",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "A WebSub Hub server implementation.",
   "main": "server.js",
   "scripts": {
@@ -39,6 +39,7 @@
     "better-sqlite3": "^7.4.3",
     "feedparser": "^2.2.10",
     "htmlparser2": "^6.1.0",
+    "iconv": "^3.0.0",
     "pg-promise": "^10.11.0"
   },
   "devDependencies": {

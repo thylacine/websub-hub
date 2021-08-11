@@ -63,6 +63,15 @@ describe('LinkHelper', function () {
       const result = await lh.validHub(url, headers, body);
       assert.strictEqual(result, expected);
     });
+    it('covers link in HTML body with charset translation', async function () {
+      headers = {
+        'content-type': 'text/html; charset=ASCII',
+      };
+      body = '<html><head><link rel="hub" href="https://example.com/hub/"></head></html>';
+      const expected = true;
+      const result = await lh.validHub(url, headers, body);
+      assert.strictEqual(result, expected);
+    });
     it('covers parser failure', async function () {
       headers = {
         link: 'Invalid Link Header',
@@ -77,6 +86,46 @@ describe('LinkHelper', function () {
       assert.strictEqual(result, expected);
     });
   }); // validHub
+
+  describe('parseContentType', function () {
+    it('handles no data', function () {
+      const expected = {
+        mediaType: 'application/octet-stream',
+        params: {},
+      };
+      const result = LinkHelper.parseContentType();
+      assert.deepStrictEqual(result, expected);
+    });
+    it('handles only media type', function () {
+      const expected = {
+        mediaType: 'application/json',
+        params: {},
+      };
+      const result = LinkHelper.parseContentType('application/json');
+      assert.deepStrictEqual(result, expected);
+    });
+    it('handles parameters', function () {
+      const expected = {
+        mediaType: 'text/html',
+        params: {
+          charset: 'ISO-8859-4',
+        },
+      };
+      const result = LinkHelper.parseContentType('text/html; charset=ISO-8859-4');
+      assert.deepStrictEqual(result, expected);
+    });
+    it('handles more parameters', function () {
+      const expected = {
+        mediaType: 'multipart/form-data',
+        params: {
+          boundary: '--123--',
+          other: 'foo',
+        },
+      };
+      const result = LinkHelper.parseContentType('multipart/form-data; boundary="--123--"; other=foo');
+      assert.deepStrictEqual(result, expected);
+    });
+  }); // parseContentType
 
   describe('absoluteURI', function () {
     it('success', function () {
@@ -136,6 +185,23 @@ describe('LinkHelper', function () {
     it('parses rss', async function () {
       const feedData = testData.rssFeedBody;
       const feedUrl = testData.rssFeedUrl;
+      const expected = [
+        {
+          attributes: [
+            {
+              name: 'rel',
+              value: 'hub',
+            },
+          ],
+          target: 'https://hub.squeep.com/',
+        },
+      ];
+      const result = await lh.linksFromFeedBody(feedUrl, feedData);
+      assert.deepStrictEqual(result, expected);
+    });
+    it('parses more rss', async function () {
+      const feedData = testData.rssFeedBody2;
+      const feedUrl = testData.rssFeedUrl2;
       const expected = [
         {
           attributes: [
