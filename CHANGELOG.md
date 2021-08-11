@@ -4,6 +4,14 @@ Releases and notable changes to this project are documented here.
 
 ## [Unreleased]
 
+### Added
+
+- Make use of the content-type charset when parsing topic content, recoding to UTF8 when needed.
+
+### Fixed
+
+- Feed parser could return a non-list for a single link entry, handle that case.
+
 ## [v1.1.1] - 2021-08-09
 
 ### Fixed

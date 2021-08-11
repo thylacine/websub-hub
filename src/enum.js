@@ -27,6 +27,7 @@ const Enum = common.mergeDeep(DingusEnum, {
 
   ContentType: {
     ApplicationAtom: 'application/atom+xml',
+    ApplicationOctetStream: 'application/octet-stream',
     ApplicationRDF: 'application/rdf+xml',
     ApplicationRSS: 'application/rss+xml',
     ApplicationXML: 'application/xml',

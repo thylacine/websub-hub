@@ -11,6 +11,7 @@ const Enum = require('./enum');
 const FeedParser = require('feedparser');
 const { Readable } = require('stream');
 const htmlparser2 = require('htmlparser2');
+const { Iconv } = require('iconv');
 
 const _fileScope = common.fileScope(__filename);
 
@@ -45,6 +46,7 @@ class LinkHelper {
       try {
         links.push(...parseLinkHeader(linkHeader));
       } catch (e) {
+        /* istanbul ignore else */
         if (e instanceof ParseSyntaxError) {
           this.logger.debug(_scope, 'failed to parse link header, bad syntax', { error: e, linkHeader });
         } else {
@@ -52,29 +54,39 @@ class LinkHelper {
         }
       }
     }
-    const contentType = getHeader(headers, Enum.Header.ContentType);
-    if (contentType) {
-      const [contentTypeBase, _contentTypeEncoding] = contentType.split(/; +/);
-      let bodyLinks = [];
-      switch (contentTypeBase) {
-        case Enum.ContentType.ApplicationAtom:
-        case Enum.ContentType.ApplicationRDF:
-        case Enum.ContentType.ApplicationRSS:
-        case Enum.ContentType.ApplicationXML:
-        case Enum.ContentType.TextXML: {
-          bodyLinks = await this.linksFromFeedBody(url, body);
-          break;
-        }
 
-        case Enum.ContentType.TextHTML:
-          bodyLinks = this.linksFromHTMLBody(body);
-          break;
-
-        default:
-          this.logger.debug(_scope, 'no parser for content type', { contentType });
+    const contentType = LinkHelper.parseContentType(getHeader(headers, Enum.Header.ContentType));
+    const nonUTF8Charset = !/utf-*8/i.test(contentType.params.charset) && contentType.params.charset;
+    if (nonUTF8Charset) {
+      const iconv = new Iconv(nonUTF8Charset, 'utf-8//translit//ignore');
+      try {
+        body = iconv.convert(body);
+      } catch (e) {
+        /* istanbul ignore next */
+        this.logger.error(_scope, 'iconv conversion error', { error: e, contentType, url });
+        // But try to carry on, anyhow.
       }
-      links.push(...bodyLinks);
     }
+
+    let bodyLinks = [];
+    switch (contentType.mediaType) {
+      case Enum.ContentType.ApplicationAtom:
+      case Enum.ContentType.ApplicationRDF:
+      case Enum.ContentType.ApplicationRSS:
+      case Enum.ContentType.ApplicationXML:
+      case Enum.ContentType.TextXML: {
+        bodyLinks = await this.linksFromFeedBody(url, body);
+        break;
+      }
+
+      case Enum.ContentType.TextHTML:
+        bodyLinks = this.linksFromHTMLBody(body);
+        break;
+
+      default:
+        this.logger.debug(_scope, 'no parser for content type', { contentType });
+    }
+    links.push(...bodyLinks);
 
     // Fetch all hub relation targets from headers, resolving relative URIs.
     const hubs = LinkHelper.locateHubTargets(links).map((link) => this.absoluteURI(link, url));
@@ -82,6 +94,30 @@ class LinkHelper {
     this.logger.debug(_scope, 'valid hubs for url', { url, hubs });
 
     return hubs.includes(this.selfUrl);
+  }
+
+
+  /**
+   * Convert a Content-Type string to normalized components.
+   * RFC7231 §3.1.1
+   * N.B. this non-parser implementation will not work if a parameter
+   * value for some reason includes a ; or = within a quoted-string.
+   * @param {String} contentTypeHeader
+   * @returns {Object} contentType
+   * @returns {String} contentType.mediaType
+   * @returns {Object} contentType.params
+   */
+  static parseContentType(contentTypeHeader) {
+    const [ mediaType, ...params ] = (contentTypeHeader || '').split(/ *; */);
+    return {
+      mediaType: mediaType.toLowerCase() || Enum.ContentType.ApplicationOctetStream,
+      params: params.reduce((obj, param) => {
+        const [field, value] = param.split('=');
+        const isQuoted = value.charAt(0) === '"' && value.charAt(value.length - 1) === '"';
+        obj[field.toLowerCase()] = isQuoted ? value.slice(1, value.length - 1) : value;
+        return obj;
+      }, {}),
+    };
   }
 
 

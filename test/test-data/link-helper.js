@@ -1,7 +1,60 @@
 'use strict';
 
-const rssFeedUrl = 'https://puppetcircuits.wordpress.com/feed/';
-const rssFeedBody = `<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"
+const rssFeedUrl = 'https://squeep.com/share/';
+const rssFeedBody = `<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0"
+     xmlns:content="http://purl.org/rss/1.0/modules/content/"
+     xmlns:sy="http://purl.org/rss/1.0/modules/syndication/"
+     xmlns:atom="http://www.w3.org/2005/Atom"
+     xmlns:dc="http://purl.org/dc/elements/1.1/"
+     xmlns:wfw="http://wellformedweb.org/CommentAPI/" >
+	<channel>
+		<title>Things To Share</title>
+		<link>https://squeep.com/share</link>
+		<atom:link rel="hub" href="https://hub.squeep.com/" />
+		<description>Miscellaneous contents what interest some harmless mammal.</description>
+		<image>
+			<url>https://squeep.com/share/img/ratmap-128.png</url>
+			<width>128</width><height>128</height>
+		</image>
+		<pubDate>Tue, 10 Aug 2021 23:21:46 GMT</pubDate>
+		<generator>Blogofile</generator>
+		<sy:updatePeriod>weekly</sy:updatePeriod>
+		<sy:updateFrequency>1</sy:updateFrequency>
+		<item>
+			<title>arts I shall never be able to collect</title>
+			<link>https://squeep.com/share/2015/08/00000011</link>
+			<pubDate>Thu, 20 Aug 2015 20:42:37 PDT</pubDate>
+			<category><![CDATA[art]]></category>
+			<guid isPermaLink="false">00000011</guid>
+			<description>arts I shall never be able to collect</description>
+			<content:encoded><![CDATA[
+<p>
+<a href="http://www.followtheblackrabbit.com/">Beth Cavener</a> does phenomenal work.
+This is the piece I'd most want for my wall.  I could spend a lifetime appreciating those expressions.
+</p>
+<div>
+	<a href="http://www.followtheblackrabbit.com/gallery/the-sentimental-question-2/" title="1/2">
+		<img src="https://squeep.com/share/assets/2b7354e42e91cd42e161ad90243c9d6ffa1deba1-0000"
+			style="display:inline; height:40ex;"
+			alt="1/2"
+		/>
+	</a>
+
+	<a href="http://www.followtheblackrabbit.com/gallery/the-sentimental-question-2/" title="2/2">
+		<img src="https://squeep.com/share/assets/470998dab71830e0dde4cd20d17a5c96ceb19278-0000"
+			style="display:inline; height:40ex;"
+			alt="2/2"
+		/>
+	</a>
+</div>
+]]></content:encoded>
+		</item>
+	</channel>
+</rss>`;
+
+const rssFeedUrl2 = 'https://puppetcircuits.wordpress.com/feed/';
+const rssFeedBody2 = `<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"
 	xmlns:content="http://purl.org/rss/1.0/modules/content/"
 	xmlns:wfw="http://wellformedweb.org/CommentAPI/"
 	xmlns:dc="http://purl.org/dc/elements/1.1/"
@@ -50,8 +103,6 @@ const rssFeedBody = `<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"
 					<wfw:commentRss>https://puppetcircuits.wordpress.com/2012/02/10/been-a-while-and-fun-video-from-eric/feed/</wfw:commentRss>
 			<slash:comments>0</slash:comments>
 
-
-
 		<media:content url="https://0.gravatar.com/avatar/c19e5ba7f3abc36656779edcc9c6b6eb?s=96&#38;d=identicon&#38;r=G" medium="image">
 			<media:title type="html">raphaelabrams</media:title>
 		</media:content>
@@ -75,8 +126,6 @@ const rssFeedBody = `<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"
 					<wfw:commentRss>https://puppetcircuits.wordpress.com/2011/02/22/botacon/feed/</wfw:commentRss>
 			<slash:comments>0</slash:comments>
 
-
-
 		<media:content url="https://0.gravatar.com/avatar/c19e5ba7f3abc36656779edcc9c6b6eb?s=96&#38;d=identicon&#38;r=G" medium="image">
 			<media:title type="html">raphaelabrams</media:title>
 		</media:content>
@@ -99,8 +148,6 @@ const rssFeedBody = `<?xml version="1.0" encoding="UTF-8"?><rss version="2.0"
 
 					<wfw:commentRss>https://puppetcircuits.wordpress.com/2011/01/22/oddball-hotplate/feed/</wfw:commentRss>
 			<slash:comments>1</slash:comments>
-
-
 
 		<media:content url="https://0.gravatar.com/avatar/c19e5ba7f3abc36656779edcc9c6b6eb?s=96&#38;d=identicon&#38;r=G" medium="image">
 			<media:title type="html">raphaelabrams</media:title>
@@ -170,10 +217,12 @@ const htmlBody = `<?xml version="1.0" encoding="UTF-8" ?>
 <hr />`;
 
 module.exports = {
-	atomFeedBody,
-	atomFeedUrl,
-	htmlBody,
-	htmlUrl,
+  atomFeedBody,
+  atomFeedUrl,
+  htmlBody,
+  htmlUrl,
   rssFeedBody,
-	rssFeedUrl,
+  rssFeedUrl,
+  rssFeedBody2,
+  rssFeedUrl2,
 };
