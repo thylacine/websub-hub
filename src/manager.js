@@ -342,7 +342,7 @@ class Manager {
       let fn, info, id;
       try {
         if (data.mode === Enum.Mode.Publish) {
-          fn = 'topicPublish';
+          fn = 'topicFetchRequested';
           info = await this.db.topicFetchRequested(dbCtx, data.topicId);
           id = data.topicId;
         } else {
@@ -366,7 +366,7 @@ class Manager {
             fn = 'topicFetchClaimAndProcessById';
             await this.communication.topicFetchClaimAndProcessById(dbCtx, id, requestId);
           } else {
-            fn = 'processVerification';
+            fn = 'verificationClaimAndProcessById';
             await this.communication.verificationClaimAndProcessById(dbCtx, id, requestId);
           }
         } catch (e) {
