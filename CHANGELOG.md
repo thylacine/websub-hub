@@ -4,6 +4,10 @@ Releases and notable changes to this project are documented here.
 
 ## [Unreleased]
 
+### Fixed
+
+- Worker tasks, such as delivering content updates, now share one database context.  This reduces the connection load for Postgres backends, affording greater scalability.
+
 ## [v1.1.2] - 2021-08-11
 
 ### Added
