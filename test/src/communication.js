@@ -837,8 +837,9 @@ describe('Communication', function () {
   }); // verificationClaimAndProcessById
 
   describe('workFeed', function () {
-    let wanted;
+    let stubCtx, wanted;
     beforeEach(function () {
+      stubCtx = {};
       sinon.stub(communication, 'topicFetchProcess');
       sinon.stub(communication, 'verificationProcess');
       sinon.stub(communication, 'subscriptionDeliveryProcess');
@@ -853,12 +854,13 @@ describe('Communication', function () {
       const expectedLength = [topicIds, verificationIds, subscriptionIds].map((x) => x.length).reduce((a, b) => a + b, 0);
       wanted = 10;
 
-      const result = await communication.workFeed(wanted);
+      const result = await communication.workFeed(stubCtx, wanted);
 
       assert.strictEqual(result.length, expectedLength);
     });
     it('covers no wanted work', async function () {
-      const result = await communication.workFeed(0);
+      wanted = 0;
+      const result = await communication.workFeed(stubCtx, wanted);
       assert.strictEqual(result.length, 0);
       assert(!communication.db.topicFetchClaim.called);
       assert(!communication.db.verificationClaim.called);
@@ -871,7 +873,7 @@ describe('Communication', function () {
       const expectedLength = topicIds.length;
       wanted = 10;
 
-      const result = await communication.workFeed(wanted);
+      const result = await communication.workFeed(stubCtx, wanted);
 
       assert.strictEqual(result.length, expectedLength);
     });

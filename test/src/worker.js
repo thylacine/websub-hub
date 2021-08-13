@@ -8,6 +8,7 @@ const Worker = require('../../src/worker');
 const Config = require('../../config');
 
 const stubLogger = require('../stub-logger');
+const stubDb = require('../stub-db');
 
 const noExpectedException = 'did not get expected exception';
 
@@ -19,7 +20,8 @@ describe('Worker', function () {
   beforeEach(function () {
     config = new Config('test');
     promiseGiver = sinon.stub();
-    worker = new Worker(stubLogger, promiseGiver, config);
+    worker = new Worker(stubLogger, stubDb, promiseGiver, config);
+    stubDb._reset();
   });
 
   afterEach(function () {
@@ -33,7 +35,7 @@ describe('Worker', function () {
   
     it('requires a promiseGiver function', function () {
       try {
-        worker = new Worker(stubLogger, undefined, config);
+        worker = new Worker(stubLogger, stubDb, undefined, config);
         assert.fail('should require function argument');
       } catch (e) {
         assert(e instanceof TypeError);
@@ -44,13 +46,13 @@ describe('Worker', function () {
   describe('start', function () {
     it('starts without polling', function () {
       config.worker.pollingEnabled = false;
-      worker = new Worker(stubLogger, promiseGiver, config);
+      worker = new Worker(stubLogger, stubDb, promiseGiver, config);
       worker.start();
       assert.strictEqual(worker.running, false);
     });
     it('starts with polling', function () {
       config.worker.pollingEnabled = true;
-      worker = new Worker(stubLogger, promiseGiver, config);
+      worker = new Worker(stubLogger, stubDb, promiseGiver, config);
       sinon.stub(worker, '_recurr');
       worker.start();
       clearTimeout(worker.nextTimeout);
@@ -60,7 +62,7 @@ describe('Worker', function () {
 
   describe('stop', function () {
     it('stops', function () {
-      worker = new Worker(stubLogger, promiseGiver, config);
+      worker = new Worker(stubLogger, stubDb, promiseGiver, config);
       worker.start();
       worker.stop();
       assert.strictEqual(worker.running, false);
@@ -124,6 +126,10 @@ describe('Worker', function () {
   }); // _handleWatchedList
 
   describe('_getWork', function () {
+    let stubCtx;
+    beforeEach(function () {
+      stubCtx = {};
+    });
     it('gets tasks', async function () {
       const expected = [
         Promise.resolve('first'),
@@ -131,7 +137,7 @@ describe('Worker', function () {
         Promise.resolve('second'),
       ];
       worker.promiseGiver.resolves(expected);
-      const result = await worker._getWork();
+      const result = await worker._getWork(stubCtx);
       assert.deepStrictEqual(result, expected);
       assert.strictEqual(worker.inFlight.length, expected.length);
     });
@@ -142,7 +148,7 @@ describe('Worker', function () {
         Promise.reject('bad'),
         Promise.resolve('second'),
       ];
-      const result = await worker._getWork();
+      const result = await worker._getWork(stubCtx);
       assert(!worker.promiseGiver.called);
       assert.deepStrictEqual(result, []);
     });
@@ -188,6 +194,14 @@ describe('Worker', function () {
     it('covers no work', async function () {
       await worker.process();
       assert.strictEqual(worker._getWork.callCount, 1);
+      assert.strictEqual(worker._recurr.callCount, 1);
+    });
+    it('covers error', async function () {
+      const expected = new Error('blah');
+      stubDb.context.restore();
+      sinon.stub(stubDb, 'context').rejects(expected);
+      await worker.process();
+      assert.strictEqual(worker._getWork.callCount, 0);
       assert.strictEqual(worker._recurr.callCount, 1);
     });
   }); // process

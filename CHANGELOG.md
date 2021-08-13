@@ -4,6 +4,12 @@ Releases and notable changes to this project are documented here.
 
 ## [Unreleased]
 
+## [v1.1.3] - 2021-08-13
+
+### Fixed
+
+- Worker tasks, such as delivering content updates, now share one database context.  This reduces the connection load for Postgres backends, affording greater scalability.
+
 ## [v1.1.2] - 2021-08-11
 
 ### Added
@@ -35,7 +41,8 @@ Releases and notable changes to this project are documented here.
 
 ---
 
-[Unreleased]: https://git.squeep.com/?p=websub-hub;a=commitdiff;h=HEAD;hp=v1.1.2
+[Unreleased]: https://git.squeep.com/?p=websub-hub;a=commitdiff;h=HEAD;hp=v1.1.3
+[v1.1.3]: https://git.squeep.com/?p=websub-hub;a=commitdiff;h=v1.1.3;hp=v1.1.2
 [v1.1.2]: https://git.squeep.com/?p=websub-hub;a=commitdiff;h=v1.1.2;hp=v1.1.1
 [v1.1.1]: https://git.squeep.com/?p=websub-hub;a=commitdiff;h=v1.1.1;hp=v1.1.0
 [v1.1.0]: https://git.squeep.com/?p=websub-hub;a=commitdiff;h=v1.1.0;hp=v1.0.0
