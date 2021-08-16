@@ -204,6 +204,18 @@ describe('Worker', function () {
       assert.strictEqual(worker._getWork.callCount, 0);
       assert.strictEqual(worker._recurr.callCount, 1);
     });
+    it('covers double invocation', async function () {
+      const snooze = async (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+      this.slow(300);
+      worker.inFlight = [
+        Worker.watchedPromise(snooze(100)),
+      ];
+
+      await Promise.all([worker.process(), worker.process()]);
+      assert.strictEqual(worker._getWork.callCount, 2);
+      assert.strictEqual(worker._recurr.callCount, 1);
+    });
   }); // process
 
 }); // Worker

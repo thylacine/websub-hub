@@ -4,6 +4,16 @@ Releases and notable changes to this project are documented here.
 
 ## [Unreleased]
 
+## [v1.1.4] - 2021-08-16
+
+### Fixed
+
+- Prevent task processor from being re-invoked if it is already running.
+
+### Added
+
+- Allow more configuration of html page content.
+
 ## [v1.1.3] - 2021-08-13
 
 ### Fixed
@@ -41,7 +51,8 @@ Releases and notable changes to this project are documented here.
 
 ---
 
-[Unreleased]: https://git.squeep.com/?p=websub-hub;a=commitdiff;h=HEAD;hp=v1.1.3
+[Unreleased]: https://git.squeep.com/?p=websub-hub;a=commitdiff;h=HEAD;hp=v1.1.4
+[v1.1.4]: https://git.squeep.com/?p=websub-hub;a=commitdiff;h=v1.1.4;hp=v1.1.3
 [v1.1.3]: https://git.squeep.com/?p=websub-hub;a=commitdiff;h=v1.1.3;hp=v1.1.2
 [v1.1.2]: https://git.squeep.com/?p=websub-hub;a=commitdiff;h=v1.1.2;hp=v1.1.1
 [v1.1.1]: https://git.squeep.com/?p=websub-hub;a=commitdiff;h=v1.1.1;hp=v1.1.0

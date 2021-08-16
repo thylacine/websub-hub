@@ -666,7 +666,9 @@ class Manager {
     this.logger.debug(_scope, 'called', { ctx });
 
     // N.B. no await on this
-    this.communication.worker.process();
+    this.communication.worker.process().catch((e) => {
+      this.logger.error(_scope, 'failed', { error: e, ctx });
+    });
 
     res.end();
     this.logger.info(_scope, 'invoked worker process', { ctx });

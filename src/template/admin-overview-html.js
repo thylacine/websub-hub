@@ -15,6 +15,7 @@ module.exports = (ctx, options) => {
   const pageTitle = `${options.manager.pageTitle} - Topics`;
   const headElements = [];
   const navLinks = [];
+  const footerEntries = options.manager.footerEntries;
   if (!ctx.topics) {
     ctx.topics = [];
   }
@@ -30,5 +31,5 @@ module.exports = (ctx, options) => {
     `        </tbody>
         </table>
       </section>`,
-  ]);
+  ], footerEntries);
 };

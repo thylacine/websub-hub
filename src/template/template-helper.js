@@ -221,22 +221,16 @@ function htmlHeader(pageTitle, navLinks = []) {
 
 /**
  * Close the main section and finish off with boilerplate.
+ * @param {String[]} footerEntries
  * @returns {String}
  */
-function htmlFooter() {
+function htmlFooter(footerEntries = []) {
   return `    </main>
-    <footer>
-      <ol>
-        <li>
-          <a href="https://git.squeep.com/?p=websub-hub;a=tree">Development Repository</a> / <a href="https://github.com/thylacine/websub-hub/">GitHub mirror</a>
-        </li>
-        <li>
-          <a href="https://squeep.com/">A Squeep Infrastructure Component</a>
-        </li>
-        <li>
-          &copy;<time datetime="2021">&#8559;&#8559;&#8553;&#8553;&#8544;</time>
-        </li>
-      </ol>
+    <footer>` +
+    (footerEntries.length ? `
+      <ol>` + footerEntries.map((f) => `        <li>${f}</li>`).join('\n') + `
+      </ol>`
+      : '') + `
     </footer>`;
 }
 
@@ -248,14 +242,15 @@ function htmlFooter() {
  * @param {String[]} headElements
  * @param {Object[]} navLinks
  * @param {String[]} main
+ * @param {String[]} footerEntries
  * @returns {String}
  */
-function htmlTemplate(pagePathLevel, pageTitle, headElements = [], navLinks = [], main = []) {
+function htmlTemplate(pagePathLevel, pageTitle, headElements = [], navLinks = [], main = [], footerEntries = []) {
   return [
     htmlHead(pagePathLevel, pageTitle, headElements),
     htmlHeader(pageTitle, navLinks),
     ...main,
-    htmlFooter(),
+    htmlFooter(footerEntries),
     htmlTail(),
   ].join('\n');
 }

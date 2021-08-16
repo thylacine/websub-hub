@@ -52,10 +52,11 @@ describe('Postgres Listener', function () {
       await listener.stop();
     });
     it('cancels pending reconnect', async function() {
+      this.slow(300);
       const pendingReconnect = sinon.stub();
       listener.reconnectPending = setTimeout(pendingReconnect, 100);
       await listener.stop();
-      snooze(110);
+      await snooze(110);
       assert(!pendingReconnect.called);
     });
     it('closes existing connection', async function () {
