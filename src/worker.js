@@ -42,6 +42,7 @@ class Worker {
     this.inFlight = []; // Our work heap of Promises  
     this.nextTimeout = undefined; // Allow clearTimeout() to reset waiting period.
     this.running = false;
+    this.isProcessing = false; // Only let one process() method execute on the work heap at a time
   }
 
   /**
@@ -177,7 +178,13 @@ class Worker {
   async process() {
     const _scope = _fileScope('process');
 
-    this.logger.debug(_scope, 'called', {});
+    this.logger.debug(_scope, 'called', { isProcessing: this.isProcessing });
+
+
+    if (this.isProcessing) {
+      return;
+    }
+    this.isProcessing = true;
 
     // Interrupt any pending sleep, if we were called out of timeout-cycle.
     clearTimeout(this.nextTimeout);
@@ -218,6 +225,8 @@ class Worker {
 
     // No more work, wait a while and retry
     this._recurr();
+
+    this.isProcessing = false;
   }
 
 }

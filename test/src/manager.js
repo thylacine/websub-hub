@@ -609,7 +609,13 @@ describe('Manager', function () {
 
   describe('processTasks', function () {
     it('covers', async function () {
-      sinon.stub(manager.communication.worker, 'process');
+      sinon.stub(manager.communication.worker, 'process').resolves();
+      await manager.processTasks(res, ctx);
+      assert(manager.communication.worker.process.called);
+      assert(res.end.called);
+    });
+    it('covers error', async function () {
+      sinon.stub(manager.communication.worker, 'process').rejects();
       await manager.processTasks(res, ctx);
       assert(manager.communication.worker.process.called);
       assert(res.end.called);
