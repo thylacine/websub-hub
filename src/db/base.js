@@ -96,7 +96,7 @@ class Database {
     const current = svh.schemaVersionObjectToNumber(currentSchema);
     const min = svh.schemaVersionObjectToNumber(this.schemaVersionsSupported.min);
     const max = svh.schemaVersionObjectToNumber(this.schemaVersionsSupported.max);
-    if (min >= current && max <= current) {
+    if (current >= min && current <= max) {
       this.logger.debug(_scope, 'schema supported', { currentSchema, schemaVersionsSupported: this.schemaVersionsSupported });
     } else {
       this.logger.error(_scope, 'schema not supported', { currentSchema, schemaVersionsSupported: this.schemaVersionsSupported });
