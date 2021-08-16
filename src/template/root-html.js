@@ -120,12 +120,15 @@ module.exports = (ctx, options) => {
   const pageTitle = options.manager.pageTitle;
   const isPublicHub = options.manager.publicHub;
   const contactHTML = options.adminContactHTML;
+  const footerEntries = options.manager.footerEntries;
   const hubURL = options.dingus.selfBaseUrl || '<s>https://hub.example.com/</s>';
   const headElements = [];
   const navLinks = [];
-  return th.htmlTemplate(1, pageTitle, headElements, navLinks, [
+  const mainContent = [
     aboutSection(),
     usageSection(isPublicHub, hubURL),
     contactSection(contactHTML),
-  ]);
+  ];
+  return th.htmlTemplate(1, pageTitle, headElements, navLinks, mainContent, footerEntries,
+  );
 };

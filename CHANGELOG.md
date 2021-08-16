@@ -8,6 +8,10 @@ Releases and notable changes to this project are documented here.
 
 - Prevent task processor from being re-invoked if it is already running.
 
+### Added
+
+- Allow more configuration of html page content.
+
 ## [v1.1.3] - 2021-08-13
 
 ### Fixed

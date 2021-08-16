@@ -21,6 +21,7 @@ module.exports = (ctx, options) => {
       text: '&uarr; All Topics',
     },
   ];
+  const footerEntries = options.manager.footerEntries;
   if (!ctx.subscriptions) {
     ctx.subscriptions = [];
   }
@@ -46,5 +47,5 @@ module.exports = (ctx, options) => {
     `          </tbody>
         </table>
       </section>`,
-  ]);
+  ], footerEntries);
 };
