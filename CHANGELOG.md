@@ -4,6 +4,10 @@ Releases and notable changes to this project are documented here.
 
 ## [Unreleased]
 
+### Added
+
+- Accept multiple topics in publish requests.
+
 ## [v1.1.5] - 2021-08-23
 
 ### Fixed

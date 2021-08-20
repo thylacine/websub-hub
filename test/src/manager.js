@@ -37,6 +37,7 @@ describe('Manager', function () {
     manager = new Manager(stubLogger, stubDb, options);
     sinon.stub(manager.communication, 'verificationProcess');
     sinon.stub(manager.communication, 'topicFetchProcess');
+    sinon.stub(manager.communication, 'topicFetchClaimAndProcessById');
     stubDb._reset();
     stubLogger._reset();
   });
@@ -174,7 +175,7 @@ describe('Manager', function () {
       await manager.getAdminOverview(res, ctx);
       assert(res.end.called);
     });
-  });
+  }); // getAdminOverview
 
   describe('getTopicDetails', function () {
     it('covers', async function() {
@@ -559,13 +560,11 @@ describe('Manager', function () {
     });
   }); // _checkMode
 
-  describe('_checkPublish', function () {
-    let dbCtx, data, warn, err, requestId;
+  describe('_publishTopics', function () {
+    let dbCtx, data, requestId;
     beforeEach(function () {
       dbCtx = {};
       data = {};
-      warn = [];
-      err = [];
       requestId = 'blah';
     });
     it('succeeds', async function () {
@@ -573,26 +572,29 @@ describe('Manager', function () {
         id: 222,
       });
       Object.assign(data, testData.validPublishRootData);
-      await manager._checkPublish(dbCtx, data, warn, err, requestId);
-      assert.strictEqual(warn.length, 0, 'unexpected warnings length');
-      assert.strictEqual(err.length, 0, 'unexpected errors length');
-      assert.strictEqual(data.topicId, 222, 'unexpected topic id');
+      const topicResults = await manager._publishTopics(dbCtx, data, requestId);
+      assert.strictEqual(topicResults.length, 1);
+      assert.strictEqual(topicResults[0].warn.length, 0, 'unexpected warnings length');
+      assert.strictEqual(topicResults[0].err.length, 0, 'unexpected errors length');
+      assert.strictEqual(topicResults[0].topicId, 222, 'unexpected topic id');
     });
     it('fails bad url', async function () {
       Object.assign(data, testData.validPublishRootData, { topic: 'not_a_url' });
-      await manager._checkPublish(dbCtx, data, warn, err, requestId);
-      assert.strictEqual(err.length, 1, 'unexpected errors length');
-      assert.strictEqual(warn.length, 0);
+      const topicResults = await manager._publishTopics(dbCtx, data, requestId);
+      assert.strictEqual(topicResults.length, 1);
+      assert.strictEqual(topicResults[0].err.length, 1, 'unexpected errors length');
+      assert.strictEqual(topicResults[0].warn.length, 0);
     });
     it('accepts new public publish topic', async function () {
       manager.db.topicGetByUrl.onCall(0).resolves().onCall(1).resolves({
         id: 222,
       });
       Object.assign(data, testData.validPublishRootData);
-      await manager._checkPublish(dbCtx, data, warn, err, requestId);
-      assert.strictEqual(warn.length, 0, 'unexpected warnings length');
-      assert.strictEqual(err.length, 0, 'unexpected errors length');
-      assert.strictEqual(data.topicId, 222, 'unexpected topic id');
+      const topicResults = await manager._publishTopics(dbCtx, data, requestId);
+      assert.strictEqual(topicResults.length, 1);
+      assert.strictEqual(topicResults[0].warn.length, 0, 'unexpected warnings length');
+      assert.strictEqual(topicResults[0].err.length, 0, 'unexpected errors length');
+      assert.strictEqual(topicResults[0].topicId, 222, 'unexpected topic id');
     });
     it('does not publish deleted topic', async function () {
       manager.db.topicGetByUrl.resolves({
@@ -600,12 +602,176 @@ describe('Manager', function () {
         isDeleted: true,
       });
       Object.assign(data, testData.validPublishRootData);
-      await manager._checkPublish(dbCtx, data, warn, err, requestId);
-      assert.strictEqual(warn.length, 0, 'unexpected warnings length');
-      assert.strictEqual(err.length, 1, 'unexpected errors length');
-      assert.strictEqual(data.topicId, undefined, 'unexpected topic id');
+      const topicResults = await manager._publishTopics(dbCtx, data, requestId);
+      assert.strictEqual(topicResults.length, 1);
+      assert.strictEqual(topicResults[0].warn.length, 0, 'unexpected warnings length');
+      assert.strictEqual(topicResults[0].err.length, 1, 'unexpected errors length');
+      assert.strictEqual(topicResults[0].topicId, undefined, 'unexpected topic id');
     });
-  }); // _checkPublish
+    it('no topics', async function() {
+      Object.assign(data, testData.validPublishRootData);
+      delete data.topic;
+      const topicResults = await manager._publishTopics(dbCtx, data, requestId);
+      assert.strictEqual(topicResults.length, 0);
+    });
+    it('multiple valid topics', async function () {
+      manager.db.topicGetByUrl.resolves({
+        id: 222,
+      });
+      Object.assign(data, testData.validPublishRootData);
+      data.url = ['https://example.com/first', 'https://example.com/second'];
+      data.topic = ['https://example.com/third'];
+      const topicResults = await manager._publishTopics(dbCtx, data, requestId);
+      assert.strictEqual(topicResults.length, 3);
+      assert.strictEqual(topicResults[0].warn.length, 0, 'unexpected warnings length');
+      assert.strictEqual(topicResults[0].err.length, 0, 'unexpected errors length');
+      assert.strictEqual(topicResults[0].topicId, 222, 'unexpected topic id');
+      assert.strictEqual(topicResults[1].warn.length, 0, 'unexpected warnings length');
+      assert.strictEqual(topicResults[1].err.length, 0, 'unexpected errors length');
+      assert.strictEqual(topicResults[1].topicId, 222, 'unexpected topic id');
+      assert.strictEqual(topicResults[2].warn.length, 0, 'unexpected warnings length');
+      assert.strictEqual(topicResults[2].err.length, 0, 'unexpected errors length');
+      assert.strictEqual(topicResults[2].topicId, 222, 'unexpected topic id');
+    });
+    it('mix of valid and invalid topics', async function () {
+      manager.db.topicGetByUrl.onCall(1).resolves().resolves({
+        id: 222,
+      });
+      Object.assign(data, testData.validPublishRootData);
+      data.url = ['https://example.com/first', 'not a url'];
+      data.topic = ['https://example.com/third'];
+      const topicResults = await manager._publishTopics(dbCtx, data, requestId);
+      assert.strictEqual(topicResults.length, 3);
+      assert.strictEqual(topicResults[0].warn.length, 0, 'unexpected warnings length');
+      assert.strictEqual(topicResults[0].err.length, 0, 'unexpected errors length');
+      assert.strictEqual(topicResults[0].topicId, 222, 'unexpected topic id');
+      assert.strictEqual(topicResults[1].warn.length, 0, 'unexpected warnings length');
+      assert.strictEqual(topicResults[1].err.length, 1, 'unexpected errors length');
+      assert.strictEqual(topicResults[1].topicId, undefined, 'unexpected topic id');
+      assert.strictEqual(topicResults[2].warn.length, 0, 'unexpected warnings length');
+      assert.strictEqual(topicResults[2].err.length, 0, 'unexpected errors length');
+      assert.strictEqual(topicResults[2].topicId, 222, 'unexpected topic id');
+    });
+  }); // _publishTopics
+
+  describe('_publishRequest', function () {
+    let dbCtx, data, res, ctx;
+    beforeEach(function () {
+      dbCtx = {};
+      data = {};
+      res = {
+        end: sinon.stub(),
+      };
+      ctx = {};
+    });
+    it('requires a topic', async function () {
+      try {
+        await manager._publishRequest(dbCtx, data, res, ctx);
+        assert.fail(noExpectedException);
+      } catch (e) {
+        assert(e instanceof Errors.ResponseError);
+      }
+    });
+    it('processes one topic', async function() {
+      manager.db.topicGetByUrl.resolves({
+        id: 222,
+      });
+      Object.assign(data, testData.validPublishRootData);
+      manager.db.topicFetchRequested.resolves();
+      await manager._publishRequest(dbCtx, data, res, ctx);
+      assert(manager.db.topicFetchRequested.called);
+      assert.strictEqual(res.statusCode, 202);
+      assert(res.end.called);
+    });
+    it('processes mix of valid and invalid topics', async function () {
+      ctx.responseType = 'application/json';
+      manager.db.topicGetByUrl.onCall(1).resolves().resolves({
+        id: 222,
+      });
+      Object.assign(data, testData.validPublishRootData);
+      data.url = ['https://example.com/first', 'not a url'];
+      data.topic = ['https://example.com/third'];
+      await manager._publishRequest(dbCtx, data, res, ctx);
+      assert.strictEqual(res.statusCode, 207);
+      assert(res.end.called);
+    });
+    it('covers topicFetchRequest failure', async function () {
+      manager.db.topicGetByUrl.resolves({
+        id: 222,
+      });
+      Object.assign(data, testData.validPublishRootData);
+      const expected = new Error('boo');
+      manager.db.topicFetchRequested.rejects(expected);
+      try {
+        await manager._publishRequest(dbCtx, data, res, ctx);
+        assert.fail(noExpectedException);
+      } catch (e) {
+        assert.deepStrictEqual(e, expected);
+      }
+    });
+    it('covers immediate processing error', async function() {
+      manager.options.manager.processImmediately = true;
+      manager.db.topicGetByUrl.onCall(0).resolves().onCall(1).resolves({
+        id: 222,
+      });
+      manager.communication.topicFetchClaimAndProcessById.rejects();
+      Object.assign(data, testData.validPublishRootData);
+      await manager._publishRequest(dbCtx, data, res, ctx);
+      assert(manager.db.topicFetchRequested.called);
+      assert.strictEqual(res.statusCode, 202);
+      assert(res.end.called);
+      assert(manager.communication.topicFetchClaimAndProcessById.called)
+    });
+    it('covers no immediate processing', async function() {
+      manager.options.manager.processImmediately = false;
+      manager.db.topicGetByUrl.onCall(0).resolves().onCall(1).resolves({
+        id: 222,
+      });
+      Object.assign(data, testData.validPublishRootData);
+      await manager._publishRequest(dbCtx, data, res, ctx);
+      assert(manager.db.topicFetchRequested.called);
+      assert.strictEqual(res.statusCode, 202);
+      assert(res.end.called);
+      assert(!manager.communication.topicFetchClaimAndProcessById.called)
+    });
+  }); // _publishRequest
+
+  describe('multiPublishContent', function () {
+    let publishTopics;
+    beforeEach(function () {
+      publishTopics = [{
+        url: 'https://example.com/first',
+        warn: [],
+        err: [],
+        topicId: 222,
+        status: 202,
+        statusMessage: 'Accepted',
+      },
+      {
+        url: 'not a url',
+        warn: [],
+        err: [ 'invalid topic url (failed to parse url)' ],
+        topicId: undefined,
+        status: 400,
+        statusMessage: 'Bad Request',
+      }];
+    });
+    it('covers json response', function () {
+      ctx.responseType = 'application/json';
+      const expected = '[{"href":"https://example.com/first","status":202,"statusMessage":"Accepted","errors":[],"warnings":[]},{"href":"not a url","status":400,"statusMessage":"Bad Request","errors":["invalid topic url (failed to parse url)"],"warnings":[]}]';
+      const result = Manager.multiPublishContent(ctx, publishTopics);
+      assert.deepStrictEqual(result, expected);
+    });
+    it('covers text response', function () {
+      ctx.responseType = 'text/plain';
+      const expected = `https://example.com/first [202 Accepted]
+----
+not a url [400 Bad Request]
+\terror: invalid topic url (failed to parse url)`;
+      const result = Manager.multiPublishContent(ctx, publishTopics);
+      assert.deepStrictEqual(result, expected);
+    });
+  }); // multiPublishContent
 
   describe('processTasks', function () {
     it('covers', async function () {

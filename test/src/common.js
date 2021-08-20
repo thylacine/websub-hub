@@ -160,4 +160,21 @@ describe('Common', function () {
     });
   }); // validHash
 
+  describe('ensureArray', function () {
+    it('returns empty array for no data', function () {
+      const result = common.ensureArray();
+      assert.deepStrictEqual(result, []);
+    });
+    it('returns same array passed in', function () {
+      const expected = [1, 2, 3, 'foo'];
+      const result = common.ensureArray(expected);
+      assert.deepStrictEqual(result, expected);
+    });
+    it('returns array containing non-array data', function () {
+      const data = 'bar';
+      const result = common.ensureArray(data);
+      assert.deepStrictEqual(result, [data]);
+    });
+  }); // ensureArray
+
 }); // Common
