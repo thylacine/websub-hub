@@ -626,6 +626,8 @@ class Manager {
           await this.db.topicDeleted(txCtx, topicId);
           res.end();
           this.logger.info(_scope, 'topic set deleted', { ctx, topicId });
+          // Attempt to remove from db if no active subscriptions.
+          await this.db.topicPendingDelete(txCtx, topicId);
           return;
         }
 

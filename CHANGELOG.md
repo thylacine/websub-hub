@@ -7,6 +7,8 @@ Releases and notable changes to this project are documented here.
 ### Added
 
 - Accept multiple topics in publish requests.
+- Expired subscription entries are removed from the database when their topics are updated.
+- Topics which have been marked deleted are removed from the database after all subscribers have been notified.
 
 ## [v1.1.5] - 2021-08-23
 

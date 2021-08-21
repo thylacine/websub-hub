@@ -404,8 +404,34 @@ describe('DatabaseSQLite', function () {
     });
   }); // subscriptionDelete
 
+  describe('subscriptionDeleteExpired', function () {
+    it('success', async function () {
+      const dbResult = {
+        changes: 1,
+        lastInsertRowid: undefined,
+      };
+      const expected = {
+        changes: 1,
+        lastInsertRowid: undefined,
+      };
+      sinon.stub(db.statement.subscriptionDeleteExpired, 'run').returns(dbResult);
+      const result = await db.subscriptionDeleteExpired(dbCtx, topicId);
+      assert.deepStrictEqual(result, expected);
+    });
+    it('failure', async function () {
+      const expected = new Error();
+      sinon.stub(db.statement.subscriptionDeleteExpired, 'run').throws(expected);
+      try {
+        await db.subscriptionDeleteExpired(dbCtx, topicId);
+        assert.fail(noExpectedException);
+      } catch (e) {
+        assert.deepStrictEqual(e, expected);
+      }
+    });
+  });
+
   describe('subscriptionDeliveryClaim', function () {
-    it('success', async function() {
+    it('success', async function () {
       const dbAllResult = [
         {
           id: 'c2e254c5-aa6e-4a8f-b1a1-e474b07392bb',
@@ -1020,6 +1046,76 @@ describe('DatabaseSQLite', function () {
       }
     });
   }); // topicGetContentById
+
+  describe('topicPendingDelete', function () {
+    beforeEach(function () {
+      sinon.stub(db.statement.topicGetById, 'get');
+      sinon.stub(db.statement.subscriptionCountByTopicUrl, 'get');
+      sinon.stub(db.statement.topicDeleteById, 'run');
+    });
+    it('success', async function () {
+      db.statement.topicGetById.get.returns({
+        id: topicId,
+        isDeleted: true,
+      });
+      db.statement.subscriptionCountByTopicUrl.get.returns({
+        count: 0,
+      });
+      db.statement.topicDeleteById.run.returns({
+        changes: 1,
+      });
+      db.topicPendingDelete(dbCtx, topicId);
+      assert(db.statement.topicDeleteById.run.called);
+    });
+    it('does not delete non-deleted topic', async function () {
+      db.statement.topicGetById.get.returns({
+        id: topicId,
+        isDeleted: false,
+      });
+      db.statement.subscriptionCountByTopicUrl.get.returns({
+        count: 0,
+      });
+      db.statement.topicDeleteById.run.returns({
+        changes: 1,
+      });
+      db.topicPendingDelete(dbCtx, topicId);
+      assert(!db.statement.topicDeleteById.run.called);
+    });
+    it('does not delete topic with active subscriptions', async function () {
+      db.statement.topicGetById.get.returns({
+        id: topicId,
+        isDeleted: true,
+      });
+      db.statement.subscriptionCountByTopicUrl.get.returns({
+        count: 10,
+      });
+      db.statement.topicDeleteById.run.returns({
+        changes: 1,
+      });
+      db.topicPendingDelete(dbCtx, topicId);
+      assert(!db.statement.topicDeleteById.run.called);
+    });
+    it('covers no deletion', async function () {
+      db.statement.topicGetById.get.returns({
+        id: topicId,
+        isDeleted: true,
+      });
+      db.statement.subscriptionCountByTopicUrl.get.returns({
+        count: 0,
+      });
+      db.statement.topicDeleteById.run.returns({
+        changes: 0,
+      });
+      try {
+        db.topicPendingDelete(dbCtx, topicId);
+        assert.fail(noExpectedException);
+
+      } catch (e) {
+        assert(e instanceof DBErrors.UnexpectedResult);
+      }
+      assert(db.statement.topicDeleteById.run.called);
+    });
+  });
 
   describe('topicSet', function () {
     let data;

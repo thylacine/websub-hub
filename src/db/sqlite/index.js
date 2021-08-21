@@ -359,6 +359,21 @@ class DatabaseSQLite extends Database {
   }
 
 
+  subscriptionDeleteExpired(dbCtx, topicId) {
+    const _scope = _fileScope('subscriptionDeleteExpired');
+    this.logger.debug(_scope, 'called', { topicId });
+
+    try {
+      const result = this.statement.subscriptionDeleteExpired.run({ topicId });
+      this.logger.debug(_scope, 'success', { topicId, deleted: result.changes });
+      return this._engineInfo(result);
+    } catch (e) {
+      this.logger.error(_scope, 'failed', { error: e, topicId });
+      throw e;
+    }
+  }
+
+
   subscriptionDeliveryClaim(dbCtx, wanted, claimTimeoutSeconds, claimant) {
     const _scope = _fileScope('subscriptionDeliveryClaim');
     this.logger.debug(_scope, 'called', { wanted, claimTimeoutSeconds, claimant });
@@ -763,6 +778,37 @@ class DatabaseSQLite extends Database {
       return this._topicDefaults(topic);
     } catch (e) {
       this.logger.error(_scope, 'failed', { error: e, topic, topicId });
+      throw e;
+    }
+  }
+
+
+  topicPendingDelete(dbCtx, topicId) {
+    const _scope = _fileScope('topicPendingDelete');
+    this.logger.debug(_scope, 'called', { topicId });
+
+    try {
+      this.db.transaction(() => {
+        const topic = this.statement.topicGetById.get({ topicId });
+        if (!topic.isDeleted) {
+          this.logger.debug(_scope, 'topic not set deleted, not deleting', { topicId });
+          return;
+        }
+
+        const { count: subscriberCount } = this.statement.subscriptionCountByTopicUrl.get({ topicUrl: topic.url });
+        if (subscriberCount) {
+          this.logger.debug(_scope, 'topic has subscribers, not deleting', { topicId, subscriberCount });
+          return;
+        }
+
+        const result = this.statement.topicDeleteById.run({ topicId });
+        if (result.changes !== 1) {
+          throw new DBErrors.UnexpectedResult('did not delete topic');
+        }
+      })();
+      this.logger.debug(_scope, 'success', { topicId });
+    } catch (e) {
+      this.logger.error(_scope, 'failed', { error: e, topicId });
       throw e;
     }
   }

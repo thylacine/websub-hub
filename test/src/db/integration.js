@@ -114,6 +114,7 @@ describe('Database Integration', function () {
       }); // Authentication
 
       describe('Topic', function () {
+        let anotherTopicId;
         step('requires data', async function () {
           try {
             await db.context(async (dbCtx) => {
@@ -222,7 +223,7 @@ describe('Database Integration', function () {
         step('deletes a topic', async function () {
           await db.context(async (dbCtx) => {
             const result = await db.topicSet(dbCtx, testData.anotherTopicSet);
-            const anotherTopicId = result.lastInsertRowid;
+            anotherTopicId = result.lastInsertRowid;
             await db.topicDeleted(dbCtx, anotherTopicId);
             const topic = await db.topicGetById(dbCtx, anotherTopicId);
             assert.strictEqual(topic.isDeleted, true);
@@ -231,7 +232,7 @@ describe('Database Integration', function () {
         step('update un-deletes a topic', async function () {
           await db.context(async (dbCtx) => {
             const result = await db.topicSet(dbCtx, testData.anotherTopicSet);
-            const anotherTopicId = result.lastInsertRowid;
+            assert.strictEqual(result.lastInsertRowid, anotherTopicId);
             const topic = await db.topicGetById(dbCtx, anotherTopicId);
             assert.strictEqual(topic.isDeleted, false);
           });
@@ -240,6 +241,15 @@ describe('Database Integration', function () {
           await db.context(async (dbCtx) => {
             const topics = await db.topicGetAll(dbCtx);
             assert(topics.length);
+          });
+        });
+        // pending delete of deleted topic with no subscriptions
+        step('really deletes unsubscribed deleted topic', async function() {
+          await db.context(async (dbCtx) => {
+            await db.topicDeleted(dbCtx, anotherTopicId);
+            await db.topicPendingDelete(dbCtx, anotherTopicId);
+            const topic = await db.topicGetById(dbCtx, anotherTopicId);
+            assert(!topic);
           });
         });
       }); // Topic
@@ -369,6 +379,28 @@ describe('Database Integration', function () {
           await db.context(async (dbCtx) => {
             await db.subscriptionDeliveryGone(dbCtx, callback, topicId);
             const subscription = await db.subscriptionGetById(dbCtx, subscriptionId);
+            assert(!subscription);
+          });
+        });
+        step('create expired subscription', async function () {
+          const data = {
+            ...testData.subscriptionUpsert,
+            secret: 'newSecret',
+            topicId,
+            leaseSeconds: -1,
+          };
+          await db.context(async (dbCtx) => {
+            const result = await db.subscriptionUpsert(dbCtx, data);
+            assert(result.lastInsertRowid);
+            assert.notStrictEqual(result.lastInsertRowid, subscriptionId);
+            subscriptionId = result.lastInsertRowid;
+            assert.strictEqual(result.changes, 1);
+          });
+        });
+        step('delete expired subscriptions', async function() {
+          await db.context(async (dbCtx) => {
+            await db.subscriptionDeleteExpired(dbCtx, topicId)
+            const subscription = await db.subscriptionGet(dbCtx, testData.subscriptionUpsert.callback, topicId);
             assert(!subscription);
           });
         });
