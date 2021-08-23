@@ -46,7 +46,7 @@ class TopicFake extends Dingus {
     res.setHeader('Link', behavior.selfLink + (behavior.hubLink ? `, ${behavior.hubLink}` : ''));
     res.statusCode = behavior.statusCode;
     res.end(behavior.content);
-    this.logger.info({ method: req.method, statusCode: res.statusCode });
+    this.logger.info({ method: req.method, statusCode: res.statusCode, url: req.url });
   }
 
   async putId(req, res, ctx) {
@@ -99,7 +99,7 @@ class SubscriberFake extends Dingus {
     res.statusCode = behavior ? behavior.statusCode : 404;
     const response = (behavior && behavior.matchChallenge) ? ctx.queryParams['hub.challenge'] : (behavior && behavior.response);
     res.end(response);
-    this.logger.info({ method: req.method, statusCode: res.statusCode, matchChallenge: !!(behavior && behavior.matchChallenge) });
+    this.logger.info({ method: req.method, statusCode: res.statusCode, matchChallenge: !!(behavior && behavior.matchChallenge), url: req.url });
   }
 
   async postId(req, res, ctx) {
@@ -112,7 +112,7 @@ class SubscriberFake extends Dingus {
       behavior.content = ctx.rawBody;
     }
     res.end();
-    this.logger.info({ content: behavior && behavior.content, method: req.method, statusCode: res.statusCode, matchChallenge: !!(behavior && behavior.matchChallenge) });
+    this.logger.info({ content: behavior && behavior.content, method: req.method, statusCode: res.statusCode, matchChallenge: !!(behavior && behavior.matchChallenge), url: req.url });
   }
 
   async putVerify(req, res, ctx) {
@@ -142,11 +142,11 @@ class SubscriberFake extends Dingus {
   }
 
   async deleteId(req, res, ctx) {
-      this.setResponseType(this.responseTypes, req, res, ctx);
-      this.contentBehaviors.delete(ctx.params.id);
-      this.verifyBehaviors.delete(ctx.params.id);
-      res.statusCode = 200;
-      res.end();
+    this.setResponseType(this.responseTypes, req, res, ctx);
+    this.contentBehaviors.delete(ctx.params.id);
+    this.verifyBehaviors.delete(ctx.params.id);
+    res.statusCode = 200;
+    res.end();
   }
 
 } // SubscriberFake
