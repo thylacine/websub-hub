@@ -20,7 +20,7 @@ const schemaVersionsSupported = {
   max: {
     major: 1,
     minor: 0,
-    patch: 0,
+    patch: 1,
   },
 };
 
@@ -299,12 +299,29 @@ class DatabaseSQLite extends Database {
   }
 
 
+  /**
+   * Converts engine subscription fields to native types.
+   * @param {Object} data
+   */
+  static _subscriptionDataToNative(data) {
+    const epochToDate = (epoch) => new Date(Number(epoch) * 1000);
+    if (data) {
+      ['created', 'verified', 'expires', 'contentDelivered'].forEach((field) => {
+        // eslint-disable-next-line security/detect-object-injection
+        data[field] = epochToDate(data[field]);
+      });
+    }
+    return data;
+  }
+
+
   subscriptionsByTopicId(dbCtx, topicId) {
     const _scope = _fileScope('subscriptionsByTopicId');
     this.logger.debug(_scope, 'called', { topicId });
 
     try {
-      return this.statement.subscriptionsByTopicId.all({ topicId });
+      const subscriptions = this.statement.subscriptionsByTopicId.all({ topicId });
+      return subscriptions.map((s) => DatabaseSQLite._subscriptionDataToNative(s));
     } catch (e) {
       this.logger.error(_scope, 'failed', { error: e, topicId });
       throw e;
@@ -463,7 +480,7 @@ class DatabaseSQLite extends Database {
     let subscription;
     try {
       subscription = this.statement.subscriptionGet.get({ callback, topicId });
-      return subscription;
+      return DatabaseSQLite._subscriptionDataToNative(subscription);
     } catch (e) {
       this.logger.error(_scope, 'failed', { error: e, callback, topicId });
       throw e;
@@ -478,7 +495,7 @@ class DatabaseSQLite extends Database {
     let subscription;
     try {
       subscription = this.statement.subscriptionGetById.get({ subscriptionId });
-      return subscription;
+      return DatabaseSQLite._subscriptionDataToNative(subscription);
     } catch (e) {
       this.logger.error(_scope, 'failed', { error: e, subscriptionId });
       throw e;

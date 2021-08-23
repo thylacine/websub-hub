@@ -4,6 +4,12 @@ Releases and notable changes to this project are documented here.
 
 ## [Unreleased]
 
+### Fixed
+
+- Reverted change introduced in v1.1.3 which consolidated db connections, as it was causing data-integrity issues.
+- Issue with SQLite backend causing admin details about subscriptions to show errors.
+- Verifications will not be attempted until their topics become active, reducing worker activity in certain situations.
+
 ## [v1.1.4] - 2021-08-16
 
 ### Fixed

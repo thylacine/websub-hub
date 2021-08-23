@@ -174,7 +174,7 @@ BEGIN;
 		SELECT *
 		FROM verification
 		WHERE
-			(topic_id, callback, created) IN (SELECT topic_id, callback, max(created) AS created FROM verification GROUP BY (topic_id, callback))
+			(topic_id, callback, created) IN (SELECT topic_id, callback, max(created) AS created FROM verification GROUP BY topic_id, callback)
 		AND
 			(topic_id, callback) NOT IN (SELECT topic_id, callback FROM verification_in_progress_active)
 		AND

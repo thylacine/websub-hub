@@ -189,7 +189,6 @@ class Worker {
     // Interrupt any pending sleep, if we were called out of timeout-cycle.
     clearTimeout(this.nextTimeout);
 
-    // Share one db connection for all tasks.
     try {
       await this.db.context(async (dbCtx) => {
 
