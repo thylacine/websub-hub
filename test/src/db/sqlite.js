@@ -339,7 +339,7 @@ describe('DatabaseSQLite', function () {
 
   describe('subscriptionsByTopicId', function () {
     it('success', async function () {
-      const expected = { count: 3 };
+      const expected = [{ id: 3 }];
       sinon.stub(db.statement.subscriptionsByTopicId, 'all').returns(expected);
       const result = await db.subscriptionsByTopicId(dbCtx, topicUrl);
       assert.deepStrictEqual(result, expected);
