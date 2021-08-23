@@ -4,6 +4,8 @@ Releases and notable changes to this project are documented here.
 
 ## [Unreleased]
 
+## [v1.1.5] - 2021-08-23
+
 ### Fixed
 
 - Reverted change introduced in v1.1.3 which consolidated db connections, as it was causing data-integrity issues.
@@ -57,7 +59,8 @@ Releases and notable changes to this project are documented here.
 
 ---
 
-[Unreleased]: https://git.squeep.com/?p=websub-hub;a=commitdiff;h=HEAD;hp=v1.1.4
+[Unreleased]: https://git.squeep.com/?p=websub-hub;a=commitdiff;h=HEAD;hp=v1.1.5
+[v1.1.5]: https://git.squeep.com/?p=websub-hub;a=commitdiff;h=v1.1.5;hp=v1.1.4
 [v1.1.4]: https://git.squeep.com/?p=websub-hub;a=commitdiff;h=v1.1.4;hp=v1.1.3
 [v1.1.3]: https://git.squeep.com/?p=websub-hub;a=commitdiff;h=v1.1.3;hp=v1.1.2
 [v1.1.2]: https://git.squeep.com/?p=websub-hub;a=commitdiff;h=v1.1.2;hp=v1.1.1
