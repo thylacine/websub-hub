@@ -557,7 +557,7 @@ describe('DatabasePostgres', function () {
         changes: 1,
         lastInsertRowid: undefined,
         duration: 10,
-      }
+      };
       sinon.stub(db.db, 'result').resolves(dbResult);
       const result = await db.subscriptionDelete(dbCtx, callback, topicId);
       assert.deepStrictEqual(result, expected);
@@ -573,6 +573,34 @@ describe('DatabasePostgres', function () {
       }
     });
   }); // subscriptionDelete
+
+  describe('subscriptionDeleteExpired', function () {
+    it('success', async function () {
+      const dbResult = {
+        rowCount: 1,
+        rows: [],
+        duration: 10,
+      };
+      const expected = {
+        changes: 1,
+        lastInsertRowid: undefined,
+        duration: 10,
+      };
+      sinon.stub(db.db, 'result').resolves(dbResult);
+      const result = await db.subscriptionDeleteExpired(dbCtx, topicId);
+      assert.deepStrictEqual(result, expected);
+    });
+    it('failure', async function() {
+      const expected = new Error();
+      sinon.stub(db.db, 'result').rejects(expected);
+      try {
+        await db.subscriptionDeleteExpired(dbCtx, topicId);
+        assert.fail(noExpectedException);
+      } catch (e) {
+        assert.deepStrictEqual(e, expected);
+      }
+    });
+  });
 
   describe('subscriptionDeliveryClaim', function () {
     it('success', async function() {
@@ -1213,6 +1241,69 @@ describe('DatabasePostgres', function () {
       assert.deepStrictEqual(result, expected);
     });
   }); // topicGetContentById
+
+  describe('topicPendingDelete', function () {
+    beforeEach(function () {
+      sinon.stub(db.db, 'one');
+      sinon.stub(db.db, 'result');
+    });
+    it('success', async function () {
+      db.db.one.onCall(0).resolves({
+        id: topicId,
+        isDeleted: true,
+      }).onCall(1).resolves({
+        count: 0,
+      });
+      const dbResult = {
+        rowCount: 1,
+        rows: [],
+        duration: 10,
+      };
+      db.db.result.resolves(dbResult);
+      await db.topicPendingDelete(dbCtx, topicId);
+      assert(db.db.result.called);
+    });
+    it('does not delete non-deleted topic', async function () {
+      db.db.one.onCall(0).resolves({
+        id: topicId,
+        isDeleted: false,
+      }).onCall(1).resolves({
+        count: 0,
+      });
+      await db.topicPendingDelete(dbCtx, topicId);
+      assert(!db.db.result.called);
+    });
+    it('does not delete topic with active subscriptions', async function () {
+      db.db.one.onCall(0).resolves({
+        id: topicId,
+        isDeleted: true,
+      }).onCall(1).resolves({
+        count: 10,
+      });
+      await db.topicPendingDelete(dbCtx, topicId);
+      assert(!db.db.result.called);
+    });
+    it('covers no deletion', async function () {
+      db.db.one.onCall(0).resolves({
+        id: topicId,
+        isDeleted: true,
+      }).onCall(1).resolves({
+        count: 0,
+      });
+      const dbResult = {
+        rowCount: 0,
+        rows: [],
+        duration: 10,
+      };
+      db.db.result.resolves(dbResult);
+      try {
+        await db.topicPendingDelete(dbCtx, topicId);
+        assert.fail(noExpectedException);
+      } catch (e) {
+        assert(e instanceof DBErrors.UnexpectedResult);
+      }
+    });
+  });
 
   describe('topicSet', function () {
     let data;

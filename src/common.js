@@ -26,6 +26,22 @@ const validHash = (algorithm) => getHashes()
   .filter((h) => h.match(/^sha[0-9]+$/))
   .includes(algorithm);
 
+
+/**
+ * Return an array containing x if x is not an array.
+ * @param {*} x
+ */
+const ensureArray = (x) => {
+  if (x === undefined) {
+    return [];
+  }
+  if (!Array.isArray(x)) {
+    return Array(x);
+  }
+  return x;
+};
+
+
 /**
  * Recursively freeze an object.
  * @param {Object} o 
@@ -140,6 +156,7 @@ module.exports = {
   arrayChunk,
   attemptRetrySeconds,
   axiosResponseLogData,
+  ensureArray,
   freezeDeep,
   logTruncate,
   randomBytesAsync,

@@ -352,6 +352,16 @@ class Database {
 
 
   /**
+   * Remove any expired subscriptions to a topic.
+   * @param {*} dbCtx
+   * @param {*} topicId
+   */
+  async subscriptionDeleteExpired(dbCtx, topicId) {
+    this._notImplemented('subscriptionDeleteExpired', arguments);
+  }
+
+
+  /**
    * Claim subscriptions needing content updates attempted.
    * @param {*} dbCtx 
    * @param {Number} wanted maximum subscription updates to claim
@@ -533,6 +543,7 @@ class Database {
     this._notImplemented('topicGetAll', arguments);
   }
 
+
   /**
    * Get topic data, without content.
    * @param {*} dbCtx 
@@ -563,14 +574,15 @@ class Database {
     this._notImplemented('topicGetContentById', arguments);
   }
 
-  // /**
-  //  * Call after an unsubscribe, to check if a topic is awaiting deletion, and that
-  //  * was the last subscription belaying it.
-  //  * @param {String|Integer} data topic url or id
-  //  */
-  // async topicPendingDelete(dbCtx, data) {
-  //   this._notImplemented('topicPendingDelete', arguments);
-  // }
+
+  /**
+   * Attempt to delete a topic, which must be set isDeleted, if there
+   * are no more subscriptions belaying its removal.
+   * @param {*} topicId
+   */
+  async topicPendingDelete(dbCtx, topicId) {
+    this._notImplemented('topicPendingDelete', arguments);
+  }
 
 
   /**

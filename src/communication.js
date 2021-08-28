@@ -223,6 +223,7 @@ class Communication {
     }
 
     if (!topic.isActive) {
+      // These should be filtered out when selecting verification tasks to process.
       this.logger.debug(_scope, 'topic not active, skipping verification', { verification, requestId });
       await this.db.verificationRelease(dbCtx, verificationId);
       return;
@@ -328,11 +329,19 @@ class Communication {
         case Enum.Mode.Unsubscribe:
           if (verificationAccepted) {
             await this.db.subscriptionDelete(txCtx, verification.callback, verification.topicId);
+            if (topic.isDeleted) {
+              // Remove a deleted topic after the last subscription is notified.
+              await this.db.topicPendingDelete(txCtx, topic.id);
+            }
           }
           break;
 
         case Enum.Mode.Denied:
           await this.db.subscriptionDelete(txCtx, verification.callback, verification.topicId);
+          if (topic.isDeleted) {
+            // Remove a deleted topic after he last subscription is notified.
+            await this.db.topicPendingDelete(txCtx, topic.id);
+          }
           break;
 
         default:
@@ -431,6 +440,9 @@ class Communication {
       throw new Errors.InternalInconsistencyError('no such topic id');
     }
 
+    // Cull any expired subscriptions
+    await this.db.subscriptionDeleteExpired(dbCtx, topicId);
+
     logInfoData.url = topicId.url;
 
     if (topic.isDeleted) {
@@ -479,13 +491,15 @@ class Communication {
 
     const validHub = await this.linkHelper.validHub(topic.url, response.headers, response.data);
     if (!validHub) {
-      this.logger.debug(_scope, 'retrieved topic does not list us as hub', { logInfoData });
+      this.logger.info(_scope, 'retrieved topic does not list us as hub', { logInfoData });
       if (this.options.communication.strictTopicHubLink) {
         await this.db.transaction(dbCtx, async (txCtx) => {
           // Set as deleted and set content_updated so subscriptions are notified.
           await this.db.topicDeleted(txCtx, topicId);
           await this.db.topicFetchComplete(txCtx, topicId);
         });
+        // Attempt to remove from db, if no active subscriptions.
+        await this.db.topicPendingDelete(dbCtx, topicId);
         return;
       }
     }

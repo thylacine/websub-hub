@@ -405,6 +405,23 @@ describe('Communication', function () {
       assert(communication.db.verificationComplete.called);
     });
 
+    it('unsubscription from deleted topic deletes topic', async function () {
+      communication.db.verificationGetById.restore();
+      verification.mode = 'unsubscribe';
+      sinon.stub(communication.db, 'verificationGetById').resolves(verification);
+      communication.db.topicGetById.restore();
+      sinon.stub(communication.db, 'topicGetById').resolves({
+        ...topic,
+        isDeleted: true,
+      });
+
+      await communication.verificationProcess(dbCtx, callback, topicId, requestId);
+
+      assert(communication.db.subscriptionDelete.called);
+      assert(communication.db.verificationComplete.called);
+      assert(communication.db.topicPendingDelete.called);
+    });
+
     it('unsubscription denial succeeds', async function () {
       communication.db.verificationGetById.restore();
       verification.mode = 'unsubscribe';
