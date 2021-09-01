@@ -46,7 +46,7 @@ const defaultOptions = {
     pageTitle: packageName, // title on html pages
     footerEntries: [ // common footers on all html pages
       '<a href="https://git.squeep.com/?p=websub-hub;a=tree">Development Repository</a> / <a href="https://github.com/thylacine/websub-hub/">GitHub mirror</a>',
-      '&copy;<time datetime="2021">&#8559;&#8559;&#8553;&#8553;&#8544;</time>',
+      '<small><span class="copyright">&copy;<time datetime="2021">&#8559;&#8559;&#8553;&#8553;&#8544;</time></span></small>',
     ],
     strictSecrets: false, // If true, reject requests with secrets but not over https
     publicHub: true, // Accept publish requests as new topics.

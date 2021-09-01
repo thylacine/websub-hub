@@ -46,6 +46,15 @@ function usageSection(isPublicHub, hubURL) {
               </code>
             </figure>
           </li>
+          <li>
+            Ideally, these should be combined in one header.
+            <figure>
+              <figcaption>Example:</figcaption>
+              <code>
+                Link: &lt;${hubURL}&gt;; rel="hub", &lt;https://example.com/feed/&gt;; rel="self"
+              </code>
+            </figure>
+          </li>
         </ul>
       </div>
       <div>
@@ -73,15 +82,21 @@ function usageSection(isPublicHub, hubURL) {
       </div>
       <div>
         <h3>Publishing Updates</h3>
-        Send a <code>POST</code> request to this hub with Form Data:
+        To notify the Hub that a topic&apos;s content has been updated and should be distributed to subscribers, send a <code>POST</code> request with Form Data (<code>application/x-www-form-urlencoded</code>):
         <ul>
           <li>
             <code>hub.mode</code> set to <code>publish</code>
           </li>
           <li>
-            <code>hub.url</code> set to the <code>self</code> link relation of the content
+            <code>hub.url</code> set to the <code>self</code> link relation of the content (this value may be set multiple times, to update more than one topic)
           </li>
         </ul>
+        <figure>
+          <figcaption>Example:</figcaption>
+          <code>
+            curl ${hubURL} -d'hub.mode=publish' -d'hub.url=https://example.com/blog_one/feed' -d'hub.url=https://example.com/blog_two/feed'
+          </code>
+        </figure>
       </div>`
     : `
       <h2>Private Hub</h2>
