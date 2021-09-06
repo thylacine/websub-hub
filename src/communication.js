@@ -443,7 +443,7 @@ class Communication {
     // Cull any expired subscriptions
     await this.db.subscriptionDeleteExpired(dbCtx, topicId);
 
-    logInfoData.url = topicId.url;
+    logInfoData.url = topic.url;
 
     if (topic.isDeleted) {
       this.logger.debug(_scope, 'topic deleted, skipping update request', logInfoData);
