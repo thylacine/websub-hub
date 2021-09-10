@@ -60,14 +60,6 @@ describe('Service', function () {
     });
   }); // maybeIngestBody
 
-  describe('handlerRedirect', function () {
-    it('covers', async function () {
-      await service.handlerRedirect(req, res, ctx, '/');
-      assert(res.end.called);
-      assert.strictEqual(res.statusCode, 307);
-    });
-  }); // handlerRedirect
-
   describe('handlerPostRoot', function () {
     it('covers public mode', async function () {
       await service.handlerPostRoot(req, res, ctx);
@@ -122,14 +114,6 @@ describe('Service', function () {
       assert(service.manager.getTopicDetails.called);
     })
   }); // handlerGetAdminTopicDetails
-
-  describe('handlerGetStaticFile', function () {
-    it('covers', async function () {
-      service.serveFile.resolves();
-      await service.handlerGetStaticFile(req, res, ctx);
-      assert(service.serveFile.called);
-    });
-  }); // handlerGetStaticFile
 
   describe('handlerPostAdminProcess', function () {
     it('covers', async function () {

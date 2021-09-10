@@ -40,14 +40,14 @@ class Service extends Dingus {
 
     // These routes are intended for accessing static content during development.
     // In production, a proxy server would likely handle these first.
-    this.on(['GET', 'HEAD'], '/static', (req, res, ctx) => this.handlerRedirect(req, res, ctx, `${options.dingus.proxyPrefix}/static/`));
-    this.on(['GET', 'HEAD'], '/static/', (req, res, ctx) => this.handlerGetStaticFile(req, res, ctx, 'index.html'));
+    this.on(['GET', 'HEAD'], '/static', this.handlerRedirect.bind(this), `${options.dingus.proxyPrefix}/static/`);
+    this.on(['GET', 'HEAD'], '/static/', this.handlerGetStaticFile.bind(this), 'index.html');
     this.on(['GET', 'HEAD'], '/static/:file', this.handlerGetStaticFile.bind(this));
-    this.on(['GET', 'HEAD'], '/favicon.ico', (req, res, ctx) => this.handlerGetStaticFile(req, res, ctx, 'favicon.ico'));
-    this.on(['GET', 'HEAD'], '/robots.txt', (req, res, ctx) => this.handlerGetStaticFile(req, res, ctx, 'robots.txt'));
+    this.on(['GET', 'HEAD'], '/favicon.ico', this.handlerGetStaticFile.bind(this), 'favicon.ico');
+    this.on(['GET', 'HEAD'], '/robots.txt', this.handlerGetStaticFile.bind(this), 'robots.txt');
 
     // Private informational endpoints
-    this.on(['GET', 'HEAD'], '/admin', (req, res, ctx) => this.handlerRedirect(req, res, ctx, `${options.dingus.proxyPrefix}/admin/`));
+    this.on(['GET', 'HEAD'], '/admin', this.handlerRedirect.bind(this), `${options.dingus.proxyPrefix}/admin/`);
     this.on(['GET', 'HEAD'], '/admin/', this.handlerGetAdminOverview.bind(this));
     this.on(['GET', 'HEAD'], '/admin/topic/:topicId', this.handlerGetAdminTopicDetails.bind(this));
 
@@ -57,22 +57,6 @@ class Service extends Dingus {
 
     // Private server-action endpoints
     this.on('POST', '/admin/process', this.handlerPostAdminProcess.bind(this));
-  }
-
-
-  /**
-   * @param {http.ClientRequest} req 
-   * @param {http.ServerResponse} res 
-   * @param {Object} ctx 
-   * @param {String} newPath
-  */
-  async handlerRedirect(req, res, ctx, newPath) {
-    const _scope = _fileScope('handlerRedirect');
-    this.logger.debug(_scope, 'called', { req: common.requestLogData(req), ctx });
-
-    res.setHeader(Enum.Header.Location, newPath);
-    res.statusCode = 307; // Temporary Redirect
-    res.end();
   }
 
 
@@ -239,25 +223,6 @@ class Service extends Dingus {
     await this.manager.updateSubscription(res, ctx);
   }
   
-
-  /**
-   * @param {http.ClientRequest} req
-   * @param {http.ServerResponse} res
-   * @param {object} ctx
-   */
-  async handlerGetStaticFile(req, res, ctx, file) {
-    const _scope = _fileScope('handlerGetStaticFile');
-    this.logger.debug(_scope, 'called', { req: common.requestLogData(req), ctx, file });
-
-    Dingus.setHeadHandler(req, res, ctx);
-
-    // Set a default response type to handle any errors; will be re-set to serve actual static content type.
-    this.setResponseType(this.responseTypes, req, res, ctx);
-
-    await this.serveFile(req, res, ctx, this.staticPath, file || ctx.params.file);
-    this.logger.info(_scope, 'finished', { ctx: { ...ctx, responseBody: common.logTruncate((ctx.responseBody || '').toString(), 100) } });
-  }
-
 
   /**
    * @param {http.ClientRequest} req
