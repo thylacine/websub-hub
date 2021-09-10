@@ -4,6 +4,12 @@ Releases and notable changes to this project are documented here.
 
 ## [Unreleased]
 
+## [v1.2.1]
+
+### Fixed
+
+- Minor issues and dependency updates.
+
 ## [v1.2.0] - 2021-08-28
 
 ### Added
