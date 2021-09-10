@@ -60,7 +60,7 @@ class LinkHelper {
     if (nonUTF8Charset) {
       const iconv = new Iconv(nonUTF8Charset, 'utf-8//translit//ignore');
       try {
-        body = iconv.convert(body);
+        body = iconv.convert(body).toString('utf8');
       } catch (e) {
         /* istanbul ignore next */
         this.logger.error(_scope, 'iconv conversion error', { error: e, contentType, url });
