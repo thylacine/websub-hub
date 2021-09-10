@@ -4,7 +4,7 @@ Releases and notable changes to this project are documented here.
 
 ## [Unreleased]
 
-## [v1.2.1]
+## [v1.2.1] - 2021-09-10
 
 ### Fixed
 
