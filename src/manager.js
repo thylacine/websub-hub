@@ -53,6 +53,7 @@ class Manager {
 
   /**
    * GET request for root.
+   * @param {http.ClientRequest} req
    * @param {http.ServerResponse} res
    * @param {object} ctx
    */

@@ -1597,4 +1597,4 @@ describe('DatabaseSQLite', function () {
     });
   }); // verificationValidated
 
-}); // DatabasePostgres
+}); // DatabaseSQLite

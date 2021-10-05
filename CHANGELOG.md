@@ -4,6 +4,12 @@ Releases and notable changes to this project are documented here.
 
 ## [Unreleased]
 
+## [v1.2.2] - 2021-10-05
+
+### Fixed
+
+- Dependency updates.
+
 ## [v1.2.1] - 2021-09-10
 
 ### Fixed
@@ -74,6 +80,8 @@ Releases and notable changes to this project are documented here.
 ---
 
 [Unreleased]: https://git.squeep.com/?p=websub-hub;a=commitdiff;h=HEAD;hp=v1.2.0
+[v1.2.2]: https://git.squeep.com/?p=websub-hub;a=commitdiff;h=v1.2.2;hp=v1.2.1
+[v1.2.1]: https://git.squeep.com/?p=websub-hub;a=commitdiff;h=v1.2.1;hp=v1.2.0
 [v1.2.0]: https://git.squeep.com/?p=websub-hub;a=commitdiff;h=v1.2.0;hp=v1.1.5
 [v1.1.5]: https://git.squeep.com/?p=websub-hub;a=commitdiff;h=v1.1.5;hp=v1.1.4
 [v1.1.4]: https://git.squeep.com/?p=websub-hub;a=commitdiff;h=v1.1.4;hp=v1.1.3
