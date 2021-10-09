@@ -1,5 +1,5 @@
 {
-  "name": "websub-hub",
+  "name": "@squeep/websub-hub",
   "version": "1.2.2",
   "description": "A WebSub Hub server implementation.",
   "main": "server.js",
