@@ -61,6 +61,11 @@ const secondsToPeriod = (seconds) => {
  * @returns {String}
  */
 function renderTopicRow(topic, subscribers, detailsLink = true) {
+  if (!topic) {
+    return `<tr>
+    <th colspan="15">(topic not found)</th>
+</tr>`;
+  }
   return `<tr>
   <th scope="row">${detailsLink ? '<a href="topic/' + topic.id + '">' : ''}${topic.url}${detailsLink ? '</a>' : ''}</th>
   <td>${subscribers.length}</td>
@@ -112,6 +117,11 @@ function renderTopicRowHeader() {
  * @returns {String}
  */
 function renderSubscriptionRow(subscription) {
+  if (!subscription) {
+    return `<tr>
+    <th colspan="12">(topic not found)</th>
+</tr>`;
+  }
   return `<tr>
   <td scope="row">${subscription.callback}</td>
   <td>${dateOrNot(subscription.created, 'Unknown')}</td>
@@ -236,7 +246,8 @@ function htmlFooter(footerEntries = []) {
 
 
 /**
- * Render all parts of an HTML page.
+ * Render all parts of an HTML page. Adds user logout nav link automatically.
+ * @param {Object} ctx
  * @param {Number} pagePathLevel
  * @param {String} pageTitle
  * @param {String[]} headElements
@@ -245,7 +256,20 @@ function htmlFooter(footerEntries = []) {
  * @param {String[]} footerEntries
  * @returns {String}
  */
-function htmlTemplate(pagePathLevel, pageTitle, headElements = [], navLinks = [], main = [], footerEntries = []) {
+function htmlTemplate(ctx, pagePathLevel, pageTitle, headElements = [], navLinks = [], main = [], footerEntries = []) {
+  const user = (ctx && ctx.session && ctx.session.authenticatedProfile) || (ctx && ctx.session && ctx.session.authenticatedIdentifier);
+  if (user) {
+    let logoutPath;
+    if (pagePathLevel > 0) {
+      logoutPath = `${'../'.repeat(pagePathLevel - 1)}`;
+    } else {
+      logoutPath = 'admin/';
+    }
+    navLinks.push({
+      text: `Logout (${user})`,
+      href: `${logoutPath}logout`,
+    });
+  }
   return [
     htmlHead(pagePathLevel, pageTitle, headElements),
     htmlHeader(pageTitle, navLinks),

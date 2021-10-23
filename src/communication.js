@@ -57,7 +57,7 @@ class Communication {
   static userAgentString(userAgentConfig) {
     // eslint-disable-next-line security/detect-object-injection
     const _conf = (field, def) => (userAgentConfig && field in userAgentConfig) ? userAgentConfig[field] : def;
-    const product = _conf('product', packageName);
+    const product = _conf('product', packageName).split('/').pop();
     const version = _conf('version', packageVersion);
     let implementation = _conf('implementation', Enum.Specification);
     if (implementation) {

@@ -2,6 +2,18 @@
 
 const th = require('./template-helper');
 
+function hAppSection(pageTitle) {
+  return `      <section class="h-app hidden">
+        <h2>h-app Information for IndieAuth Logins</h2>
+        <img src="static/favicon.ico" class="u-logo">
+        <a href="" class="u-url p-name">${pageTitle}</a>
+        <p class="p-summary">
+          This is a WebSub Hub service, facilitating content distribution.
+          Authenticated users may view details of any syndications related to their profile.
+        </p>
+      </section>`;
+}
+
 function aboutSection() {
   return `      <section class="about">
         <h2>What</h2>
@@ -82,7 +94,7 @@ function usageSection(isPublicHub, hubURL) {
       </div>
       <div>
         <h3>Publishing Updates</h3>
-        To notify the Hub that a topic&apos;s content has been updated and should be distributed to subscribers, send a <code>POST</code> request with Form Data (<code>application/x-www-form-urlencoded</code>):
+        To notify the Hub either of a new topic to syndicate, or that a topic&apos;s content has been updated and should be distributed to subscribers, send a <code>POST</code> request with Form Data (<code>application/x-www-form-urlencoded</code>):
         <ul>
           <li>
             <code>hub.mode</code> set to <code>publish</code>
@@ -138,12 +150,16 @@ module.exports = (ctx, options) => {
   const footerEntries = options.manager.footerEntries;
   const hubURL = options.dingus.selfBaseUrl || '<s>https://hub.example.com/</s>';
   const headElements = [];
-  const navLinks = [];
+  const navLinks = [{
+    href: 'admin/',
+    text: 'Admin',
+  }];
   const mainContent = [
     aboutSection(),
     usageSection(isPublicHub, hubURL),
     contactSection(contactHTML),
+    hAppSection(pageTitle),
   ];
-  return th.htmlTemplate(1, pageTitle, headElements, navLinks, mainContent, footerEntries,
+  return th.htmlTemplate(ctx, 0, pageTitle, headElements, navLinks, mainContent, footerEntries,
   );
 };

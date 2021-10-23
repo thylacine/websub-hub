@@ -9,6 +9,9 @@ const defaultOptions = {
   // Uniquely identify this instance, used to tag work-in-progress.
   nodeId: common.requestId(), // Default to ephemeral ID: easiest for clustered deployments.
 
+  // This should be set to a reasonably long passphrase or random buffer, to keep client session data secure.
+  encryptionSecret: undefined, // REQUIRED
+
   // Dingus API Server Framework options. Be sure to set the one REQUIRED option here.
   dingus: {
     // This needs to be the full externally accessible root URL, including any proxyPrefix component, which clients will connect to, and which topics will list as their hub link.
@@ -69,6 +72,8 @@ const defaultOptions = {
   authenticator: {
     basicRealm: packageName, // Realm prompt for login on administration pages
     secureAuthOnly: true, // Require secure transport for authentication.
+    authnEnabled: ['argon2', 'pam'],
+    forbiddenPAMIdentifiers: ['root'],
   },
 
   worker: {

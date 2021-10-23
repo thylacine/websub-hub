@@ -577,6 +577,15 @@ class Manager {
     });
     this.logger.debug(_scope, 'got topics', { topics: ctx.topics });
 
+    // Profile users can only see related topics.
+    if (ctx.session && ctx.session.authenticatedProfile) {
+      const profileUrlObj = new URL(ctx.session.authenticatedProfile);
+      ctx.topics = ctx.topics.filter((topic) => {
+        const topicUrlObj = new URL(topic.url);
+        return (topicUrlObj.hostname === profileUrlObj.hostname);
+      });
+    }
+
     res.end(Template.adminOverviewHTML(ctx, this.options));
     this.logger.info(_scope, 'finished', { ...ctx, topics: ctx.topics.length })
   }
@@ -598,8 +607,18 @@ class Manager {
     });
     this.logger.debug(_scope, 'got topic details', { topic: ctx.topic, subscriptions: ctx.subscriptions });
 
+    // Profile users can only see related topics.
+    if (ctx.session && ctx.session.authenticatedProfile) {
+      const profileUrlObj = new URL(ctx.session.authenticatedProfile);
+      const topicUrlObj = new URL(ctx.topic.url);
+      if (topicUrlObj.hostname !== profileUrlObj.hostname) {
+        ctx.topic = null;
+        ctx.subscriptions = [];
+      }
+    }
+
     res.end(Template.adminTopicDetailsHTML(ctx, this.options));
-    this.logger.info(_scope, 'finished', { ...ctx, subscriptions: ctx.subscriptions.length, topic: ctx.topic.id });
+    this.logger.info(_scope, 'finished', { ...ctx, subscriptions: ctx.subscriptions.length, topic: ctx.topic && ctx.topic.id || ctx.topic });
   }
 
 

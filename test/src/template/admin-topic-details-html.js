@@ -22,6 +22,12 @@ describe('Admin Topic Details HTML Template', function () {
     const result = template(ctx, config);
     assert(result);
   });
+  it('covers null topic', function () {
+    ctx.topic = null;
+    ctx.subscriptions = null;
+    const result = template(ctx, config);
+    assert(result);
+  });
   it('covers missing subscriptions', function () {
     delete ctx.subscriptions;
     const result = template(ctx, config);
@@ -32,5 +38,4 @@ describe('Admin Topic Details HTML Template', function () {
     const result = template(ctx, config);
     assert(result);
   });
-
 });

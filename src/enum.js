@@ -15,10 +15,12 @@ const Enum = common.mergeDeep(DingusEnum, {
   
   Header: {
     Authorization: 'Authorization',
+    Cookie: 'Cookie',
     From: 'From',
     LastSeen: 'Last-Seen',
     Link: 'Link',
     Location: 'Location',
+    SetCookie: 'Set-Cookie',
     Signature: 'Signature',
     UserAgent: 'User-Agent',
     WWWAuthenticate: 'WWW-Authenticate',

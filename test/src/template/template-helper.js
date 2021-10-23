@@ -75,6 +75,12 @@ describe('Template Helper', function () {
       const result = th.renderTopicRow(topic, subscribers);
       assert(result);
     });
+    it('covers empty', function () {
+      topic = null;
+      subscribers = null;
+      const result = th.renderTopicRow(topic, subscribers);
+      assert(result);
+    });
     it('covers no link', function () {
       subscribers = [{}, {}];
       const result = th.renderTopicRow(topic, subscribers, false);
@@ -101,6 +107,10 @@ describe('Template Helper', function () {
     });
     it('covers', function () {
       const result = th.renderSubscriptionRow(subscription);
+      assert(result);
+    });
+    it('covers empty', function () {
+      const result = th.renderSubscriptionRow();
       assert(result);
     });
   }); // renderSubscriptionRow
@@ -179,6 +189,10 @@ describe('Template Helper', function () {
 
   describe('htmlFooter', function () {
     it('covers', function () {
+      const result = th.htmlFooter(['foo', 'bar']);
+      assert(result);
+    });
+    it('covers default', function () {
       const result = th.htmlFooter();
       assert(result);
     });
@@ -187,6 +201,7 @@ describe('Template Helper', function () {
   describe('htmlTemplate', function () {
     let pagePathLevel, pageTitle, headElements, navLinks, main;
     beforeEach(function () {
+      ctx = {};
       pagePathLevel = 1;
       pageTitle = 'title';
       headElements = [];
@@ -194,11 +209,26 @@ describe('Template Helper', function () {
       main = [];
     });
     it('covers', function () {
-      const result = th.htmlTemplate(pagePathLevel, pageTitle, headElements, navLinks, main);
+      const result = th.htmlTemplate(ctx, pagePathLevel, pageTitle, headElements, navLinks, main);
       assert(result);
     });
     it('covers defaults', function () {
-      const result = th.htmlTemplate(pagePathLevel, pageTitle);
+      const result = th.htmlTemplate(ctx, pagePathLevel, pageTitle);
+      assert(result);
+    });
+    it('covers user', function () {
+      ctx.session = {
+        authenticatedProfile: 'user',
+      };
+      const result = th.htmlTemplate(ctx, pagePathLevel, pageTitle);
+      assert(result);
+    });
+    it('covers user at root path', function () {
+      ctx.session = {
+        authenticatedIdentifier: 'user',
+      };
+      pagePathLevel = 0;
+      const result = th.htmlTemplate(ctx, pagePathLevel, pageTitle);
       assert(result);
     });
   }); // htmlTemplate

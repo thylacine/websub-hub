@@ -11,16 +11,36 @@ body {
 	flex-direction: column;
 }
 header {}
+header nav {
+	margin-bottom: 1em;
+}
 header nav ol {
 	list-style-type: none;
 	margin: 0;
 	padding: 0;
-	border: 1px solid #000;
 }
-header nav ol li a {
-	display: block;
-	width: 10em;
+header nav ol li {
+	display: inline;
 	text-align: center;
+	border-top: 2px solid #666;
+	border-bottom: 2px solid #666;
+	border-left: 1px solid #666;
+	border-right: 1px solid #666;
+	padding: .3em .5em .2em .5em;
+}
+header nav ol > li:first-child {
+	border-left: 2px solid #666;
+}
+header nav ol > li:last-child {
+	border-right: 2px solid #666;
+}
+header nav ol li:hover {
+	background-color: #ddd;
+}
+header nav ol a {
+	font-variant-caps: small-caps;
+	text-decoration: none;
+	font-weight: bold;
 }
 h1 {
 	margin-top: 1em;
@@ -35,6 +55,9 @@ main {
 	flex-grow: 1;
 }
 section {}
+section + section {
+	margin-top: 2em;
+}
 .about {}
 .usage {}
 .topics {}
@@ -44,6 +67,15 @@ section {}
 	background-position: right center;
 	background-repeat: no-repeat;
 	padding-right: 13px;
+}
+.hidden {
+	display: none;
+}
+.h-app img {
+	vertical-align: middle;
+}
+.errors ul {
+	border: 1px solid red;
 }
 table {
 	border: 0;

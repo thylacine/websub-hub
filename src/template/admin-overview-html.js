@@ -19,7 +19,7 @@ module.exports = (ctx, options) => {
   if (!ctx.topics) {
     ctx.topics = [];
   }
-  return th.htmlTemplate(1, pageTitle, headElements, navLinks, [
+  return th.htmlTemplate(ctx, 1, pageTitle, headElements, navLinks, [
     `      <section class="topics">
         <p>${ctx.topics.length ? ctx.topics.length : 'no'} topic${(ctx.topics.length === 1) ? '' : 's'}</p>
         <table>

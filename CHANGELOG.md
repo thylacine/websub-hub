@@ -4,6 +4,13 @@ Releases and notable changes to this project are documented here.
 
 ## [Unreleased]
 
+## [v1.3.0] - 2021-10-23
+
+### Added
+
+- IndieAuth logins now supported, admin overview page will show topics related to the authenticated profile's host.
+- Due to the new session-based admin login system, the config value `encryptionSecret` will need to be populated when upgrading.
+
 ## [v1.2.2] - 2021-10-05
 
 ### Fixed
@@ -79,7 +86,8 @@ Releases and notable changes to this project are documented here.
 
 ---
 
-[Unreleased]: https://git.squeep.com/?p=websub-hub;a=commitdiff;h=HEAD;hp=v1.2.0
+[Unreleased]: https://git.squeep.com/?p=websub-hub;a=commitdiff;h=HEAD;hp=v1.3.0
+[v1.3.0]: https://git.squeep.com/?p=websub-hub;a=commitdiff;h=v1.3.0;hp=v1.2.2
 [v1.2.2]: https://git.squeep.com/?p=websub-hub;a=commitdiff;h=v1.2.2;hp=v1.2.1
 [v1.2.1]: https://git.squeep.com/?p=websub-hub;a=commitdiff;h=v1.2.1;hp=v1.2.0
 [v1.2.0]: https://git.squeep.com/?p=websub-hub;a=commitdiff;h=v1.2.0;hp=v1.1.5

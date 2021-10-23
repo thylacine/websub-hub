@@ -20,6 +20,7 @@ describe('Service', function () {
     options = new Config('test');
     service = new Service(stubLogger, stubDb, options);
     sinon.stub(service.manager);
+    sinon.stub(service.sessionManager);
     sinon.stub(service.authenticator);
     sinon.stub(service, 'setResponseType');
     sinon.stub(service, 'serveFile');
@@ -119,7 +120,7 @@ describe('Service', function () {
     it('covers', async function () {
       service.serveFile.resolves();
       await service.handlerPostAdminProcess(req, res, ctx);
-      assert(service.authenticator.required.called);
+      assert(service.authenticator.requiredLocal.called);
       assert(service.manager.processTasks.called);
     });
   }); // handlerPostAdminProcess
@@ -128,7 +129,7 @@ describe('Service', function () {
     it('covers', async function () {
       sinon.stub(service, 'bodyData').resolves();
       await service.handlerUpdateTopic(req, res, ctx);
-      assert(service.authenticator.required.called);
+      assert(service.authenticator.requiredLocal.called);
       assert(service.manager.updateTopic.called);
     });
   }); // handlerUpdateTopic
@@ -137,9 +138,38 @@ describe('Service', function () {
     it('covers', async function () {
       sinon.stub(service, 'bodyData').resolves();
       await service.handlerUpdateSubscription(req, res, ctx);
-      assert(service.authenticator.required.called);
+      assert(service.authenticator.requiredLocal.called);
       assert(service.manager.updateSubscription.called);
     });
   }); // handlerUpdateSubscription
+
+  describe('handlerGetAdminLogin', function () {
+    it('covers', async function () {
+      await service.handlerGetAdminLogin(req, res, ctx);
+      assert(service.sessionManager.getAdminLogin.called);
+    });
+  }); // handlerGetAdminLogin
+
+  describe('handlerPostAdminLogin', function () {
+    it('covers', async function () {
+      sinon.stub(service, 'bodyData').resolves();
+      await service.handlerPostAdminLogin(req, res, ctx);
+      assert(service.sessionManager.postAdminLogin.called);
+    });
+  }); // handlerPostAdminLogin
+
+  describe('handlerGetAdminLogout', function () {
+    it('covers', async function () {
+      await service.handlerGetAdminLogout(req, res, ctx);
+      assert(service.sessionManager.getAdminLogout.called);
+    });
+}); // handlerGetAdminLogout
+
+  describe('handlerGetAdminIA', function () {
+    it('covers', async function () {
+      await service.handlerGetAdminIA(req, res, ctx);
+      assert(service.sessionManager.getAdminIA.called);
+    });
+  }); // handlerGetAdminIA
 
 });
