@@ -10,4 +10,5 @@ module.exports = {
     queryLogLevel: 'debug',
     cacheEnabled: false,
   },
+  encryptionSecret: 'not a very good secret',
 };

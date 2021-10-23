@@ -9,6 +9,7 @@ const { Dingus } = require('@squeep/api-dingus');
 const common = require('./common');
 const Enum = require('./enum');
 const Manager = require('./manager');
+const SessionManager = require('./session-manager');
 const Authenticator = require('./authenticator');
 const path = require('path');
 
@@ -23,7 +24,9 @@ class Service extends Dingus {
 
     this.manager = new Manager(logger, db, options);
     this.authenticator = new Authenticator(logger, db, options);
+    this.sessionManager = new SessionManager(logger, this.authenticator, options);
     this.staticPath = path.join(__dirname, '..', 'static');
+    this.loginPath = `${options.dingus.proxyPrefix}/admin/login`;
 
     // Primary API endpoint
     this.on('POST', '/', this.handlerPostRoot.bind(this));
@@ -57,13 +60,20 @@ class Service extends Dingus {
 
     // Private server-action endpoints
     this.on('POST', '/admin/process', this.handlerPostAdminProcess.bind(this));
+
+    // Admin login
+    this.on(['GET', 'HEAD'], '/admin/login', this.handlerGetAdminLogin.bind(this));
+    this.on(['POST'], '/admin/login', this.handlerPostAdminLogin.bind(this));
+    this.on(['GET'], '/admin/logout', this.handlerGetAdminLogout.bind(this));
+    this.on(['GET'], '/admin/_ia', this.handlerGetAdminIA.bind(this));
+
   }
 
 
   /**
-   * @param {http.ClientRequest} req 
-   * @param {http.ServerResponse} res 
-   * @param {object} ctx 
+   * @param {http.ClientRequest} req
+   * @param {http.ServerResponse} res
+   * @param {Object} ctx
    */
   async handlerPostRoot(req, res, ctx) {
     const _scope = _fileScope('handlerPostRoot');
@@ -77,9 +87,9 @@ class Service extends Dingus {
 
 
   /**
-   * @param {http.ClientRequest} req 
-   * @param {http.ServerResponse} res 
-   * @param {object} ctx 
+   * @param {http.ClientRequest} req
+   * @param {http.ServerResponse} res
+   * @param {Object} ctx
    */
   async handlerGetRoot(req, res, ctx) {
     const _scope = _fileScope('handlerGetRoot');
@@ -97,9 +107,9 @@ class Service extends Dingus {
 
 
   /**
-   * @param {http.ClientRequest} req 
-   * @param {http.ServerResponse} res 
-   * @param {object} ctx 
+   * @param {http.ClientRequest} req
+   * @param {http.ServerResponse} res
+   * @param {Object} ctx
    */
   async handlerGetHealthcheck(req, res, ctx) {
     const _scope = _fileScope('handlerGetHealthcheck');
@@ -116,7 +126,7 @@ class Service extends Dingus {
   /**
    * @param {http.ClientRequest} req
    * @param {http.ServerResponse} res
-   * @param {object} ctx
+   * @param {Object} ctx
    */
   async handlerGetInfo(req, res, ctx) {
     const _scope = _fileScope('handlerGetInfo');
@@ -135,7 +145,7 @@ class Service extends Dingus {
   /**
    * @param {http.ClientRequest} req
    * @param {http.ServerResponse} res
-   * @param {object} ctx
+   * @param {Object} ctx
    */
   async handlerGetAdminOverview(req, res, ctx) {
     const _scope = _fileScope('handlerGetAdminOverview');
@@ -145,7 +155,7 @@ class Service extends Dingus {
 
     this.setResponseType(this.responseTypes, req, res, ctx);
 
-    await this.authenticator.required(req, res, ctx);
+    await this.authenticator.required(req, res, ctx, this.loginPath);
 
     await this.manager.getAdminOverview(res, ctx);
   }
@@ -154,7 +164,7 @@ class Service extends Dingus {
   /**
    * @param {http.ClientRequest} req
    * @param {http.ServerResponse} res
-   * @param {object} ctx
+   * @param {Object} ctx
    */
   async handlerGetAdminTopicDetails(req, res, ctx) {
     const _scope = _fileScope('handlerGetAdminTopicDetails');
@@ -164,7 +174,7 @@ class Service extends Dingus {
 
     this.setResponseType(this.responseTypes, req, res, ctx);
 
-    await this.authenticator.required(req, res, ctx);
+    await this.authenticator.required(req, res, ctx, this.loginPath);
 
     await this.manager.getTopicDetails(res, ctx);
   }
@@ -197,7 +207,7 @@ class Service extends Dingus {
 
     this.setResponseType(this.responseTypes, req, res, ctx);
 
-    await this.authenticator.required(req, res, ctx);
+    await this.authenticator.requiredLocal(req, res, ctx, this.loginPath);
 
     await this.maybeIngestBody(req, res, ctx);
     ctx.method = req.method;
@@ -216,7 +226,7 @@ class Service extends Dingus {
 
     this.setResponseType(this.responseTypes, req, res, ctx);
 
-    await this.authenticator.required(req, res, ctx);
+    await this.authenticator.requiredLocal(req, res, ctx, this.loginPath);
 
     await this.maybeIngestBody(req, res, ctx);
     ctx.method = req.method;
@@ -227,7 +237,7 @@ class Service extends Dingus {
   /**
    * @param {http.ClientRequest} req
    * @param {http.ServerResponse} res
-   * @param {object} ctx
+   * @param {Object} ctx
    */
   async handlerPostAdminProcess(req, res, ctx) {
     const _scope = _fileScope('handlerPostAdminProcess');
@@ -235,10 +245,78 @@ class Service extends Dingus {
 
     this.setResponseType(this.responseTypes, req, res, ctx);
 
-    await this.authenticator.required(req, res, ctx);
+    await this.authenticator.requiredLocal(req, res, ctx, this.loginPath);
 
     await this.manager.processTasks(res, ctx);
   }
+
+
+  /**
+   * @param {http.ClientRequest} req
+   * @param {http.ServerResponse} res
+   * @param {Object} ctx
+   */
+  async handlerGetAdminLogin(req, res, ctx) {
+    const _scope = _fileScope('handlerGetAdminLogin');
+    this.logger.debug(_scope, 'called', { req: common.requestLogData(req), ctx });
+
+    Dingus.setHeadHandler(req, res, ctx);
+
+    this.setResponseType(this.responseTypes, req, res, ctx);
+
+    await this.sessionManager.getAdminLogin(res, ctx);
+  }
+
+
+  /**
+   * @param {http.ClientRequest} req
+   * @param {http.ServerResponse} res
+   * @param {Object} ctx
+   */
+  async handlerPostAdminLogin(req, res, ctx) {
+    const _scope = _fileScope('handlerPostAdminLogin');
+    this.logger.debug(_scope, 'called', { req: common.requestLogData(req), ctx });
+
+    this.setResponseType(this.responseTypes, req, res, ctx);
+
+    await this.maybeIngestBody(req, res, ctx);
+
+    await this.sessionManager.postAdminLogin(res, ctx);
+  }
+
+
+  /**
+   * @param {http.ClientRequest} req
+   * @param {http.ServerResponse} res
+   * @param {Object} ctx
+   */
+  async handlerGetAdminLogout(req, res, ctx) {
+    const _scope = _fileScope('handlerGetAdminLogout');
+    this.logger.debug(_scope, 'called', { req: common.requestLogData(req), ctx });
+
+    this.setResponseType(this.responseTypes, req, res, ctx);
+
+    await this.sessionManager.getAdminLogout(res, ctx);
+  }
+
+
+  /**
+   * @param {http.ClientRequest} req
+   * @param {http.ServerResponse} res
+   * @param {Object} ctx
+   */
+  async handlerGetAdminIA(req, res, ctx) {
+    const _scope = _fileScope('handlerGetAdminIA');
+    this.logger.debug(_scope, 'called', { req: common.requestLogData(req), ctx });
+
+    this.setResponseType(this.responseTypes, req, res, ctx);
+
+    // Special case here, to see cookie before session established
+    ctx.cookie = req.getHeader(Enum.Header.Cookie);
+
+    await this.sessionManager.getAdminIA(res, ctx);
+  }
+
 }
 
 module.exports = Service;

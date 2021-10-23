@@ -18,6 +18,8 @@ Database table initialization and schema version migrations are automated.  Conf
 
 A user will need to be created in order to view the `/admin` pages; the `bin/authAddUser.js` script will do this.
 
+An IndieAuth profile may be used to view any topics associated with that profile.
+
 The bundled logger spews JSON to stdout.
 
 ### Quickstart Example
@@ -126,6 +128,7 @@ This implementation is built atop an in-house API framework, for Reasons.  It wo
   - *.js - environment specific values, edit these as needed
 - server.js - launches the application server
 - src/
+  - authenticator.js - interact with credentials and validation mechanisms
   - common.js - utility functions
   - communication.js - outgoing requests and associated logic
   - db/
@@ -146,6 +149,7 @@ This implementation is built atop an in-house API framework, for Reasons.  It wo
   - logger.js - a very simple logging class
   - manager.js - process incoming requests
   - service.js - defines incoming endpoints, linking the API server framework to the manager methods
+  - session-manager.js - process login/logout requests
   - template/ - HTML content
   - worker.js - maintains a pool of tasks in progress, for sending out updates, performing verifications, et cetera
 - test/ - unit and coverage tests

@@ -25,14 +25,14 @@ module.exports = (ctx, options) => {
   if (!ctx.subscriptions) {
     ctx.subscriptions = [];
   }
-  return th.htmlTemplate(2, pageTitle, headElements, navLinks, [
+  return th.htmlTemplate(ctx, 2, pageTitle, headElements, navLinks, [
     `      <section class="topics">
         <table>
           <thead>`,
     th.renderTopicRowHeader(),
     `          </thead>
         <tbody>`,
-    ...(ctx.topic && [ th.renderTopicRow(ctx.topic, ctx.subscriptions, false) ]),
+    ...(ctx.topic && [ th.renderTopicRow(ctx.topic, ctx.subscriptions, false) ] || []),
     `        </tbody>
         </table>
       </section>`,

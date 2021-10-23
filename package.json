@@ -32,10 +32,10 @@
     "coverage-check"
   ],
   "dependencies": {
-    "@squeep/api-dingus": "git+https://git.squeep.com/squeep-api-dingus/#v1.2.0",
+    "@squeep/api-dingus": "git+https://git.squeep.com/squeep-api-dingus/#v1.2.1",
     "@squeep/indieauth-helper": "git+https://git.squeep.com/squeep-indieauth-helper/#v1.0.0",
-    "@squeep/mystery-box": "git+https://git.squeep.com/squeep-mystery-box/#v1.0.0",
-    "@squeep/web-linking": "git+https://git.squeep.com/squeep-web-linking/#v1.0.0",
+    "@squeep/mystery-box": "git+https://git.squeep.com/squeep-mystery-box/#v1.0.1",
+    "@squeep/web-linking": "git+https://git.squeep.com/squeep-web-linking/#v1.0.1",
     "axios": "^0.23.0",
     "feedparser": "^2.2.10",
     "htmlparser2": "^7.1.2",
@@ -48,7 +48,7 @@
     "pg-promise": "^10.11.1"
   },
   "devDependencies": {
-    "eslint": "^8.0.1",
+    "eslint": "^8.1.0",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-security": "^1.4.0",
     "eslint-plugin-sonarjs": "^0.10.0",

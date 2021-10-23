@@ -150,7 +150,7 @@ describe('Manager', function () {
   }); // getInfo
 
   describe('getAdminOverview', function () {
-    it('covers', async function () {
+    beforeEach(function () {
       manager.db.topicGetAll.resolves([
         {
           id: '56c557ce-e667-11eb-bd80-0025905f714a',
@@ -172,13 +172,23 @@ describe('Manager', function () {
           subscribers: 12,
         },
       ]);
+    });
+    it('covers', async function () {
       await manager.getAdminOverview(res, ctx);
+      assert(res.end.called);
+    });
+    it('covers non-matching profile', async function () {
+      ctx.session = {
+        authenticatedProfile: 'https://different.example.com/profile',
+      };
+      await manager.getAdminOverview(res, ctx);
+      assert.deepStrictEqual(ctx.topics, []);
       assert(res.end.called);
     });
   }); // getAdminOverview
 
   describe('getTopicDetails', function () {
-    it('covers', async function() {
+    beforeEach(function () {
       ctx.params.topicId = '56c557ce-e667-11eb-bd80-0025905f714a';
       manager.db.topicGetById.resolves({
         id: '56c557ce-e667-11eb-bd80-0025905f714a',
@@ -214,7 +224,25 @@ describe('Manager', function () {
         deliveryAttemptsSinceSuccess: 0,
         deliveryNextAttempt: new Date(-Infinity),
       }]);
+    });
+    it('covers', async function() {
       await manager.getTopicDetails(res, ctx);
+      assert(res.end.called);
+    });
+    it('covers non-matching profile', async function () {
+      ctx.session = {
+        authenticatedProfile: 'https://different.example.com/profile',
+      };
+      await manager.getTopicDetails(res, ctx);
+      assert.strictEqual(ctx.topic, null);
+      assert(res.end.called);
+    });
+    it('covers matching profile', async function () {
+      ctx.session = {
+        authenticatedProfile: 'https://example.com/profile',
+      };
+      await manager.getTopicDetails(res, ctx);
+      assert(ctx.topic);
       assert(res.end.called);
     });
   }); // getTopicDetails
