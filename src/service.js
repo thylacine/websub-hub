@@ -181,8 +181,9 @@ class Service extends Dingus {
 
 
   /**
-   * Same as super.ingestBody, but if no body was sent, do not parse (and
+   * Similar to super.ingestBody, but if no body was sent, do not parse (and
    * thus avoid possible unsupported media type error).
+   * Also removes raw body from context, to simplify scrubbing sensitive data from logs.
    * @param {http.ClientRequest} req
    * @param {http.ServerResponse} res
    * @param {Object} ctx
@@ -192,6 +193,7 @@ class Service extends Dingus {
     const contentType = Dingus.getRequestContentType(req);
     if (ctx.rawBody) {
       this.parseBody(contentType, ctx);
+      delete ctx.rawBody;
     }
   }
 
