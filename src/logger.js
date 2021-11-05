@@ -66,6 +66,14 @@ class Logger {
   }
 
   payload(level, scope, message, data, ...other) {
+    // Try to keep credentials out of logs.
+    // This approach feels sort of jank, but it's better than nothing, for now.
+    if (data && data.ctx && data.ctx.parsedBody && data.ctx.parsedBody.credential) {
+      // Create copy of data
+      data = JSON.parse(JSON.stringify(data));
+      data.ctx.parsedBody.credential = '*'.repeat(data.ctx.parsedBody.credential.length);
+    }
+
     const now = new Date();
     return JSON.stringify({
       nodeId: this.nodeId,

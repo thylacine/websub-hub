@@ -48,4 +48,17 @@ describe('Logger', function () {
     logger = new Logger(config);
     logger.info();
   });
+
+  it('masks credentials', function () {
+    logger = new Logger(config);
+    logger.info('testScope', 'message', {
+      ctx: {
+        parsedBody: {
+          identity: 'username',
+          credential: 'password',
+        },
+      },
+    });
+  });
+
 }); // Logger
