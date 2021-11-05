@@ -38,6 +38,7 @@ One way of deploying this server is behind nginx, with the pm2 package to manage
   > 'use strict';
   > // Minimum required configuration settings
   > module.exports = {
+  >   encryptionSecret: 'this is a secret passphrase, it is pretty important to be unguessable',
   >   dingus: {
   >     selfBaseUrl: 'https://hub.squeep.com/',
   >   },
