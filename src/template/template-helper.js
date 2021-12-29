@@ -172,7 +172,7 @@ function renderSubscriptionRowHeader() {
 function htmlHead(pagePathLevel, pageTitle, headElements = []) {
   const rootPathPfx = '../'.repeat(pagePathLevel);
   return `<!DOCTYPE html>
-<html lang="en>
+<html lang="en">
   <head>
     <meta charset="utf-8">` +
   headElements.map((e) => `${'  '.repeat(2)}${e}`).join('\n') + `

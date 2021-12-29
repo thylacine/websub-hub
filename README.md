@@ -153,5 +153,6 @@ This implementation is built atop an in-house API framework, for Reasons.  It wo
   - session-manager.js - process login/logout requests
   - template/ - HTML content
   - worker.js - maintains a pool of tasks in progress, for sending out updates, performing verifications, et cetera
+- static/ - static assets
 - test/ - unit and coverage tests
 - test-e2e/ - support for whole-service testing

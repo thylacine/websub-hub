@@ -4,9 +4,16 @@ Releases and notable changes to this project are documented here.
 
 ## [Unreleased]
 
+## [v1.3.2] - 2021-12-29
+
+### Fixed
+
+- Minor fix and update to HTML templates.
+- Dependency updates.
+
 ## [v1.3.1] - 2021-10-23
 
-## Fixed
+### Fixed
 
 - Login credentials are no longer logged.
 
@@ -92,7 +99,8 @@ Releases and notable changes to this project are documented here.
 
 ---
 
-[Unreleased]: https://git.squeep.com/?p=websub-hub;a=commitdiff;h=HEAD;hp=v1.3.1
+[Unreleased]: https://git.squeep.com/?p=websub-hub;a=commitdiff;h=HEAD;hp=v1.3.2
+[v1.3.2]: https://git.squeep.com/?p=websub-hub;a=commitdiff;h=v1.3.2;hp=v1.3.1
 [v1.3.1]: https://git.squeep.com/?p=websub-hub;a=commitdiff;h=v1.3.1;hp=v1.3.0
 [v1.3.0]: https://git.squeep.com/?p=websub-hub;a=commitdiff;h=v1.3.0;hp=v1.2.2
 [v1.2.2]: https://git.squeep.com/?p=websub-hub;a=commitdiff;h=v1.2.2;hp=v1.2.1

@@ -60,6 +60,9 @@ section + section {
 }
 .about {}
 .usage {}
+.copyright {
+	font-size: small;
+}
 .topics {}
 .subscriptions {}
 .external {
