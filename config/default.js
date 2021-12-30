@@ -2,8 +2,9 @@
 
 // Provide default values for all configuration.
 
-const packageName = require('../package.json').name;
+const { name: packageName, version: packageVersion } = require('../package.json');
 const common = require('../src/common');
+const Enum = require('../src/enum');
 
 const defaultOptions = {
   // Uniquely identify this instance, used to tag work-in-progress.
@@ -47,6 +48,7 @@ const defaultOptions = {
 
   manager: {
     pageTitle: packageName, // title on html pages
+    logoUrl: '/static/logo.svg', // image to go with title
     footerEntries: [ // common footers on all html pages
       '<a href="https://git.squeep.com/?p=websub-hub;a=tree">Development Repository</a> / <a href="https://github.com/thylacine/websub-hub/">GitHub mirror</a>',
       '<span class="copyright">&copy;<time datetime="2021">&#8559;&#8559;&#8553;&#8553;&#8544;</time></span>',
@@ -62,17 +64,19 @@ const defaultOptions = {
     claimTimeoutSeconds: 600, // how long until an in-progress task is deemed abandoned
   },
 
-  // Outgoing request UA header. Comments are defaults in code.
+  // Outgoing request UA header.
+  // These values are the same as the defaults in the code, but we are setting
+  // them here so they also apply to UA of other modules, e.g. @squeep/indieauth-helper
   userAgent: {
-    // product: packageName,
-    // version: packageVersion,
-    // implementation: Enum.Specification,
+    product: packageName,
+    version: packageVersion,
+    implementation: Enum.Specification,
   },
 
   authenticator: {
     basicRealm: packageName, // Realm prompt for login on administration pages
     secureAuthOnly: true, // Require secure transport for authentication.
-    authnEnabled: ['argon2', 'pam'],
+    authnEnabled: ['indieAuth', 'argon2', 'pam'],
     forbiddenPAMIdentifiers: ['root'],
   },
 

@@ -103,7 +103,7 @@ describe('Service', function () {
   describe('handlerGetAdminOverview', function () {
     it('covers', async function () {
       await service.handlerGetAdminOverview(req, res, ctx);
-      assert(service.authenticator.required.called);
+      assert(service.authenticator.sessionRequired.called);
       assert(service.manager.getAdminOverview.called);
     })
   }); // handlerGetAdminOverview
@@ -111,7 +111,7 @@ describe('Service', function () {
   describe('handlerGetAdminTopicDetails', function () {
     it('covers', async function () {
       await service.handlerGetAdminTopicDetails(req, res, ctx);
-      assert(service.authenticator.required.called);
+      assert(service.authenticator.sessionRequired.called);
       assert(service.manager.getTopicDetails.called);
     })
   }); // handlerGetAdminTopicDetails
@@ -120,7 +120,7 @@ describe('Service', function () {
     it('covers', async function () {
       service.serveFile.resolves();
       await service.handlerPostAdminProcess(req, res, ctx);
-      assert(service.authenticator.requiredLocal.called);
+      assert(service.authenticator.apiRequiredLocal.called);
       assert(service.manager.processTasks.called);
     });
   }); // handlerPostAdminProcess
@@ -129,7 +129,7 @@ describe('Service', function () {
     it('covers', async function () {
       sinon.stub(service, 'bodyData').resolves();
       await service.handlerUpdateTopic(req, res, ctx);
-      assert(service.authenticator.requiredLocal.called);
+      assert(service.authenticator.apiRequiredLocal.called);
       assert(service.manager.updateTopic.called);
     });
   }); // handlerUpdateTopic
@@ -138,7 +138,7 @@ describe('Service', function () {
     it('covers', async function () {
       sinon.stub(service, 'bodyData').resolves();
       await service.handlerUpdateSubscription(req, res, ctx);
-      assert(service.authenticator.requiredLocal.called);
+      assert(service.authenticator.apiRequiredLocal.called);
       assert(service.manager.updateSubscription.called);
     });
   }); // handlerUpdateSubscription

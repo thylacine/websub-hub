@@ -2,10 +2,10 @@
 
 const th = require('./template-helper');
 
-function hAppSection(pageTitle) {
+function hAppSection(pageTitle, logoUrl) {
   return `      <section class="h-app hidden">
         <h2>h-app Information for IndieAuth Logins</h2>
-        <img src="static/favicon.ico" class="u-logo">
+        <img src="${logoUrl}" class="u-logo">
         <a href="" class="u-url p-name">${pageTitle}</a>
         <p class="p-summary">
           This is a WebSub Hub service, facilitating content distribution.
@@ -149,17 +149,22 @@ module.exports = (ctx, options) => {
   const contactHTML = options.adminContactHTML;
   const footerEntries = options.manager.footerEntries;
   const hubURL = options.dingus.selfBaseUrl || '<s>https://hub.example.com/</s>';
-  const headElements = [];
   const navLinks = [{
     href: 'admin/',
     text: 'Admin',
   }];
-  const mainContent = [
+  const htmlOptions = {
+    pageTitle,
+    logoUrl: options.manager.logoUrl,
+    footerEntries,
+    navLinks,
+  };
+  const content = [
+    '<script>0</script>', // This fixes a layout rendering flash on load in FF; do not know why this works but it does.
     aboutSection(),
     usageSection(isPublicHub, hubURL),
     contactSection(contactHTML),
-    hAppSection(pageTitle),
+    hAppSection(pageTitle, options.manager.logoUrl),
   ];
-  return th.htmlTemplate(ctx, 0, pageTitle, headElements, navLinks, mainContent, footerEntries,
-  );
+  return th.htmlPage(1, ctx, htmlOptions, content);
 };

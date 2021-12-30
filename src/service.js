@@ -9,8 +9,7 @@ const { Dingus } = require('@squeep/api-dingus');
 const common = require('./common');
 const Enum = require('./enum');
 const Manager = require('./manager');
-const SessionManager = require('./session-manager');
-const Authenticator = require('./authenticator');
+const { Authenticator, SessionManager } = require('@squeep/authentication-module');
 const path = require('path');
 
 const _fileScope = common.fileScope(__filename);
@@ -155,7 +154,7 @@ class Service extends Dingus {
 
     this.setResponseType(this.responseTypes, req, res, ctx);
 
-    await this.authenticator.required(req, res, ctx, this.loginPath);
+    await this.authenticator.sessionRequired(req, res, ctx, this.loginPath);
 
     await this.manager.getAdminOverview(res, ctx);
   }
@@ -174,7 +173,7 @@ class Service extends Dingus {
 
     this.setResponseType(this.responseTypes, req, res, ctx);
 
-    await this.authenticator.required(req, res, ctx, this.loginPath);
+    await this.authenticator.sessionRequired(req, res, ctx, this.loginPath);
 
     await this.manager.getTopicDetails(res, ctx);
   }
@@ -209,7 +208,7 @@ class Service extends Dingus {
 
     this.setResponseType(this.responseTypes, req, res, ctx);
 
-    await this.authenticator.requiredLocal(req, res, ctx, this.loginPath);
+    await this.authenticator.apiRequiredLocal(req, res, ctx);
 
     await this.maybeIngestBody(req, res, ctx);
     ctx.method = req.method;
@@ -228,7 +227,7 @@ class Service extends Dingus {
 
     this.setResponseType(this.responseTypes, req, res, ctx);
 
-    await this.authenticator.requiredLocal(req, res, ctx, this.loginPath);
+    await this.authenticator.apiRequiredLocal(req, res, ctx);
 
     await this.maybeIngestBody(req, res, ctx);
     ctx.method = req.method;
@@ -247,13 +246,14 @@ class Service extends Dingus {
 
     this.setResponseType(this.responseTypes, req, res, ctx);
 
-    await this.authenticator.requiredLocal(req, res, ctx, this.loginPath);
+    await this.authenticator.apiRequiredLocal(req, res, ctx);
 
     await this.manager.processTasks(res, ctx);
   }
 
 
   /**
+   * Delegate login to authentication module.
    * @param {http.ClientRequest} req
    * @param {http.ServerResponse} res
    * @param {Object} ctx
@@ -271,6 +271,7 @@ class Service extends Dingus {
 
 
   /**
+   * Delegate login to authentication module.
    * @param {http.ClientRequest} req
    * @param {http.ServerResponse} res
    * @param {Object} ctx
@@ -281,6 +282,8 @@ class Service extends Dingus {
 
     this.setResponseType(this.responseTypes, req, res, ctx);
 
+    await this.authenticator.sessionOptionalLocal(req, res, ctx);
+
     await this.maybeIngestBody(req, res, ctx);
 
     await this.sessionManager.postAdminLogin(res, ctx);
@@ -288,6 +291,7 @@ class Service extends Dingus {
 
 
   /**
+   * Delegate login to authentication module.
    * @param {http.ClientRequest} req
    * @param {http.ServerResponse} res
    * @param {Object} ctx
@@ -298,11 +302,14 @@ class Service extends Dingus {
 
     this.setResponseType(this.responseTypes, req, res, ctx);
 
+    await this.authenticator.sessionOptionalLocal(req, res, ctx);
+
     await this.sessionManager.getAdminLogout(res, ctx);
   }
 
 
   /**
+   * Delegate login to authentication module.
    * @param {http.ClientRequest} req
    * @param {http.ServerResponse} res
    * @param {Object} ctx
