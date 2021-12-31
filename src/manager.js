@@ -792,7 +792,7 @@ class Manager {
    * @param {object} ctx
    */
   async processTasks(res, ctx) {
-    const _scope = _fileScope('getTopicDetails');
+    const _scope = _fileScope('processTasks');
     this.logger.debug(_scope, 'called', { ctx });
 
     // N.B. no await on this
