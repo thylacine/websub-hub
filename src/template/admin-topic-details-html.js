@@ -58,5 +58,5 @@ module.exports = (ctx, options) => {
       </section>`,
   ];
 
-  return th.htmlPage(2, htmlOptions, content);
+  return th.htmlPage(2, ctx, htmlOptions, content);
 };
