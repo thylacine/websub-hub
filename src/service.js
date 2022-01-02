@@ -101,6 +101,8 @@ class Service extends Dingus {
 
     this.setResponseType(responseTypes, req, res, ctx);
 
+    await this.authenticator.sessionOptional(req, res, ctx, this.loginPath);
+
     await this.manager.getRoot(req, res, ctx);
   }
 

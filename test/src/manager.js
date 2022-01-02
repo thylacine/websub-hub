@@ -59,18 +59,6 @@ describe('Manager', function () {
       await manager.getRoot(req, res, ctx);
       assert(res.end.called);
     });
-    it('repeat response', async function () {
-      manager.startTime = (new Date()).toGMTString();
-      common.isClientCached.returns(true);
-      await manager.getRoot(req, res, ctx);
-      assert(res.end.called);
-    });
-    it('cached response', async function () {
-      common.isClientCached.returns(true);
-      await manager.getRoot(req, res, ctx);
-      assert(res.end.called);
-      assert.strictEqual(res.statusCode, 304);      
-    });
   }); // getRoot
 
   describe('getHealthcheck', function () {

@@ -25,13 +25,6 @@ class Manager {
     this.db = db;
     this.options = options;
     this.communication = new Communication(logger, db, options);
-
-    // Precalculate the invariant root GET metadata.
-    this.getRootContent = Template.rootHTML(undefined, options);
-    const now = new Date();
-    this.startTimeString = now.toGMTString();
-    this.startTimeMs = now.getTime();
-    this.getRootETag = common.generateETag(undefined, undefined, this.getRootContent);
   }
 
 
@@ -61,16 +54,8 @@ class Manager {
     const _scope = _fileScope('getRoot');
     this.logger.debug(_scope, 'called', { ctx });
 
-    res.setHeader(Enum.Header.LastModified, this.startTimeString);
-    res.setHeader(Enum.Header.ETag, this.getRootETag);
-
-    if (common.isClientCached(req, this.startTimeMs, this.getRootETag)) {
-      this.logger.debug(_scope, 'client cached response', { ctx });
-      res.statusCode = 304;
-      res.end();
-      return;
-    }
-    res.end(this.getRootContent);
+    const content = Template.rootHTML(ctx, this.options);
+    res.end(content);
     this.logger.info(_scope, 'finished', { ctx });
   }
 
