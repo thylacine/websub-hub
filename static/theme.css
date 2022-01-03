@@ -58,6 +58,10 @@ section {}
 section + section {
 	margin-top: 2em;
 }
+.logo {
+	vertical-align: middle;
+	height: 2em;
+}
 .about {}
 .usage {}
 .copyright {

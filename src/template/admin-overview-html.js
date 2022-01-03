@@ -13,13 +13,20 @@ const th = require('./template-helper');
  */
 module.exports = (ctx, options) => {
   const pageTitle = `${options.manager.pageTitle} - Topics`;
-  const headElements = [];
-  const navLinks = [];
+  const logoUrl = options.manager.logoUrl;
   const footerEntries = options.manager.footerEntries;
   if (!ctx.topics) {
     ctx.topics = [];
   }
-  return th.htmlTemplate(ctx, 1, pageTitle, headElements, navLinks, [
+
+  const htmlOptions = {
+    pageTitle,
+    logoUrl,
+    footerEntries,
+  };
+
+  const content = [
+    '<script>0</script>', // This fixes a layout rendering flash on load in FF; do not know why this works but it does.
     `      <section class="topics">
         <p>${ctx.topics.length ? ctx.topics.length : 'no'} topic${(ctx.topics.length === 1) ? '' : 's'}</p>
         <table>
@@ -31,5 +38,7 @@ module.exports = (ctx, options) => {
     `        </tbody>
         </table>
       </section>`,
-  ], footerEntries);
+  ];
+
+  return th.htmlPage(1, ctx, htmlOptions, content);
 };
