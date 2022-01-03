@@ -29,7 +29,7 @@ const ADDR = process.env.LISTEN_ADDR || '127.0.0.1';
         logger.error(_scope, 'error starting server', err);
         throw err;
       }
-      logger.info(_scope, `server (version ${version}) started on ${ADDR}:${PORT}`);
+      logger.info(_scope, 'server started', { version, listenAddress: ADDR, listenPort: PORT });
     });
   } catch (e) {
     logger.error(_scope, 'error starting server', e);
