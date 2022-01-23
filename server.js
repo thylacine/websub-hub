@@ -32,6 +32,6 @@ const ADDR = process.env.LISTEN_ADDR || '127.0.0.1';
       logger.info(_scope, 'server started', { version, listenAddress: ADDR, listenPort: PORT });
     });
   } catch (e) {
-    logger.error(_scope, 'error starting server', e);
+    (logger || console).error(_scope, 'error starting server', e);
   }
 })();

@@ -18,10 +18,10 @@ Database table initialization and schema version migrations are automated.  Conf
 
 A user will need to be created in order to view the `/admin` pages; the `bin/authAddUser.js` script will do this.
 
-An IndieAuth profile may be used to view any topics associated with that profile.
-
 The bundled logger spews JSON to stdout.
 
+An IndieAuth profile may be used to view any topics associated with that profile.
+![IndieAuth view of topics](./documentation/media/topics-indieauth.png)
 ### Quickstart Example
 
 One way of deploying this server is behind nginx, with the pm2 package to manage the server process, and a local postgres database.  Some details on this are presented here as a rough guide to any parts of this stack which may be unfamiliar.

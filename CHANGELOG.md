@@ -2,6 +2,11 @@
 
 Releases and notable changes to this project are documented here.
 
+## [v1.3.4] - 2022-01-23
+### Fixed
+
+- Dependency updates.
+
 ## [v1.3.3] - 2022-01-03
 
 ### Fixed
