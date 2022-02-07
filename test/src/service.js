@@ -61,6 +61,20 @@ describe('Service', function () {
     });
   }); // maybeIngestBody
 
+  describe('setHeadHandler', function () {
+    it('covers', function () {
+      const origEnd = res.end;
+      sinon.stub(Service.__proto__, 'setHeadHandler');
+      ctx.responseBody = 'data';
+      req.method = 'HEAD';
+      Service.setHeadHandler(req, res, ctx);
+      res.end('foop');
+      assert(Service.__proto__.setHeadHandler.called);
+      assert(origEnd.called);
+      assert(!('responseBody' in ctx));
+    });
+  }); // setHeadHandler
+
   describe('handlerPostRoot', function () {
     it('covers public mode', async function () {
       await service.handlerPostRoot(req, res, ctx);
