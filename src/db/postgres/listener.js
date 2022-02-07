@@ -54,7 +54,7 @@ class PostgresListener {
       delete this.reconnectPending;
     }
     if (this.connection) {
-      this.connection.client.removeListener(this.notificationEventName, this.onNotificationBound);
+      this.connection.client.removeListener(this.notificationEventName, this._onNotificationBound);
       this.connection.done();
       this.connection = null;
       await this.options.connectionLostCallback();
@@ -106,7 +106,7 @@ class PostgresListener {
     this.logger.error(_scope, 'listener connection lost', { error, event });
     this.connection = null;
     try {
-      event.client.removeListener(this.notificationEventName, this.onNotificationBound);
+      event.client.removeListener(this.notificationEventName, this._onNotificationBound);
     } catch (e) {
       this.logger.error(_scope, 'failed to remove listener', { error: e });
       // That's okay, it was probably just gone anyhow.
