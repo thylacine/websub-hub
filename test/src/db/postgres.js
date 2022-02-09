@@ -227,10 +227,23 @@ describe('DatabasePostgres', function () {
     });
     it('covers migration', async function() {
       sinon.stub(db.db, 'oneOrNone').resolves({});
-      sinon.stub(db.db, 'multiResult');
-      sinon.stub(db, '_currentSchema').resolves(db.schemaVersionsSupported.max);
+      sinon.stub(db.db, 'multiResult').resolves({});
+      sinon.stub(db, '_currentSchema').resolves(db.schemaVersionsSupported.min);
       sinon.stub(db.db, 'one').resolves(db.schemaVersionsSupported.max);
       await db.initialize();
+    });
+    it('covers migration failure', async function() {
+      const expected = new Error('oh no');
+      sinon.stub(db.db, 'oneOrNone').resolves({});
+      sinon.stub(db.db, 'multiResult').rejects(expected);
+      sinon.stub(db, '_currentSchema').resolves(db.schemaVersionsSupported.min);
+      sinon.stub(db.db, 'one').resolves(db.schemaVersionsSupported.max);
+      try {
+        await db.initialize();
+        assert.fail(noExpectedException);
+      } catch (e) {
+        assert.deepStrictEqual(e, expected);
+      }
     });
     it('covers listener', async function() {
       db.listener = {
@@ -659,12 +672,16 @@ describe('DatabasePostgres', function () {
   }); // subscriptionDeliveryClaimById
 
   describe('subscriptionDeliveryComplete', function () {
+    let topicContentUpdated;
+    before(function () {
+      topicContentUpdated = new Date();
+    });
     it('success', async function() {
       const dbResult = {
         rowCount: 1,
       };
       sinon.stub(db.db, 'result').resolves(dbResult);
-      await db.subscriptionDeliveryComplete(dbCtx, callback, topicId);
+      await db.subscriptionDeliveryComplete(dbCtx, callback, topicId, topicContentUpdated);
     });
     it('failure', async function () {
       const dbResult = {
@@ -672,7 +689,7 @@ describe('DatabasePostgres', function () {
       };
       sinon.stub(db.db, 'result').onCall(0).resolves(dbResult);
       try {
-        await db.subscriptionDeliveryComplete(dbCtx, callback, topicId);
+        await db.subscriptionDeliveryComplete(dbCtx, callback, topicId, topicContentUpdated);
         assert.fail(noExpectedException);
       } catch (e) {
         assert(e instanceof DBErrors.UnexpectedResult);
@@ -687,7 +704,7 @@ describe('DatabasePostgres', function () {
       };
       sinon.stub(db.db, 'result').onCall(0).resolves(dbResult0).onCall(1).resolves(dbResult1);
       try {
-        await db.subscriptionDeliveryComplete(dbCtx, callback, topicId);
+        await db.subscriptionDeliveryComplete(dbCtx, callback, topicId, topicContentUpdated);
         assert.fail(noExpectedException);
       } catch (e) {
         assert(e instanceof DBErrors.UnexpectedResult);

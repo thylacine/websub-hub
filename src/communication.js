@@ -565,7 +565,7 @@ class Communication {
 
       await this.db.transaction(dbCtx, async (txCtx) => {
         await this.db.verificationInsert(txCtx, verification);
-        await this.db.subscriptionDeliveryComplete(txCtx, subscription.callback, subscription.topicId);
+        await this.db.subscriptionDeliveryComplete(txCtx, subscription.callback, subscription.topicId, topic.contentUpdated);
       });
       this.logger.info(_scope, 'update unsubscription for deleted topic', logInfoData);
       return;
@@ -617,7 +617,7 @@ class Communication {
         return;
     }
 
-    await this.db.subscriptionDeliveryComplete(dbCtx, subscription.callback, subscription.topicId);
+    await this.db.subscriptionDeliveryComplete(dbCtx, subscription.callback, subscription.topicId, topic.contentUpdated);
     this.logger.info(_scope, 'update success', logInfoData);
   }
 

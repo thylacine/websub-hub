@@ -30,7 +30,7 @@ const schemaVersionsSupported = {
   max: {
     major: 1,
     minor: 0,
-    patch: 1,
+    patch: 2,
   },
 };
 
@@ -162,10 +162,16 @@ class DatabasePostgres extends Database {
     this.logger.debug(_scope, 'schema migrations wanted', { migrationsWanted });
     for (const v of migrationsWanted) {
       const fPath = path.join(__dirname, 'sql', 'schema', v, 'apply.sql');
-      const migrationSql = _queryFile(fPath);
-      const results = await this.db.multiResult(migrationSql);
-      this.logger.debug(_scope, 'executed migration sql', { version: v, results });
-      this.logger.info(_scope, 'applied migration', { version: v });
+      try {
+        const migrationSql = _queryFile(fPath);
+        this.logger.debug(_scope, 'applying migration', { version: v });
+        const results = await this.db.multiResult(migrationSql);
+        this.logger.debug(_scope, 'migration results', { results });
+        this.logger.info(_scope, 'applied migration', { version: v });
+      } catch (e) {
+        this.logger.error(_scope, 'migration failed', { error: e, fPath, version: v });
+        throw e;
+      }
     }
   }
 
@@ -473,14 +479,14 @@ class DatabasePostgres extends Database {
   }
 
 
-  async subscriptionDeliveryComplete(dbCtx, callback, topicId) {
+  async subscriptionDeliveryComplete(dbCtx, callback, topicId, topicContentUpdated) {
     const _scope = _fileScope('subscriptionDeliveryComplete');
-    this.logger.debug(_scope, 'called', { callback, topicId });
+    this.logger.debug(_scope, 'called', { callback, topicId, topicContentUpdated });
 
     let result;
     try {
       await dbCtx.txIf(async (txCtx) => {
-        result = await txCtx.result(this.statement.subscriptionDeliverySuccess, { callback, topicId });
+        result = await txCtx.result(this.statement.subscriptionDeliverySuccess, { callback, topicId, topicContentUpdated });
         if (result.rowCount != 1) {
           throw new DBErrors.UnexpectedResult('did not set subscription delivery success');
         }
@@ -490,7 +496,7 @@ class DatabasePostgres extends Database {
         }
       });
     } catch (e) {
-      this.logger.error(_scope, 'failed', { error: e, callback, topicId });
+      this.logger.error(_scope, 'failed', { error: e, callback, topicId, topicContentUpdated });
       throw e;
     }
   }
