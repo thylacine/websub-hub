@@ -1392,6 +1392,7 @@ describe('DatabasePostgres', function () {
         contentType: 'text/plain',
         contentHash: 'abc123',
       };
+      sinon.stub(db.db, 'result');
     });
     it('success', async function() {
       const dbResult = {
@@ -1404,7 +1405,7 @@ describe('DatabasePostgres', function () {
         lastInsertRowid: undefined,
         duration: 10,
       };
-      sinon.stub(db.db, 'result').resolves(dbResult);
+      db.db.result.resolves(dbResult);
       const result = await db.topicSetContent(dbCtx, data);
       assert.deepStrictEqual(result, expected);
     });
@@ -1414,7 +1415,28 @@ describe('DatabasePostgres', function () {
         rows: [],
         duration: 10,
       };
-      sinon.stub(db.db, 'result').resolves(dbResult);
+      db.db.result.resolves(dbResult);
+      try {
+        await db.topicSetContent(dbCtx, data);
+        assert.fail(noExpectedException);
+      } catch (e) {
+        assert(e instanceof DBErrors.UnexpectedResult);
+      }
+    });
+    it('failure 2', async function () {
+      const dbResultSuccess = {
+        rowCount: 1,
+        rows: [],
+        duration: 10,
+      };
+      const dbResultFail = {
+        rowCount: 0,
+        rows: [],
+        duration: 10,
+      };
+      db.db.result
+        .onCall(0).resolves(dbResultSuccess)
+        .onCall(1).resolves(dbResultFail);
       try {
         await db.topicSetContent(dbCtx, data);
         assert.fail(noExpectedException);

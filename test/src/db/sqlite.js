@@ -1220,6 +1220,8 @@ describe('DatabaseSQLite', function () {
         contentType: 'text/plain',
         contentHash: 'abc123',
       };
+      sinon.stub(db.statement.topicSetContent, 'run');
+      sinon.stub(db.statement.topicSetContentHistory, 'run');
     });
     it('success', async function() {
       const dbResult = {
@@ -1230,7 +1232,8 @@ describe('DatabaseSQLite', function () {
         changes: 1,
         lastInsertRowid: undefined,
       };
-      sinon.stub(db.statement.topicSetContent, 'run').returns(dbResult);
+      db.statement.topicSetContent.run.returns(dbResult);
+      db.statement.topicSetContentHistory.run.returns(dbResult);
       const result = await db.topicSetContent(dbCtx, data);
       assert.deepStrictEqual(result, expected);
     });
@@ -1239,7 +1242,25 @@ describe('DatabaseSQLite', function () {
         changes: 0,
         lastInsertRowid: undefined,
       };
-      sinon.stub(db.statement.topicSetContent, 'run').returns(dbResult);
+      db.statement.topicSetContent.run.returns(dbResult);
+      try {
+        await db.topicSetContent(dbCtx, data);
+        assert.fail(noExpectedException);
+      } catch (e) {
+        assert(e instanceof DBErrors.UnexpectedResult);
+      }
+    });
+    it('failure 2', async function () {
+      const dbResultSuccess = {
+        changes: 1,
+        lastInsertRowid: undefined,
+      };
+      const dbResultFail = {
+        changes: 0,
+        lastInsertRowid: undefined,
+      };
+      db.statement.topicSetContent.run.returns(dbResultSuccess);
+      db.statement.topicSetContentHistory.run.returns(dbResultFail);
       try {
         await db.topicSetContent(dbCtx, data);
         assert.fail(noExpectedException);

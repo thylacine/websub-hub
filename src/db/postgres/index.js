@@ -30,7 +30,7 @@ const schemaVersionsSupported = {
   max: {
     major: 1,
     minor: 0,
-    patch: 2,
+    patch: 3,
   },
 };
 
@@ -903,6 +903,10 @@ class DatabasePostgres extends Database {
       logData.result = this._resultLog(result);
       if (result.rowCount !=  1) {
         throw new DBErrors.UnexpectedResult('did not set topic content');
+      }
+      result = await dbCtx.result(this.statement.topicSetContentHistory, { topicId: data.topicId, contentHash: data.contentHash, contentSize: data.content.length });
+      if (result.rowCount != 1) {
+        throw new DBErrors.UnexpectedResult('did not set topic content history');
       }
       this.logger.debug(_scope, 'success', { ...logData });
       return this._engineInfo(result);
