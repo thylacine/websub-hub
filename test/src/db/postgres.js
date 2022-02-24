@@ -227,10 +227,23 @@ describe('DatabasePostgres', function () {
     });
     it('covers migration', async function() {
       sinon.stub(db.db, 'oneOrNone').resolves({});
-      sinon.stub(db.db, 'multiResult');
-      sinon.stub(db, '_currentSchema').resolves(db.schemaVersionsSupported.max);
+      sinon.stub(db.db, 'multiResult').resolves({});
+      sinon.stub(db, '_currentSchema').resolves(db.schemaVersionsSupported.min);
       sinon.stub(db.db, 'one').resolves(db.schemaVersionsSupported.max);
       await db.initialize();
+    });
+    it('covers migration failure', async function() {
+      const expected = new Error('oh no');
+      sinon.stub(db.db, 'oneOrNone').resolves({});
+      sinon.stub(db.db, 'multiResult').rejects(expected);
+      sinon.stub(db, '_currentSchema').resolves(db.schemaVersionsSupported.min);
+      sinon.stub(db.db, 'one').resolves(db.schemaVersionsSupported.max);
+      try {
+        await db.initialize();
+        assert.fail(noExpectedException);
+      } catch (e) {
+        assert.deepStrictEqual(e, expected);
+      }
     });
     it('covers listener', async function() {
       db.listener = {
@@ -659,12 +672,16 @@ describe('DatabasePostgres', function () {
   }); // subscriptionDeliveryClaimById
 
   describe('subscriptionDeliveryComplete', function () {
+    let topicContentUpdated;
+    before(function () {
+      topicContentUpdated = new Date();
+    });
     it('success', async function() {
       const dbResult = {
         rowCount: 1,
       };
       sinon.stub(db.db, 'result').resolves(dbResult);
-      await db.subscriptionDeliveryComplete(dbCtx, callback, topicId);
+      await db.subscriptionDeliveryComplete(dbCtx, callback, topicId, topicContentUpdated);
     });
     it('failure', async function () {
       const dbResult = {
@@ -672,7 +689,7 @@ describe('DatabasePostgres', function () {
       };
       sinon.stub(db.db, 'result').onCall(0).resolves(dbResult);
       try {
-        await db.subscriptionDeliveryComplete(dbCtx, callback, topicId);
+        await db.subscriptionDeliveryComplete(dbCtx, callback, topicId, topicContentUpdated);
         assert.fail(noExpectedException);
       } catch (e) {
         assert(e instanceof DBErrors.UnexpectedResult);
@@ -687,7 +704,7 @@ describe('DatabasePostgres', function () {
       };
       sinon.stub(db.db, 'result').onCall(0).resolves(dbResult0).onCall(1).resolves(dbResult1);
       try {
-        await db.subscriptionDeliveryComplete(dbCtx, callback, topicId);
+        await db.subscriptionDeliveryComplete(dbCtx, callback, topicId, topicContentUpdated);
         assert.fail(noExpectedException);
       } catch (e) {
         assert(e instanceof DBErrors.UnexpectedResult);
@@ -1375,6 +1392,7 @@ describe('DatabasePostgres', function () {
         contentType: 'text/plain',
         contentHash: 'abc123',
       };
+      sinon.stub(db.db, 'result');
     });
     it('success', async function() {
       const dbResult = {
@@ -1387,7 +1405,7 @@ describe('DatabasePostgres', function () {
         lastInsertRowid: undefined,
         duration: 10,
       };
-      sinon.stub(db.db, 'result').resolves(dbResult);
+      db.db.result.resolves(dbResult);
       const result = await db.topicSetContent(dbCtx, data);
       assert.deepStrictEqual(result, expected);
     });
@@ -1397,7 +1415,28 @@ describe('DatabasePostgres', function () {
         rows: [],
         duration: 10,
       };
-      sinon.stub(db.db, 'result').resolves(dbResult);
+      db.db.result.resolves(dbResult);
+      try {
+        await db.topicSetContent(dbCtx, data);
+        assert.fail(noExpectedException);
+      } catch (e) {
+        assert(e instanceof DBErrors.UnexpectedResult);
+      }
+    });
+    it('failure 2', async function () {
+      const dbResultSuccess = {
+        rowCount: 1,
+        rows: [],
+        duration: 10,
+      };
+      const dbResultFail = {
+        rowCount: 0,
+        rows: [],
+        duration: 10,
+      };
+      db.db.result
+        .onCall(0).resolves(dbResultSuccess)
+        .onCall(1).resolves(dbResultFail);
       try {
         await db.topicSetContent(dbCtx, data);
         assert.fail(noExpectedException);

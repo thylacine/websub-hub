@@ -68,6 +68,24 @@ class Service extends Dingus {
 
   }
 
+  /**
+   * Wrap the Dingus head handler, to remove the response body from the context,
+   * lest it be logged.
+   * @param {http.ClientRequest} req
+   * @param {http.ServerResponse} res
+   * @param {object} ctx
+   */
+  static setHeadHandler(req, res, ctx) {
+    if (req.method === 'HEAD') {
+      Dingus.setHeadHandler(req, res, ctx);
+      const origEnd = res.end.bind(res);
+      res.end = function (data, encoding, ...rest) {
+        const origResult = origEnd(data, encoding, ...rest);
+        delete ctx.responseBody;
+        return origResult;
+      };
+    }
+  }
 
   /**
    * @param {http.ClientRequest} req
@@ -97,7 +115,7 @@ class Service extends Dingus {
     ];
     this.logger.debug(_scope, 'called', { req: common.requestLogData(req), ctx });
 
-    Dingus.setHeadHandler(req, res, ctx);
+    Service.setHeadHandler(req, res, ctx);
 
     this.setResponseType(responseTypes, req, res, ctx);
 
@@ -116,7 +134,7 @@ class Service extends Dingus {
     const _scope = _fileScope('handlerGetHealthcheck');
     this.logger.debug(_scope, 'called', { req: common.requestLogData(req), ctx });
   
-    Dingus.setHeadHandler(req, res, ctx);
+    Service.setHeadHandler(req, res, ctx);
 
     this.setResponseType(this.responseTypes, req, res, ctx);
 
@@ -135,7 +153,7 @@ class Service extends Dingus {
 
     const responseTypes = [...this.responseTypes, Enum.ContentType.ImageSVG];
 
-    Dingus.setHeadHandler(req, res, ctx);
+    Service.setHeadHandler(req, res, ctx);
 
     this.setResponseType(responseTypes, req, res, ctx);
 
@@ -152,7 +170,7 @@ class Service extends Dingus {
     const _scope = _fileScope('handlerGetAdminOverview');
     this.logger.debug(_scope, 'called', { req: common.requestLogData(req), ctx });
 
-    Dingus.setHeadHandler(req, res, ctx);
+    Service.setHeadHandler(req, res, ctx);
 
     this.setResponseType(this.responseTypes, req, res, ctx);
 
@@ -171,7 +189,7 @@ class Service extends Dingus {
     const _scope = _fileScope('handlerGetAdminTopicDetails');
     this.logger.debug(_scope, 'called', { req: common.requestLogData(req), ctx });
 
-    Dingus.setHeadHandler(req, res, ctx);
+    Service.setHeadHandler(req, res, ctx);
 
     this.setResponseType(this.responseTypes, req, res, ctx);
 
@@ -264,7 +282,7 @@ class Service extends Dingus {
     const _scope = _fileScope('handlerGetAdminLogin');
     this.logger.debug(_scope, 'called', { req: common.requestLogData(req), ctx });
 
-    Dingus.setHeadHandler(req, res, ctx);
+    Service.setHeadHandler(req, res, ctx);
 
     this.setResponseType(this.responseTypes, req, res, ctx);
 

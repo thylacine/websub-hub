@@ -328,7 +328,8 @@ describe('Database Integration', function () {
         step('complete subscription', async function () {
           const { callback } = testData.subscriptionUpsert;
           await db.context(async (dbCtx) => {
-            await db.subscriptionDeliveryComplete(dbCtx, callback, topicId);
+            const topic = await db.topicGetById(dbCtx, topicId);
+            await db.subscriptionDeliveryComplete(dbCtx, callback, topicId, topic.contentUpdated);
             const subscription = await db.subscriptionGetById(dbCtx, subscriptionId);
             assert.strictEqual(Number(subscription.deliveryAttemptsSinceSuccess), 0);
           });

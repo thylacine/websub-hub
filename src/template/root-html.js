@@ -3,7 +3,7 @@
 const th = require('./template-helper');
 
 function hAppSection(pageTitle, logoUrl) {
-  return `      <section class="h-app hidden">
+  return `      <section hidden class="h-app">
         <h2>h-app Information for IndieAuth Logins</h2>
         <img src="${logoUrl}" class="u-logo">
         <a href="" class="u-url p-name">${pageTitle}</a>
@@ -166,5 +166,5 @@ module.exports = (ctx, options) => {
     contactSection(contactHTML),
     hAppSection(pageTitle, options.manager.logoUrl),
   ];
-  return th.htmlPage(1, ctx, htmlOptions, content);
+  return th.htmlPage(0, ctx, htmlOptions, content);
 };

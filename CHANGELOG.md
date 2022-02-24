@@ -2,7 +2,22 @@
 
 Releases and notable changes to this project are documented here.
 
+## [v1.3.5] - 2022-02-23
+
+### Added
+- IndieAuth profile logins now support latest spec, id est metadata discovery and issuer validation.
+- Topic content update history is now tracked.
+
+### Fixed
+
+- Fixed potential race condition which could cause a subscriber to miss an update.
+- Fixed postfix listener to more properly deal with errors.
+- Removed accidental logging of response body during HEAD requests.
+- Fixed session logout link on root page.
+- Dependency updates.
+
 ## [v1.3.4] - 2022-01-23
+
 ### Fixed
 
 - Dependency updates.
@@ -109,7 +124,9 @@ Releases and notable changes to this project are documented here.
 
 ---
 
-[Unreleased]: https://git.squeep.com/?p=websub-hub;a=commitdiff;h=HEAD;hp=v1.3.2
+[Unreleased]: https://git.squeep.com/?p=websub-hub;a=commitdiff;h=HEAD;hp=v1.3.5
+[v1.3.5]: https://git.squeep.com/?p=websub-hub;a=commitdiff;h=v1.3.5;hp=v1.3.4
+[v1.3.4]: https://git.squeep.com/?p=websub-hub;a=commitdiff;h=v1.3.4;hp=v1.3.3
 [v1.3.3]: https://git.squeep.com/?p=websub-hub;a=commitdiff;h=v1.3.3;hp=v1.3.2
 [v1.3.2]: https://git.squeep.com/?p=websub-hub;a=commitdiff;h=v1.3.2;hp=v1.3.1
 [v1.3.1]: https://git.squeep.com/?p=websub-hub;a=commitdiff;h=v1.3.1;hp=v1.3.0

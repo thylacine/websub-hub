@@ -66,6 +66,38 @@ describe('DatabaseSQLite', function () {
     });
   }); // Implementation
 
+  describe('_initTables', function () {
+    let preparedGet;
+    beforeEach(function () {
+      preparedGet = sinon.stub();
+      sinon.stub(db.db, 'prepare').returns({
+        pluck: () => ({
+          bind: () => ({
+            get: preparedGet,
+          }),
+        }),
+      });
+      sinon.stub(db, '_currentSchema').returns(db.schemaVersionsSupported.min);
+      sinon.stub(db.db, 'exec');
+    });
+    it('covers migration', async function() {
+      preparedGet.returns({});
+      await db._initTables();
+      assert(db.db.exec.called);
+    });
+    it('covers migration failure', async function() {
+      const expected = new Error('oh no');
+      preparedGet.returns({});
+      db.db.exec.throws(expected);
+      try {
+        await db._initTables();
+        assert.fail(noExpectedException);
+      } catch (e) {
+        assert.deepStrictEqual(e, expected);
+      }
+    });
+  }); // _initTables
+
   describe('_currentSchema', function () {
     it('covers', async function () {
       const version = { major: 1, minor: 0, patch: 0 };
@@ -494,13 +526,17 @@ describe('DatabaseSQLite', function () {
   }); // subscriptionDeliveryClaimById
 
   describe('subscriptionDeliveryComplete', function () {
+    let topicContentUpdated;
+    before(function () {
+      topicContentUpdated = new Date();
+    });
     it('success', async function() {
       const dbResult = {
         changes: 1,
       };
       sinon.stub(db.statement.subscriptionDeliverySuccess, 'run').returns(dbResult);
       sinon.stub(db.statement.subscriptionDeliveryDone, 'run').returns(dbResult);
-      await db.subscriptionDeliveryComplete(dbCtx, callback, topicId);
+      await db.subscriptionDeliveryComplete(dbCtx, callback, topicId, topicContentUpdated);
     });
     it('failure', async function () {
       const dbResult = {
@@ -509,7 +545,7 @@ describe('DatabaseSQLite', function () {
       sinon.stub(db.statement.subscriptionDeliverySuccess, 'run').returns(dbResult);
       sinon.stub(db.statement.subscriptionDeliveryDone, 'run').returns(dbResult);
       try {
-        await db.subscriptionDeliveryComplete(dbCtx, callback, topicId);
+        await db.subscriptionDeliveryComplete(dbCtx, callback, topicId, topicContentUpdated);
         assert.fail(noExpectedException);
       } catch (e) {
         assert(e instanceof DBErrors.UnexpectedResult);
@@ -525,7 +561,7 @@ describe('DatabaseSQLite', function () {
       sinon.stub(db.statement.subscriptionDeliverySuccess, 'run').returns(dbResult0);
       sinon.stub(db.statement.subscriptionDeliveryDone, 'run').returns(dbResult1);
       try {
-        await db.subscriptionDeliveryComplete(dbCtx, callback, topicId);
+        await db.subscriptionDeliveryComplete(dbCtx, callback, topicId, topicContentUpdated);
         assert.fail(noExpectedException);
       } catch (e) {
         assert(e instanceof DBErrors.UnexpectedResult);
@@ -1184,6 +1220,8 @@ describe('DatabaseSQLite', function () {
         contentType: 'text/plain',
         contentHash: 'abc123',
       };
+      sinon.stub(db.statement.topicSetContent, 'run');
+      sinon.stub(db.statement.topicSetContentHistory, 'run');
     });
     it('success', async function() {
       const dbResult = {
@@ -1194,7 +1232,8 @@ describe('DatabaseSQLite', function () {
         changes: 1,
         lastInsertRowid: undefined,
       };
-      sinon.stub(db.statement.topicSetContent, 'run').returns(dbResult);
+      db.statement.topicSetContent.run.returns(dbResult);
+      db.statement.topicSetContentHistory.run.returns(dbResult);
       const result = await db.topicSetContent(dbCtx, data);
       assert.deepStrictEqual(result, expected);
     });
@@ -1203,7 +1242,25 @@ describe('DatabaseSQLite', function () {
         changes: 0,
         lastInsertRowid: undefined,
       };
-      sinon.stub(db.statement.topicSetContent, 'run').returns(dbResult);
+      db.statement.topicSetContent.run.returns(dbResult);
+      try {
+        await db.topicSetContent(dbCtx, data);
+        assert.fail(noExpectedException);
+      } catch (e) {
+        assert(e instanceof DBErrors.UnexpectedResult);
+      }
+    });
+    it('failure 2', async function () {
+      const dbResultSuccess = {
+        changes: 1,
+        lastInsertRowid: undefined,
+      };
+      const dbResultFail = {
+        changes: 0,
+        lastInsertRowid: undefined,
+      };
+      db.statement.topicSetContent.run.returns(dbResultSuccess);
+      db.statement.topicSetContentHistory.run.returns(dbResultFail);
       try {
         await db.topicSetContent(dbCtx, data);
         assert.fail(noExpectedException);

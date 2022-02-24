@@ -20,12 +20,14 @@ const schemaVersionsSupported = {
   max: {
     major: 1,
     minor: 0,
-    patch: 1,
+    patch: 3,
   },
 };
 
 // max of signed int64 (2^63 - 1), should be enough
 const EPOCH_FOREVER = BigInt('9223372036854775807');
+const epochToDate = (epoch) => new Date(Number(epoch) * 1000);
+const dateToEpoch = (date) => Math.round(date.getTime() / 1000);
 
 class DatabaseSQLite extends Database {
   constructor(logger, options) {
@@ -85,10 +87,17 @@ class DatabaseSQLite extends Database {
     this.logger.debug(_scope, 'schema migrations wanted', { migrationsWanted });
     migrationsWanted.forEach((v) => {
       const fPath = path.join(__dirname, 'sql', 'schema', v, 'apply.sql');
-      // eslint-disable-next-line security/detect-non-literal-fs-filename
-      const fSql = fs.readFileSync(fPath, { encoding: 'utf8' });
-      this.logger.info(_scope, 'applying migration', { version: v });
-      this.db.exec(fSql);
+      try {
+        // eslint-disable-next-line security/detect-non-literal-fs-filename
+        const fSql = fs.readFileSync(fPath, { encoding: 'utf8' });
+        this.logger.debug(_scope, 'applying migration', { version: v });
+        const results = this.db.exec(fSql);
+        this.logger.debug(_scope, 'migration results', { results });
+        this.logger.info(_scope, 'applied migration', { version: v });
+      } catch (e) {
+        this.logger.error(_scope, 'migration failed', { error: e, fPath, version: v });
+        throw e;
+      }
     });
   }
 
@@ -304,7 +313,6 @@ class DatabaseSQLite extends Database {
    * @param {Object} data
    */
   static _subscriptionDataToNative(data) {
-    const epochToDate = (epoch) => new Date(Number(epoch) * 1000);
     if (data) {
       ['created', 'verified', 'expires', 'contentDelivered'].forEach((field) => {
         // eslint-disable-next-line security/detect-object-injection
@@ -414,14 +422,15 @@ class DatabaseSQLite extends Database {
   }
 
 
-  subscriptionDeliveryComplete(dbCtx, callback, topicId) {
+  subscriptionDeliveryComplete(dbCtx, callback, topicId, topicContentUpdated) {
     const _scope = _fileScope('subscriptionDeliveryComplete');
-    this.logger.debug(_scope, 'called', { callback, topicId });
+    this.logger.debug(_scope, 'called', { callback, topicId, topicContentUpdated });
 
     let result;
     try {
       this.db.transaction(() => {
-        result = this.statement.subscriptionDeliverySuccess.run({ callback, topicId });
+        topicContentUpdated = dateToEpoch(topicContentUpdated);
+        result = this.statement.subscriptionDeliverySuccess.run({ callback, topicId, topicContentUpdated });
         if (result.changes != 1) {
           throw new DBErrors.UnexpectedResult('did not set subscription delivery success');
         }
@@ -432,7 +441,7 @@ class DatabaseSQLite extends Database {
       })();
       return this._engineInfo(result);
     } catch (e) {
-      this.logger.error(_scope, 'failed', { error: e, callback, topicId });
+      this.logger.error(_scope, 'failed', { error: e, callback, topicId, topicContentUpdated });
       throw e;
     }
   }
@@ -698,7 +707,6 @@ class DatabaseSQLite extends Database {
    * @param {Object} data
    */
   static _topicDataToNative(data) {
-    const epochToDate = (epoch) => new Date(Number(epoch) * 1000);
     if (data) {
       data.isActive = !!data.isActive;
       data.isDeleted = !!data.isDeleted;
@@ -860,6 +868,10 @@ class DatabaseSQLite extends Database {
       logData.result = result;
       if (result.changes !=  1) {
         throw new DBErrors.UnexpectedResult('did not set topic content');
+      }
+      result = this.statement.topicSetContentHistory.run({ topicId: data.topicId, contentHash: data.contentHash, contentSize: data.content.length });
+      if (result.changes != 1) {
+        throw new DBErrors.UnexpectedResult('did not set topic content history');
       }
       return this._engineInfo(result);
     } catch (e) {

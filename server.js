@@ -26,12 +26,13 @@ const ADDR = process.env.LISTEN_ADDR || '127.0.0.1';
       service.dispatch(req, res);
     }).listen(PORT, ADDR, (err) => {
       if (err) {
-        logger.error(_scope, 'error starting server', err);
+        logger.error(_scope, 'error creating server', err);
         throw err;
       }
       logger.info(_scope, 'server started', { version, listenAddress: ADDR, listenPort: PORT });
     });
   } catch (e) {
     (logger || console).error(_scope, 'error starting server', e);
+    db && db.listener && await db.listener.stop();
   }
 })();
