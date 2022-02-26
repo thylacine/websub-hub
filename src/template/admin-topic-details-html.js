@@ -34,7 +34,6 @@ module.exports = (ctx, options) => {
   };
 
   const content = [
-    '<script>0</script>', // This fixes a layout rendering flash on load in FF; do not know why this works but it does.
     `      <section class="topics">
         <table>
           <thead>`,

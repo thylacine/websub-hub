@@ -34,7 +34,7 @@
   "dependencies": {
     "@squeep/api-dingus": "git+https://git.squeep.com/squeep-api-dingus/#v1.2.4",
     "@squeep/authentication-module": "git+https://git.squeep.com/squeep-authentication-module/#v1.2.0",
-    "@squeep/html-template-helper": "git+https://git.squeep.com/squeep-html-template-helper#v1.0.2",
+    "@squeep/html-template-helper": "git+https://git.squeep.com/squeep-html-template-helper#v1.0.3",
     "@squeep/web-linking": "git+https://git.squeep.com/squeep-web-linking/#v1.0.3",
     "axios": "^0.26.0",
     "feedparser": "^2.2.10",
@@ -46,7 +46,7 @@
     "pg-promise": "^10.11.1"
   },
   "devDependencies": {
-    "eslint": "^8.9.0",
+    "eslint": "^8.10.0",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-security": "^1.4.0",
     "eslint-plugin-sonarjs": "^0.12.0",
