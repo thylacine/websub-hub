@@ -590,6 +590,7 @@ class Database {
    * @param {*} dbCtx
    * @param {*} topicId
    * @param {Number} days
+   * @returns {Number[]}
    */
   async topicPublishHistory(dbCtx, topicId, days) {
     this._notImplemented('topicPublishHistory', arguments);
