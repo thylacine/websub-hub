@@ -828,7 +828,7 @@ class DatabaseSQLite extends Database {
 
     const events = this.statement.topicPublishHistory.all({ topicId, daysAgo: days });
     const history = Array.from({ length: days }, () => 0);
-    events.forEach(({ daysAgo, contentUpdates }) => history[daysAgo] = contentUpdates);
+    events.forEach(({ daysAgo, contentUpdates }) => history[daysAgo] = Number(contentUpdates));
 
     return history;
   }
