@@ -1,0 +1,137 @@
+digraph WebsubHubERD {
+	graph[
+		rankdir=LR,
+		overlap=false,
+		splines=true,
+		label="Websub Hub Entity-Relations\nPostgres\nSchema 1.0.3",
+		labelloc="t",
+		fontsize=26,
+	];
+	// layout=neato;
+	node[shape=plain];
+	edge[arrowhead=crow];
+
+	topic [label=<
+	<table cellspacing="0" cellborder="1" border="0">
+		<tr><td border="2" bgcolor="lightblue">TOPIC</td></tr>
+		<tr><td port="pk_id">id</td></tr>
+		<tr><td port="">created</td></tr>
+		<tr><td port="">url</td></tr>
+		<tr><td port="">lease_seconds_preferred</td></tr>
+		<tr><td port="">lease_seconds_min</td></tr>
+		<tr><td port="">lease_seconds_max</td></tr>
+		<tr><td port="">publisher_validation_url</td></tr>
+		<tr><td port="">content_hash_algorithm</td></tr>
+		<tr><td port="">is_active</td></tr>
+		<tr><td port="">is_deleted</td></tr>
+		<tr><td port="">last_publish</td></tr>
+		<tr><td port="">content_fetch_next_attempt</td></tr>
+		<tr><td port="">content_fetch_attempts_since_success</td></tr>
+		<tr><td port="">content_updated</td></tr>
+		<tr><td port="">content</td></tr>
+		<tr><td port="">content_hash</td></tr>
+		<tr><td port="">content_type</td></tr>
+	</table>
+	>];
+
+	topic_fetch_in_progress [label=<
+	<table cellspacing="0" cellborder="1" border="0">
+		<tr><td border="2" bgcolor="lightblue">TOPIC_FETCH_IN_PROGRESS</td></tr>
+		<tr><td port="fk_id">id</td></tr>
+		<tr><td port="">claimant</td></tr>
+		<tr><td port="">claimed</td></tr>
+		<tr><td port="">claim_expires</td></tr>
+	</table>
+	>];
+	topic:pk_id -> topic_fetch_in_progress:fk_id;
+
+	topic_content_history [label=<
+	<table cellspacing="0" cellborder="1" border="0">
+		<tr><td border="2" bgcolor="lightblue">TOPIC_CONTENT_HISTORY</td></tr>
+		<tr><td port="fk_topic_id">topic_id</td></tr>
+		<tr><td port="">content_updated</td></tr>
+		<tr><td port="">content_size</td></tr>
+		<tr><td port="">content_hash</td></tr>
+	</table>
+	>];
+	topic:pk_id -> topic_content_history:fk_topic_id;
+
+	subscription [label=<
+	<table cellspacing="0" cellborder="1" border="0">
+		<tr><td border="2" bgcolor="lightblue">SUBSCRIPTION</td></tr>
+		<tr><td port="pk_id">id</td></tr>
+		<tr><td port="">created</td></tr>
+		<tr><td port="fk_topic_id">topic_id</td></tr>
+		<tr><td port="">callback</td></tr>
+		<tr><td port="">verified</td></tr>
+		<tr><td port="">expires</td></tr>
+		<tr><td port="">secret</td></tr>
+		<tr><td port="">signature_algorithm</td></tr>
+		<tr><td port="">http_remote_addr</td></tr>
+		<tr><td port="">http_from</td></tr>
+		<tr><td port="">content_delivered</td></tr>
+		<tr><td port="">latest_content_delivered</td></tr>
+		<tr><td port="">delivery_attempts_since_success</td></tr>
+		<tr><td port="">delivery_next_attempt</td></tr>
+	</table>
+	>];
+	topic:pk_id -> subscription:fk_topic_id;
+
+	subscription_delivery_in_progress [label=<
+	<table cellspacing="0" cellborder="1" border="0">
+		<tr><td border="2" bgcolor="lightblue">SUBSCRIPTION_DELIVERY_IN_PROGRESS</td></tr>
+		<tr><td port="fk_id">id</td></tr>
+		<tr><td port="">claimant</td></tr>
+		<tr><td port="">claimed</td></tr>
+		<tr><td port="">claim_expires</td></tr>
+	</table>
+	>];
+	subscription:pk_id -> subscription_delivery_in_progress:fk_id;
+
+	verification [label=<
+	<table cellspacing="0" cellborder="1" border="0">
+		<tr><td border="2" bgcolor="lightblue">VERIFICATION</td></tr>
+		<tr><td port="pk_id">id</td></tr>
+		<tr><td port="">created</td></tr>
+		<tr><td port="fk_topic_id">topic_id</td></tr>
+		<tr><td port="">callback</td></tr>
+		<tr><td port="">secret</td></tr>
+		<tr><td port="">signature_algorithm</td></tr>
+		<tr><td port="">http_remote_addr</td></tr>
+		<tr><td port="">http_from</td></tr>
+		<tr><td port="">mode</td></tr>
+		<tr><td port="">reason</td></tr>
+		<tr><td port="">lease_seconds</td></tr>
+		<tr><td port="">is_publisher_validated</td></tr>
+		<tr><td port="">request_id</td></tr>
+		<tr><td port="">attempts</td></tr>
+		<tr><td port="">next_attempt</td></tr>
+	</table>
+	>];
+	topic:pk_id -> verification:fk_topic_id;
+
+	verification_in_progress [label=<
+	<table cellspacing="0" cellborder="1" border="0">
+		<tr><td border="2" bgcolor="lightblue">VERIFICATION_IN_PROGRESS</td></tr>
+		<tr><td port="fk_id">id</td></tr>
+		<tr><td port="fk_topic_id">topic_id</td></tr>
+		<tr><td port="">callback</td></tr>
+		<tr><td port="">claimant</td></tr>
+		<tr><td port="">claimed</td></tr>
+		<tr><td port="">claim_expires</td></tr>
+	</table>
+	>];
+	verification:pk_id -> verification_in_progress:fk_id;
+	topic:pk_id -> verification_in_progress:fk_topic_id;
+
+	authentication [label=<
+	<table cellspacing="0" cellborder="1" border="0">
+		<tr><td border="2" bgcolor="lightblue">AUTHENTICATION</td></tr>
+		<tr><td port="">created</td></tr>
+		<tr><td port="">last_authenticated</td></tr>
+		<tr><td port="">identifier</td></tr>
+		<tr><td port="">credential</td></tr>
+	</table>
+	>];
+
+}
