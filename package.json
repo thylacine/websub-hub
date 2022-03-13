@@ -33,9 +33,9 @@
   ],
   "dependencies": {
     "@squeep/api-dingus": "git+https://git.squeep.com/squeep-api-dingus/#v1.2.5",
-    "@squeep/authentication-module": "git+https://git.squeep.com/squeep-authentication-module/#v1.2.0",
-    "@squeep/html-template-helper": "git+https://git.squeep.com/squeep-html-template-helper#v1.0.3",
-    "@squeep/web-linking": "git+https://git.squeep.com/squeep-web-linking/#v1.0.3",
+    "@squeep/authentication-module": "git+https://git.squeep.com/squeep-authentication-module/#v1.2.1",
+    "@squeep/html-template-helper": "git+https://git.squeep.com/squeep-html-template-helper#v1.0.4",
+    "@squeep/web-linking": "git+https://git.squeep.com/squeep-web-linking/#v1.0.4",
     "axios": "^0.26.1",
     "feedparser": "^2.2.10",
     "htmlparser2": "^7.2.0",
