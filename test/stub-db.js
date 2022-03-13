@@ -38,6 +38,7 @@ const stubFns = [
   'topicGetByUrl',
   'topicGetContentById',
   'topicPendingDelete',
+  'topicPublishHistory',
   'topicSet',
   'topicSetContent',
   'topicUpdate',

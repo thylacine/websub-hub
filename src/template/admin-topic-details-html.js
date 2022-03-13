@@ -44,6 +44,10 @@ module.exports = (ctx, options) => {
     `        </tbody>
         </table>
       </section>`,
+    `      <section class="history">
+        <p>Topic Publish History &mdash; ${ctx.publishCount} updates in the last ${ctx.publishSpan} days</p>
+        <img title="Topic Publish History" src="${ctx.params.topicId}/history.svg">
+      </section>`,
     `      <section class="subscriptions">
         <p>${ctx.subscriptions.length ? ctx.subscriptions.length : 'no'} subscription${(ctx.subscriptions.length === 1) ? '' : 's'}</p>
         <table>

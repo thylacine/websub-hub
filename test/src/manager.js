@@ -33,6 +33,7 @@ describe('Manager', function () {
     };
     ctx = {
       params: {},
+      queryParams: {},
     };
     manager = new Manager(stubLogger, stubDb, options);
     sinon.stub(manager.communication, 'verificationProcess');
@@ -137,6 +138,31 @@ describe('Manager', function () {
     });
   }); // getInfo
 
+  describe('_historyBarCaption', function () {
+    it('covers today, none', function () {
+      const result = Manager._historyBarCaption(0, 0);
+      assert.strictEqual(result, 'today, no updates');
+    });
+    it('covers yesterday, singular', function () {
+      const result = Manager._historyBarCaption(1, 1);
+      assert.strictEqual(result, 'yesterday, 1 update');
+    });
+    it('covers older, plural', function () {
+      const result = Manager._historyBarCaption(7, 3);
+      assert.strictEqual(result, '7 days ago, 3 updates');
+    });
+  }); // _historyBarCaption
+
+  describe('getHistorySVG', function () {
+    beforeEach(function () {
+      manager.db.topicPublishHistory.resolves([0, 1, 2, 1, 0, 1, 2, 0, 1]);
+    });
+    it('covers', async function () {
+      await manager.getHistorySVG(res, ctx);
+      assert(res.end.called);
+    });
+  }); // getHistorySVG
+
   describe('getAdminOverview', function () {
     beforeEach(function () {
       manager.db.topicGetAll.resolves([
@@ -212,6 +238,7 @@ describe('Manager', function () {
         deliveryAttemptsSinceSuccess: 0,
         deliveryNextAttempt: new Date(-Infinity),
       }]);
+      manager.db.topicPublishHistory.resolves([0, 1, 0, 1, 0]);
     });
     it('covers', async function() {
       await manager.getTopicDetails(res, ctx);

@@ -586,6 +586,17 @@ class Database {
 
 
   /**
+   * Return an array of the counts of the last #days of topic updates.
+   * @param {*} dbCtx
+   * @param {*} topicId
+   * @param {Number} days
+   */
+  async topicPublishHistory(dbCtx, topicId, days) {
+    this._notImplemented('topicPublishHistory', arguments);
+  }
+
+
+  /**
    * Create or update the basic parameters of a topic.
    * @param {*} dbCtx 
    * @param {TopicData} data
@@ -598,7 +609,7 @@ class Database {
   /**
    * Updates a topic's content data and content update timestamp.
    * @param {Object} data
-   * @param {Integer} data.topicId
+   * @param {*} data.topicId
    * @param {String} data.content
    * @param {String} data.contentHash
    * @param {String=} data.contentType

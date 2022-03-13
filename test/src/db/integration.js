@@ -79,6 +79,11 @@ describe('Database Integration', function () {
         assert(db);
       });
 
+      it('is healthy', async function () {
+        const result = await db.healthCheck();
+        assert(result);
+      });
+
       describe('Authentication', function () {
         let identifier, credential;
         beforeEach(function () {
@@ -219,6 +224,14 @@ describe('Database Integration', function () {
             const topic = await db.topicGetById(dbCtx, topicId);
             assert.strictEqual(Number(topic.contentFetchAttemptsSinceSuccess), 0);
           });
+        });
+        step('gets publish history', async function () {
+          await db.context(async (dbCtx) => {
+            const result = (await db.topicPublishHistory(dbCtx, topicId, 7))
+              .map((x) => Number(x));
+            const expected = [1, 0, 0, 0, 0, 0, 0];
+            assert.deepStrictEqual(result, expected);
+          });  
         });
         step('deletes a topic', async function () {
           await db.context(async (dbCtx) => {

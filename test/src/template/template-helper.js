@@ -63,4 +63,19 @@ describe('Template Helper', function () {
     });
   }); // renderSubscriptionRowHeader
 
+  describe('xmlEscape', function () {
+    it('ignores numbers', function () {
+      const result = th.xmlEscape(3);
+      assert.strictEqual(result, 3);
+    });
+    it('ignores objects', function () {
+      const result = th.xmlEscape({});
+      assert.strictEqual(result, undefined);
+    });
+    it('escapes a thing', function () {
+      const result = th.xmlEscape('&');
+      assert.strictEqual(result, '&amp;');
+    });
+  }); // xmlEscape
+
 });

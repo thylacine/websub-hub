@@ -52,6 +52,7 @@ class Service extends Dingus {
     this.on(['GET', 'HEAD'], '/admin', this.handlerRedirect.bind(this), `${options.dingus.proxyPrefix}/admin/`);
     this.on(['GET', 'HEAD'], '/admin/', this.handlerGetAdminOverview.bind(this));
     this.on(['GET', 'HEAD'], '/admin/topic/:topicId', this.handlerGetAdminTopicDetails.bind(this));
+    this.on(['GET', 'HEAD'], '/admin/topic/:topicId/history.svg', this.handlerGetHistorySVG.bind(this));
 
     // Private data-editing endpoints
     this.on(['PATCH', 'DELETE'], '/admin/topic/:topicId', this.handlerUpdateTopic.bind(this));
@@ -158,6 +159,20 @@ class Service extends Dingus {
     this.setResponseType(responseTypes, req, res, ctx);
 
     await this.manager.getInfo(res, ctx);
+  }
+
+
+  async handlerGetHistorySVG(req, res, ctx) {
+    const _scope = _fileScope('handlerGetHist');
+    this.logger.debug(_scope, 'called', { req: common.requestLogData(req), ctx });
+
+    const responseTypes = [Enum.ContentType.ImageSVG];
+
+    Service.setHeadHandler(req, res, ctx);
+
+    this.setResponseType(responseTypes, req, res, ctx);
+
+    await this.manager.getHistorySVG(res, ctx);
   }
 
 

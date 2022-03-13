@@ -856,6 +856,18 @@ class DatabasePostgres extends Database {
   }
 
 
+  async topicPublishHistory(dbCtx, topicId, days) {
+    const _scope = _fileScope('topicPublishHistory');
+    this.logger.debug(_scope, 'called', { topicId, days });
+
+    const events = await dbCtx.manyOrNone(this.statement.topicPublishHistory, { topicIds: [topicId], daysAgo: days });
+    const history = Array.from({ length: days }, () => 0);
+    events.forEach(({ daysAgo, contentUpdates }) => history[daysAgo] = contentUpdates);
+
+    return history;
+  }
+
+
   async topicSet(dbCtx, data) {
     const _scope = _fileScope('topicSet');
     this.logger.debug(_scope, 'called', data);

@@ -173,13 +173,13 @@ describe('DatabaseBase', function () {
       db._topicSetDataValidate(data);
     });
     it('covers invalid value', function () {
-     data.leaseSecondsPreferred = -100;
-     try {
-       db._topicSetDataValidate(data);
-       assert.fail('did not get expected exception');
-     } catch (e) {
-       assert(e instanceof DBErrors.DataValidation);
-     }
+      data.leaseSecondsPreferred = -100;
+      try {
+        db._topicSetDataValidate(data);
+        assert.fail('did not get expected exception');
+      } catch (e) {
+        assert(e instanceof DBErrors.DataValidation);
+      }
     });
     it('covers invalid range', function () {
       data.leaseSecondsPreferred = 10000;

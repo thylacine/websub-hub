@@ -53,6 +53,7 @@ const defaultOptions = {
       '<a href="https://git.squeep.com/?p=websub-hub;a=tree">Development Repository</a> / <a href="https://github.com/thylacine/websub-hub/">GitHub mirror</a>',
       '<span class="copyright">&copy;<time datetime="2022">&#8559;&#8559;&#8553;&#8553;&#8544;&#8544;</time></span>',
     ],
+    publishHistoryDays: 60, // Number of days of update history to show on topic details page
     strictSecrets: false, // If true, reject requests with secrets but not over https
     publicHub: true, // Accept publish requests as new topics.
     processImmediately: true, // If true, immediately attempt to process requests when accepted.

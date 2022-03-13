@@ -108,11 +108,18 @@ describe('Service', function () {
   }); // handlerGetHealthcheck
 
   describe('handlerGetInfo', function () {
-    it('covers', async function() {
+    it('covers', async function () {
       await service.handlerGetInfo(req, res, ctx);
       assert(service.manager.getInfo.called);
     });
   }); // handlerGetInfo
+
+  describe('handlerGetHistorySVG', function () {
+    it('covers', async function () {
+      await service.handlerGetHistorySVG(req, res, ctx);
+      assert(service.manager.getHistorySVG.called);
+    });
+  }); // handlerGetHistorySVG
 
   describe('handlerGetAdminOverview', function () {
     it('covers', async function () {

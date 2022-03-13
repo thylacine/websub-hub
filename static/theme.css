@@ -69,6 +69,9 @@ section + section {
 }
 .topics {}
 .subscriptions {}
+.history img {
+	width: 100%;
+}
 .external {
 	background-image: url("external-link.svg");
 	background-position: right center;

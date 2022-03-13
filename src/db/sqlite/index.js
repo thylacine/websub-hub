@@ -822,6 +822,18 @@ class DatabaseSQLite extends Database {
   }
 
 
+  topicPublishHistory(dbCtx, topicId, days) {
+    const _scope = _fileScope('topicPublishHistory');
+    this.logger.debug(_scope, 'called', { topicId, days })
+
+    const events = this.statement.topicPublishHistory.all({ topicId, daysAgo: days });
+    const history = Array.from({ length: days }, () => 0);
+    events.forEach(({ daysAgo, contentUpdates }) => history[daysAgo] = contentUpdates);
+
+    return history;
+  }
+
+
   topicSet(dbCtx, data) {
     const _scope = _fileScope('topicSet');
     this.logger.debug(_scope, 'called', data);

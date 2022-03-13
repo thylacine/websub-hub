@@ -1322,6 +1322,21 @@ describe('DatabasePostgres', function () {
     });
   });
 
+  describe('topicPublishHistory', function () {
+    beforeEach(function () {
+      sinon.stub(db.db, 'manyOrNone');
+    });
+    it('success', async function () {
+      db.db.manyOrNone.returns([
+        { daysAgo: 1, contentUpdates: 1 },
+        { daysAgo: 3, contentUpdates: 2 },
+      ]);
+      const result = await db.topicPublishHistory(dbCtx, topicId, 7);
+      const expected = [0, 1, 0, 2, 0, 0, 0];
+      assert.deepStrictEqual(result, expected);
+    });
+  }); // topicPublishHistory
+
   describe('topicSet', function () {
     let data;
     beforeEach(function () {
