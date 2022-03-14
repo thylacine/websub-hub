@@ -114,6 +114,8 @@ The Hub keeps track of three primary entities:
 
 Any tasks in progress (notably: fetching new topic content, distributing that content to subscribers, or confirming pending verifications) are doled out and managed by a cooperative advisory locking mechanism.  The task queue is wrangled in the database within the `*_in_progress` tables.
 
+![Entity relationship diagram for Postgres engine](./documentation/media/postgres-er.svg)
+
 A Hub node will periodically check for more tasks to perform, executing them up to a set concurrency limit.
 
 ### Quirks
