@@ -2,6 +2,16 @@
 
 Releases and notable changes to this project are documented here.
 
+## [v1.3.6] - TBD
+
+### Added
+
+- Recent history of topic publish updates are now displayed on topic details page.
+
+### Fixed
+
+- Depdency updates.
+
 ## [v1.3.5] - 2022-02-23
 
 ### Added
@@ -124,7 +134,8 @@ Releases and notable changes to this project are documented here.
 
 ---
 
-[Unreleased]: https://git.squeep.com/?p=websub-hub;a=commitdiff;h=HEAD;hp=v1.3.5
+[Unreleased]: https://git.squeep.com/?p=websub-hub;a=commitdiff;h=HEAD;hp=v1.3.6
+[v1.3.6]: https://git.squeep.com/?p=websub-hub;a=commitdiff;h=v1.3.6;hp=v1.3.5
 [v1.3.5]: https://git.squeep.com/?p=websub-hub;a=commitdiff;h=v1.3.5;hp=v1.3.4
 [v1.3.4]: https://git.squeep.com/?p=websub-hub;a=commitdiff;h=v1.3.4;hp=v1.3.3
 [v1.3.3]: https://git.squeep.com/?p=websub-hub;a=commitdiff;h=v1.3.3;hp=v1.3.2
