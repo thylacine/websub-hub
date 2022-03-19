@@ -460,7 +460,7 @@ describe('DatabaseSQLite', function () {
         assert.deepStrictEqual(e, expected);
       }
     });
-  });
+  }); // subscriptionDeleteExpired
 
   describe('subscriptionDeliveryClaim', function () {
     it('success', async function () {
@@ -1151,7 +1151,22 @@ describe('DatabaseSQLite', function () {
       }
       assert(db.statement.topicDeleteById.run.called);
     });
-  });
+  }); // topicPendingDelete
+
+  describe('topicPublishHistory', function () {
+    beforeEach(function () {
+      sinon.stub(db.statement.topicPublishHistory, 'all');
+    });
+    it('success', function () {
+      db.statement.topicPublishHistory.all.returns([
+        { daysAgo: 1, contentUpdates: 1 },
+        { daysAgo: 3, contentUpdates: 2 },
+      ]);
+      const result = db.topicPublishHistory(dbCtx, topicId, 7);
+      const expected = [0, 1, 0, 2, 0, 0, 0];
+      assert.deepStrictEqual(result, expected);
+    });
+  }); // topicPublishHistory
 
   describe('topicSet', function () {
     let data;

@@ -11,6 +11,9 @@ describe('Admin Topic Details HTML Template', function () {
 
   beforeEach(function () {
     ctx = {
+      params: {
+        topicId: '97dd5488-a303-11ec-97ab-0025905f714a',
+      },
       topic: {},
       subscriptions: [
         {},

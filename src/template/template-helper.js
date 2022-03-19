@@ -2,7 +2,6 @@
 
 const { TemplateHelper } = require('@squeep/html-template-helper');
 
-
 /**
  * Render a topic as a row of details.
  * @param {Object} topic
@@ -112,7 +111,29 @@ function renderSubscriptionRowHeader() {
 }
 
 
+/**
+ * Escape some xml things in strings.
+ * @param {String} string
+ */
+function xmlEscape(string) {
+  if (typeof string === 'number') {
+    return string;
+  }
+  if (typeof string !== 'string') {
+    return undefined;
+  }
+  // eslint-disable-next-line security/detect-object-injection
+  return string.replace(/[<>&'"]/, (c) => ({
+    '<': '&lt;',
+    '>': '&gt;',
+    '&': '&amp;',
+    '\'': '&apos;',
+    '"': '&quot;',
+  }[c]));
+}
+
 module.exports = Object.assign(Object.create(TemplateHelper), {
+  xmlEscape,
   renderTopicRowHeader,
   renderTopicRow,
   renderSubscriptionRowHeader,

@@ -1,19 +1,6 @@
 'use strict';
 
-function escapeXml(s) {
-  if (typeof s === 'number') {
-    return s;
-  } else if (typeof s !== 'string') {
-    return undefined;
-  } else {
-    return s
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&apos;');
-  }
-}
+const th = require('./template-helper');
 
 
 const ctxDefaults = {
@@ -57,8 +44,8 @@ module.exports = (ctx, label, message, accessibleText) => {
    * renderer from https://github.com/badges/shields/tree/master/badge-maker which
    * is under the http://creativecommons.org/publicdomain/zero/1.0/ license.
    */
-  return `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${ctx.width}" height="${ctx.height}" role="img" aria-label="${escapeXml(ctx.accessibleText)}">
-  <title>${escapeXml(ctx.accessibleText)}</title>
+  return `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${ctx.width}" height="${ctx.height}" role="img" aria-label="${th.xmlEscape(ctx.accessibleText)}">
+  <title>${th.xmlEscape(ctx.accessibleText)}</title>
   <linearGradient id="s" x2="0" y2="100%">
     <stop offset="0"  stop-color="#fff" stop-opacity=".7"/>
     <stop offset=".1" stop-color="#aaa" stop-opacity=".1"/>
@@ -74,8 +61,8 @@ module.exports = (ctx, label, message, accessibleText) => {
     <rect width="${ctx.width}" height="${ctx.height}" fill="url(#s)"/>
   </g>
   <g fill="${ctx.color}" text-anchor="left" font-family="${ctx.fontFamily}" text-rendering="geometricPrecision" font-size="11" font-weight="bold">
-    <text x="${ctx.halfCharWidth}" y="${ctx.verticalMargin}">${escapeXml(ctx.label)}</text>
-    <text x="${fixedRound(ctx.halfCharWidth + ctx.labelWidth)}" y="${ctx.verticalMargin}">${escapeXml(ctx.message)}</text>
+    <text x="${ctx.halfCharWidth}" y="${ctx.verticalMargin}">${th.xmlEscape(ctx.label)}</text>
+    <text x="${fixedRound(ctx.halfCharWidth + ctx.labelWidth)}" y="${ctx.verticalMargin}">${th.xmlEscape(ctx.message)}</text>
   </g>
 </svg>`;
 };

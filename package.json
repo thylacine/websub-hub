@@ -1,6 +1,6 @@
 {
   "name": "@squeep/websub-hub",
-  "version": "1.3.5",
+  "version": "1.3.6",
   "description": "A WebSub Hub server implementation.",
   "main": "server.js",
   "scripts": {
@@ -32,11 +32,11 @@
     "coverage-check"
   ],
   "dependencies": {
-    "@squeep/api-dingus": "git+https://git.squeep.com/squeep-api-dingus/#v1.2.4",
-    "@squeep/authentication-module": "git+https://git.squeep.com/squeep-authentication-module/#v1.2.0",
-    "@squeep/html-template-helper": "git+https://git.squeep.com/squeep-html-template-helper#v1.0.2",
-    "@squeep/web-linking": "git+https://git.squeep.com/squeep-web-linking/#v1.0.3",
-    "axios": "^0.26.0",
+    "@squeep/api-dingus": "git+https://git.squeep.com/squeep-api-dingus/#v1.2.5",
+    "@squeep/authentication-module": "git+https://git.squeep.com/squeep-authentication-module/#v1.2.1",
+    "@squeep/html-template-helper": "git+https://git.squeep.com/squeep-html-template-helper#v1.0.4",
+    "@squeep/web-linking": "git+https://git.squeep.com/squeep-web-linking/#v1.0.4",
+    "axios": "^0.26.1",
     "feedparser": "^2.2.10",
     "htmlparser2": "^7.2.0",
     "iconv": "^3.0.1"
@@ -46,12 +46,12 @@
     "pg-promise": "^10.11.1"
   },
   "devDependencies": {
-    "eslint": "^8.9.0",
+    "eslint": "^8.11.0",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-security": "^1.4.0",
     "eslint-plugin-sonarjs": "^0.12.0",
     "html-minifier-lint": "^2.0.0",
-    "mocha": "^9.2.1",
+    "mocha": "^9.2.2",
     "mocha-steps": "^1.3.0",
     "nyc": "^15.1.0",
     "pre-commit": "^1.2.2",

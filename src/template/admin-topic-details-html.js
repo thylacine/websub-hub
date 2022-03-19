@@ -34,7 +34,6 @@ module.exports = (ctx, options) => {
   };
 
   const content = [
-    '<script>0</script>', // This fixes a layout rendering flash on load in FF; do not know why this works but it does.
     `      <section class="topics">
         <table>
           <thead>`,
@@ -44,6 +43,10 @@ module.exports = (ctx, options) => {
     ...(ctx.topic && [ th.renderTopicRow(ctx.topic, ctx.subscriptions, false) ] || []),
     `        </tbody>
         </table>
+      </section>`,
+    `      <section class="history">
+        <p>Topic Publish History &mdash; ${ctx.publishCount} updates in the last ${ctx.publishSpan} days</p>
+        <img title="Topic Publish History" src="${ctx.params.topicId}/history.svg">
       </section>`,
     `      <section class="subscriptions">
         <p>${ctx.subscriptions.length ? ctx.subscriptions.length : 'no'} subscription${(ctx.subscriptions.length === 1) ? '' : 's'}</p>

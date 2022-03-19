@@ -61,20 +61,6 @@ describe('Service', function () {
     });
   }); // maybeIngestBody
 
-  describe('setHeadHandler', function () {
-    it('covers', function () {
-      const origEnd = res.end;
-      sinon.stub(Service.__proto__, 'setHeadHandler');
-      ctx.responseBody = 'data';
-      req.method = 'HEAD';
-      Service.setHeadHandler(req, res, ctx);
-      res.end('foop');
-      assert(Service.__proto__.setHeadHandler.called);
-      assert(origEnd.called);
-      assert(!('responseBody' in ctx));
-    });
-  }); // setHeadHandler
-
   describe('handlerPostRoot', function () {
     it('covers public mode', async function () {
       await service.handlerPostRoot(req, res, ctx);
@@ -108,11 +94,18 @@ describe('Service', function () {
   }); // handlerGetHealthcheck
 
   describe('handlerGetInfo', function () {
-    it('covers', async function() {
+    it('covers', async function () {
       await service.handlerGetInfo(req, res, ctx);
       assert(service.manager.getInfo.called);
     });
   }); // handlerGetInfo
+
+  describe('handlerGetHistorySVG', function () {
+    it('covers', async function () {
+      await service.handlerGetHistorySVG(req, res, ctx);
+      assert(service.manager.getHistorySVG.called);
+    });
+  }); // handlerGetHistorySVG
 
   describe('handlerGetAdminOverview', function () {
     it('covers', async function () {

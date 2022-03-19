@@ -544,9 +544,64 @@ class Manager {
     });
 
     res.end(this.infoContent(ctx));
-    this.logger.info(_scope, 'finished', { ...ctx });
+    this.logger.info(_scope, 'finished', { ctx });
   }
 
+
+  /**
+   * label the bars of the topic update history graph
+   * @param {Number} index
+   * @param {Number} value
+   * @returns {String}
+   */
+  static _historyBarCaption(index, value) {
+    let when;
+    switch (index) {
+      case 0:
+        when ='today';
+        break;
+      case 1:
+        when = 'yesterday';
+        break;
+      default:
+        when = `${index} days ago`;
+    }
+    return `${when}, ${value ? value : 'no'} update${value === 1 ? '': 's'}`;
+  }
+
+
+  /**
+   * GET SVG chart of topic update history
+   * @param {http.ServerResponse} res
+   * @param {object} ctx
+   */
+  async getHistorySVG(res, ctx) {
+    const _scope = _fileScope('getHist');
+    this.logger.debug(_scope, 'called', { ctx });
+
+    const days = Math.min(parseInt(ctx.queryParams.days) || this.options.manager.publishHistoryDays, 365);
+    const histOptions = {
+      title: 'Topic Publish History',
+      description: 'Updates per Day',
+      labelZero: '^ Today',
+      labelX: 'Days Ago',
+      maxItems: days,
+      minItems: days,
+      tickEvery: 7,
+      barWidth: 25,
+      barHeight: 40,
+      labelHeight: 12,
+      barCaptionFn: Manager._historyBarCaption,
+    };
+
+    let publishHistory;
+    await this.db.context(async (dbCtx) => {
+      publishHistory = await this.db.topicPublishHistory(dbCtx, ctx.params.topicId, days);
+    });
+
+    res.end(Template.histogramSVG(publishHistory, histOptions));
+    this.logger.info(_scope, 'finished', { ctx });
+  }
 
   /**
    * GET request for authorized /admin information.
@@ -572,7 +627,7 @@ class Manager {
     }
 
     res.end(Template.adminOverviewHTML(ctx, this.options));
-    this.logger.info(_scope, 'finished', { ...ctx, topics: ctx.topics.length })
+    this.logger.info(_scope, 'finished', { ctx, topics: ctx.topics.length });
   }
 
 
@@ -585,12 +640,17 @@ class Manager {
     const _scope = _fileScope('getTopicDetails');
     this.logger.debug(_scope, 'called', { ctx });
 
+
+    ctx.publishSpan = 60;
     const topicId = ctx.params.topicId;
+    let publishHistory;
     await this.db.context(async (dbCtx) => {
       ctx.topic = await this.db.topicGetById(dbCtx, topicId);
       ctx.subscriptions = await this.db.subscriptionsByTopicId(dbCtx, topicId);
+      publishHistory = await this.db.topicPublishHistory(dbCtx, topicId, ctx.publishSpan);
     });
-    this.logger.debug(_scope, 'got topic details', { topic: ctx.topic, subscriptions: ctx.subscriptions });
+    ctx.publishCount = publishHistory.reduce((a, b) => a + b, 0);
+    this.logger.debug(_scope, 'got topic details', { topic: ctx.topic, subscriptions: ctx.subscriptions, updates: ctx.publishCount });
 
     // Profile users can only see related topics.
     if (ctx.session && ctx.session.authenticatedProfile) {
@@ -603,7 +663,7 @@ class Manager {
     }
 
     res.end(Template.adminTopicDetailsHTML(ctx, this.options));
-    this.logger.info(_scope, 'finished', { ...ctx, subscriptions: ctx.subscriptions.length, topic: ctx.topic && ctx.topic.id || ctx.topic });
+    this.logger.info(_scope, 'finished', { ctx, subscriptions: ctx.subscriptions.length, topic: ctx.topic && ctx.topic.id || ctx.topic });
   }
 
 
