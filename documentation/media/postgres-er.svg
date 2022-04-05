@@ -11,7 +11,7 @@
 <polygon fill="white" stroke="transparent" points="-4,4 -4,-1079.63 918,-1079.63 918,4 -4,4"/>
 <text text-anchor="middle" x="457" y="-1050.83" font-family="Times,serif" font-size="26.00">Websub Hub Entity&#45;Relations</text>
 <text text-anchor="middle" x="457" y="-1021.83" font-family="Times,serif" font-size="26.00">Postgres</text>
-<text text-anchor="middle" x="457" y="-992.83" font-family="Times,serif" font-size="26.00">Schema 1.0.3</text>
+<text text-anchor="middle" x="457" y="-992.83" font-family="Times,serif" font-size="26.00">Schema 1.0.4</text>
 <!-- topic -->
 <g id="node1" class="node">
 <title>topic</title>
@@ -52,6 +52,10 @@
 <text text-anchor="start" x="92.5" y="-335.93" font-family="Times,serif" font-size="14.00">content_hash</text>
 <polygon fill="none" stroke="black" points="0,-308.13 0,-329.13 280,-329.13 280,-308.13 0,-308.13"/>
 <text text-anchor="start" x="93.5" y="-314.93" font-family="Times,serif" font-size="14.00">content_type</text>
+<polygon fill="none" stroke="black" points="0,-287.13 0,-308.13 280,-308.13 280,-287.13 0,-287.13"/>
+<text text-anchor="start" x="105.5" y="-293.93" font-family="Times,serif" font-size="14.00">http_etag</text>
+<polygon fill="none" stroke="black" points="0,-266.13 0,-287.13 280,-287.13 280,-266.13 0,-266.13"/>
+<text text-anchor="start" x="73.5" y="-272.93" font-family="Times,serif" font-size="14.00">http_last_modified</text>
 </g>
 <!-- topic_fetch_in_progress -->
 <g id="node2" class="node">

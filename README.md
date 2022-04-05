@@ -148,7 +148,7 @@ This implementation is built atop an in-house API framework, for Reasons.  It wo
   - enum.js - invariants
   - errors.js - local Error types
   - link-helper.js - processes Link headers
-  - logger.js - a very simple logging class
+  - logger/ - adds service-specific data filters to our logging module
   - manager.js - process incoming requests
   - service.js - defines incoming endpoints, linking the API server framework to the manager methods
   - template/ - HTML content

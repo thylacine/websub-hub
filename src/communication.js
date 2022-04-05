@@ -196,6 +196,8 @@ class Communication {
     const acceptPreferred = [topic.contentType, acceptWildcard].filter((x) => x).join(', ');
     return Communication._axiosConfig('GET', topic.url, undefined, {}, {
       [Enum.Header.Accept]: acceptPreferred,
+      ...(topic.httpEtag && { [Enum.Header.IfNoneMatch]: topic.httpEtag }),
+      ...(topic.httpLastModified && { [Enum.Header.IfModifiedSince]: topic.httpLastModified }),
     });
   }
 
@@ -467,6 +469,7 @@ class Communication {
 
     switch (common.httpStatusCodeClass(response.status)) {
       case 2:
+      case 3:
         // Fall out of switch on success
         break;
 
@@ -479,6 +482,12 @@ class Communication {
         this.logger.info(_scope, 'fetch failed by status', logInfoData);
         await this.db.topicFetchIncomplete(dbCtx, topicId, this.options.communication.retryBackoffSeconds);
         return;
+    }
+
+    if (response.status === 304) {
+      this.logger.info(_scope, 'content has not changed, per server', logInfoData);
+      await this.db.topicFetchComplete(dbCtx, topicId);
+      return;
     }
 
     const contentHash = Communication.contentHash(response.data, topic.contentHashAlgorithm);
@@ -505,6 +514,8 @@ class Communication {
     }
 
     const contentType = response.headers[Enum.Header.ContentType.toLowerCase()];
+    const httpETag = response.headers[Enum.Header.ETag.toLowerCase()];
+    const httpLastModified = response.headers[Enum.Header.LastModified.toLowerCase()];
 
     await this.db.transaction(dbCtx, async (txCtx) => {
       await this.db.topicSetContent(txCtx, {
@@ -512,6 +523,8 @@ class Communication {
         content: Buffer.from(response.data),
         contentHash,
         ...(contentType && { contentType }),
+        ...(httpETag && { httpETag }),
+        ...(httpLastModified && { httpLastModified }),
       });
 
       await this.db.topicFetchComplete(txCtx, topicId);

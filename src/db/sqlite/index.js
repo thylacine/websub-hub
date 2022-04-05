@@ -20,7 +20,7 @@ const schemaVersionsSupported = {
   max: {
     major: 1,
     minor: 0,
-    patch: 3,
+    patch: 4,
   },
 };
 
@@ -865,6 +865,8 @@ class DatabaseSQLite extends Database {
     const _scope = _fileScope('topicSetContent');
     const topicSetContentData = {
       contentType: null,
+      httpETag: null,
+      httpLastModified: null,
       ...data,
     };
     const logData = {
@@ -881,7 +883,11 @@ class DatabaseSQLite extends Database {
       if (result.changes !=  1) {
         throw new DBErrors.UnexpectedResult('did not set topic content');
       }
-      result = this.statement.topicSetContentHistory.run({ topicId: data.topicId, contentHash: data.contentHash, contentSize: data.content.length });
+      result = this.statement.topicSetContentHistory.run({
+        topicId: data.topicId,
+        contentHash: data.contentHash,
+        contentSize: data.content.length,
+      });
       if (result.changes != 1) {
         throw new DBErrors.UnexpectedResult('did not set topic content history');
       }

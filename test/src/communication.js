@@ -552,6 +552,8 @@ describe('Communication', function () {
         headers: {
           'content-type': 'text/plain',
           link: '<https://example.com/hub/>; rel="hub"',
+          'last-modified': 'Thu, 18 Nov 2021 20:34:35 GMT',
+          'etag': '"9c104-1673e-5d1161636d742"',
         },
         data: 'Jackdaws love my big sphinx of quartz.',
       });
@@ -624,6 +626,20 @@ describe('Communication', function () {
       communication.db.topicGetById.restore();
       topic.contentHash = 'a630999c61738f3e066d79a1b299a295c5d0598c173e0904d04a707d43988e3e81660bfc1b1779377f4ec26f837d1bb31fa2b860c9ad2d37495d83de32647fea';
       sinon.stub(communication.db, 'topicGetById').resolves(topic);
+
+      await communication.topicFetchProcess(dbCtx, topicId, requestId);
+
+      assert(communication.db.topicFetchComplete.called);
+      assert(!communication.db.topicSetContent.called);
+    });
+
+    it('recognizes 304 response', async function () {
+      topic.httpLastModified = 'Thu, 18 Nov 2021 20:34:35 GMT';
+      topic.httpEtag = '"9c104-1673e-5d1161636d742"';
+      communication.db.topicGetById.resolves(topic);
+      communication.axios.resolves({
+        status: 304,
+      });
 
       await communication.topicFetchProcess(dbCtx, topicId, requestId);
 
