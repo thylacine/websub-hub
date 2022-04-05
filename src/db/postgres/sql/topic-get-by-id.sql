@@ -15,6 +15,8 @@ SELECT
 	content_fetch_attempts_since_success,
 	content_updated,
 	content_hash,
-	content_type
+	content_type,
+	http_etag,
+	http_last_modified
 FROM topic
 WHERE id = $(topicId)
