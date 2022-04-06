@@ -33,7 +33,7 @@
   ],
   "dependencies": {
     "@squeep/api-dingus": "git+https://git.squeep.com/squeep-api-dingus/#v1.2.5",
-    "@squeep/authentication-module": "git+https://git.squeep.com/squeep-authentication-module/#v1.2.1",
+    "@squeep/authentication-module": "git+https://git.squeep.com/squeep-authentication-module/#v1.2.2",
     "@squeep/html-template-helper": "git+https://git.squeep.com/squeep-html-template-helper#v1.1.1",
     "@squeep/logger-json-console": "git+https://git.squeep.com/squeep-logger-json-console#v1.0.0",
     "@squeep/web-linking": "git+https://git.squeep.com/squeep-web-linking/#v1.0.4",
