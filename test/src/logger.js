@@ -2,6 +2,7 @@
 'use strict';
 
 const assert = require('assert');
+const sinon = require('sinon'); // eslint-disable-line node/no-unpublished-require
 const Logger = require('../../src/logger');
 const Config = require('../../config');
 
@@ -11,46 +12,32 @@ describe('Logger', function () {
 
   beforeEach(function () {
     config = new Config('test');
+    logger = new Logger(config);
+    Object.keys(Logger.nullLogger).forEach((level) => sinon.stub(logger.backend, level));
+  });
+
+  afterEach(function () {
+    sinon.restore();
   });
 
   it('logs', function () {
-    logger = new Logger(config);
     logger.info('testScope', 'message', { baz: 'quux' }, { foo: 1 }, 'more other');
-  });
-
-  it('stubs missing levels', function () {
-    const backend = {};
-    logger = new Logger(config, backend);
-    assert.strictEqual(typeof logger.info, 'function');
+    assert(logger.backend.info.called);
   });
 
   it('logs BigInts', function () {
-    logger = new Logger(config);
     logger.info('testScope', 'message', { aBigInteger: BigInt(2) });
+    assert(logger.backend.info.called);
+    assert(logger.backend.info.args[0][0].includes('"2"'));
   });
 
   it('logs Errors', function () {
-    logger = new Logger(config);
     logger.error('testScope', 'message', { e: new Error('an error') });
-  });
-
-  it('covers config error', function () {
-    config.logger.ignoreBelowLevel = 'not a level';
-    try {
-      logger = new Logger(config);
-      assert.fail('expected RangeError here');
-    } catch (e) {
-      assert(e instanceof RangeError);
-    }
-  });
-
-  it('covers empty fields', function () {
-    logger = new Logger(config);
-    logger.info();
+    assert(logger.backend.error.called);
+    assert(logger.backend.error.args[0][0].includes('an error'));
   });
 
   it('masks credentials', function () {
-    logger = new Logger(config);
     logger.info('testScope', 'message', {
       ctx: {
         parsedBody: {
@@ -59,6 +46,9 @@ describe('Logger', function () {
         },
       },
     });
+    assert(logger.backend.info.called);
+    assert(logger.backend.info.args[0][0].includes('"username"'));
+    assert(logger.backend.info.args[0][0].includes('"********"'));
   });
 
 }); // Logger

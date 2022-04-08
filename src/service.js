@@ -77,7 +77,7 @@ class Service extends Dingus {
    */
   async handlerPostRoot(req, res, ctx) {
     const _scope = _fileScope('handlerPostRoot');
-    this.logger.debug(_scope, 'called', { req: common.requestLogData(req), ctx });
+    this.logger.debug(_scope, 'called', { req, ctx });
 
     this.setResponseType(this.responseTypes, req, res, ctx);
     await this.ingestBody(req, res, ctx);
@@ -96,7 +96,7 @@ class Service extends Dingus {
     const responseTypes = [
       Enum.ContentType.TextHTML,
     ];
-    this.logger.debug(_scope, 'called', { req: common.requestLogData(req), ctx });
+    this.logger.debug(_scope, 'called', { req, ctx });
 
     Dingus.setHeadHandler(req, res, ctx);
 
@@ -115,7 +115,7 @@ class Service extends Dingus {
    */
   async handlerGetHealthcheck(req, res, ctx) {
     const _scope = _fileScope('handlerGetHealthcheck');
-    this.logger.debug(_scope, 'called', { req: common.requestLogData(req), ctx });
+    this.logger.debug(_scope, 'called', { req, ctx });
   
     Dingus.setHeadHandler(req, res, ctx);
 
@@ -132,7 +132,7 @@ class Service extends Dingus {
    */
   async handlerGetInfo(req, res, ctx) {
     const _scope = _fileScope('handlerGetInfo');
-    this.logger.debug(_scope, 'called', { req: common.requestLogData(req), ctx });
+    this.logger.debug(_scope, 'called', { req, ctx });
 
     const responseTypes = [...this.responseTypes, Enum.ContentType.ImageSVG];
 
@@ -146,7 +146,7 @@ class Service extends Dingus {
 
   async handlerGetHistorySVG(req, res, ctx) {
     const _scope = _fileScope('handlerGetHist');
-    this.logger.debug(_scope, 'called', { req: common.requestLogData(req), ctx });
+    this.logger.debug(_scope, 'called', { req, ctx });
 
     const responseTypes = [Enum.ContentType.ImageSVG];
 
@@ -165,7 +165,7 @@ class Service extends Dingus {
    */
   async handlerGetAdminOverview(req, res, ctx) {
     const _scope = _fileScope('handlerGetAdminOverview');
-    this.logger.debug(_scope, 'called', { req: common.requestLogData(req), ctx });
+    this.logger.debug(_scope, 'called', { req, ctx });
 
     Dingus.setHeadHandler(req, res, ctx);
 
@@ -184,7 +184,7 @@ class Service extends Dingus {
    */
   async handlerGetAdminTopicDetails(req, res, ctx) {
     const _scope = _fileScope('handlerGetAdminTopicDetails');
-    this.logger.debug(_scope, 'called', { req: common.requestLogData(req), ctx });
+    this.logger.debug(_scope, 'called', { req, ctx });
 
     Dingus.setHeadHandler(req, res, ctx);
 
@@ -216,7 +216,7 @@ class Service extends Dingus {
    */
   async handlerUpdateTopic(req, res, ctx) {
     const _scope = _fileScope('handlerUpdateTopic');
-    this.logger.debug(_scope, 'called', { req: common.requestLogData(req), ctx });
+    this.logger.debug(_scope, 'called', { req, ctx });
 
     this.setResponseType(this.responseTypes, req, res, ctx);
 
@@ -235,7 +235,7 @@ class Service extends Dingus {
    */
   async handlerUpdateSubscription(req, res, ctx) {
     const _scope = _fileScope('handlerUpdateSubscription');
-    this.logger.debug(_scope, 'called', { req: common.requestLogData(req), ctx });
+    this.logger.debug(_scope, 'called', { req, ctx });
 
     this.setResponseType(this.responseTypes, req, res, ctx);
 
@@ -254,7 +254,7 @@ class Service extends Dingus {
    */
   async handlerPostAdminProcess(req, res, ctx) {
     const _scope = _fileScope('handlerPostAdminProcess');
-    this.logger.debug(_scope, 'called', { req: common.requestLogData(req), ctx });
+    this.logger.debug(_scope, 'called', { req, ctx });
 
     this.setResponseType(this.responseTypes, req, res, ctx);
 
@@ -272,7 +272,7 @@ class Service extends Dingus {
    */
   async handlerGetAdminLogin(req, res, ctx) {
     const _scope = _fileScope('handlerGetAdminLogin');
-    this.logger.debug(_scope, 'called', { req: common.requestLogData(req), ctx });
+    this.logger.debug(_scope, 'called', { req, ctx });
 
     Dingus.setHeadHandler(req, res, ctx);
 
@@ -290,7 +290,7 @@ class Service extends Dingus {
    */
   async handlerPostAdminLogin(req, res, ctx) {
     const _scope = _fileScope('handlerPostAdminLogin');
-    this.logger.debug(_scope, 'called', { req: common.requestLogData(req), ctx });
+    this.logger.debug(_scope, 'called', { req, ctx });
 
     this.setResponseType(this.responseTypes, req, res, ctx);
 
@@ -310,7 +310,7 @@ class Service extends Dingus {
    */
   async handlerGetAdminLogout(req, res, ctx) {
     const _scope = _fileScope('handlerGetAdminLogout');
-    this.logger.debug(_scope, 'called', { req: common.requestLogData(req), ctx });
+    this.logger.debug(_scope, 'called', { req, ctx });
 
     this.setResponseType(this.responseTypes, req, res, ctx);
 
@@ -328,7 +328,7 @@ class Service extends Dingus {
    */
   async handlerGetAdminIA(req, res, ctx) {
     const _scope = _fileScope('handlerGetAdminIA');
-    this.logger.debug(_scope, 'called', { req: common.requestLogData(req), ctx });
+    this.logger.debug(_scope, 'called', { req, ctx });
 
     this.setResponseType(this.responseTypes, req, res, ctx);
 

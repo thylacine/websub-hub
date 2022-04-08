@@ -173,6 +173,8 @@ class Database {
     this._ensureTypes(data, ['content'], ['string', 'buffer']);
     this._ensureTypes(data, ['contentHash'], ['string']);
     this._ensureTypes(data, ['contentType'], ['string', 'null', 'undefined']);
+    this._ensureTypes(data, ['eTag'], ['string', 'null', 'undefined']);
+    this._ensureTypes(data, ['lastModified'], ['string', 'null', 'undefined']);
   }
 
 
@@ -614,6 +616,8 @@ class Database {
    * @param {String} data.content
    * @param {String} data.contentHash
    * @param {String=} data.contentType
+   * @param {String=} data.eTag
+   * @param {String=} data.lastModified
    */
   async topicSetContent(dbCtx, data) {
     this._notImplemented('topicSetContent', arguments);

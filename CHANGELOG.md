@@ -2,7 +2,18 @@
 
 Releases and notable changes to this project are documented here.
 
-## [v1.3.6] - TBD
+## [v1.3.7] - 2022-04-08
+
+### Added
+
+- If publish requests are made without the topic actually having updated, behave like a proper caching client by negotiating etag/last-modified fields for topic fetches.
+
+### Fixed
+
+- Timestamps on admin pages are displayed more succinctly.
+- Dependency updates.
+
+## [v1.3.6] - 2022-03-19
 
 ### Added
 
@@ -10,7 +21,7 @@ Releases and notable changes to this project are documented here.
 
 ### Fixed
 
-- Depdency updates.
+- Dependency updates.
 
 ## [v1.3.5] - 2022-02-23
 
@@ -21,7 +32,7 @@ Releases and notable changes to this project are documented here.
 ### Fixed
 
 - Fixed potential race condition which could cause a subscriber to miss an update.
-- Fixed postfix listener to more properly deal with errors.
+- Fixed postgres listener to more properly deal with errors.
 - Removed accidental logging of response body during HEAD requests.
 - Fixed session logout link on root page.
 - Dependency updates.
@@ -134,7 +145,8 @@ Releases and notable changes to this project are documented here.
 
 ---
 
-[Unreleased]: https://git.squeep.com/?p=websub-hub;a=commitdiff;h=HEAD;hp=v1.3.6
+[Unreleased]: https://git.squeep.com/?p=websub-hub;a=commitdiff;h=HEAD;hp=v1.3.7
+[v1.3.7]: https://git.squeep.com/?p=websub-hub;a=commitdiff;h=v1.3.7;hp=v1.3.6
 [v1.3.6]: https://git.squeep.com/?p=websub-hub;a=commitdiff;h=v1.3.6;hp=v1.3.5
 [v1.3.5]: https://git.squeep.com/?p=websub-hub;a=commitdiff;h=v1.3.5;hp=v1.3.4
 [v1.3.4]: https://git.squeep.com/?p=websub-hub;a=commitdiff;h=v1.3.4;hp=v1.3.3

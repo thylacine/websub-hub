@@ -18,17 +18,17 @@ function renderTopicRow(topic, subscribers, detailsLink = true) {
   return `<tr>
   <th scope="row">${detailsLink ? '<a href="topic/' + topic.id + '">' : ''}${topic.url}${detailsLink ? '</a>' : ''}</th>
   <td>${subscribers.length}</td>
-  <td>${TemplateHelper.dateOrNot(topic.created, 'Unknown')}</td>
+  <td>${TemplateHelper.dateFormat(topic.created, 'End of Time', 'Beginning of Time', 'Unknown')}</td>
   <td>${TemplateHelper.secondsToPeriod(topic.leaseSecondsPreferred)}</td>
   <td>${TemplateHelper.secondsToPeriod(topic.leaseSecondsMin)}</td>
   <td>${TemplateHelper.secondsToPeriod(topic.leaseSecondsMax)}</td>
   <td>${topic.publisherValidationUrl ? topic.publisherValidationUrl : 'None'}</td>
   <td>${topic.isActive}</td>
   <td>${topic.isDeleted}</td>
-  <td>${TemplateHelper.dateOrNot(topic.lastPublish, 'Never')}</td>
-  <td>${TemplateHelper.dateOrNot(topic.contentFetchNextAttempt, 'Next Publish')}</td>
+  <td>${TemplateHelper.dateFormat(topic.lastPublish, 'End of Time', 'Never', 'Never')}</td>
+  <td>${TemplateHelper.dateFormat(topic.contentFetchNextAttempt, 'Next Publish', 'Pending', 'Next Publish')}</td>
   <td>${topic.contentFetchAttemptsSinceSuccess}</td>
-  <td>${TemplateHelper.dateOrNot(topic.contentUpdated, 'Never')}</td>
+  <td>${TemplateHelper.dateFormat(topic.contentUpdated, 'End of Time', 'Never', 'Never')}</td>
   <td>${topic.contentType}</td>
   <td>${topic.id}</td>
 </tr>`;
@@ -55,7 +55,7 @@ function renderTopicRowHeader() {
   <th scope="col">Content Fetch Failures</th>
   <th scope="col">Content Updated</th>
   <th scope="col">Content Type</th>
-  <th scope="col">ID</th>
+  <th scope="col">Internal Id</th>
 </tr>`;
 }
 
@@ -73,16 +73,16 @@ function renderSubscriptionRow(subscription) {
   }
   return `<tr>
   <td scope="row">${subscription.callback}</td>
-  <td>${TemplateHelper.dateOrNot(subscription.created, 'Unknown')}</td>
-  <td>${TemplateHelper.dateOrNot(subscription.verified, 'Never')}</td>
-  <td>${TemplateHelper.dateOrNot(subscription.expires, 'Never')}</td>
+  <td>${TemplateHelper.dateFormat(subscription.created, 'End of Time', 'Beginning of Time', 'Unknown')}</td>
+  <td>${TemplateHelper.dateFormat(subscription.verified, 'End of Time', 'Never', 'Never')}</td>
+  <td>${TemplateHelper.dateFormat(subscription.expires, 'Never', 'Beginning of Time', 'Never')}</td>
   <td>${!!subscription.secret}</td>
   <td>${subscription.signatureAlgorithm}</td>
   <td>${subscription.httpRemoteAddr}</td>
   <td>${subscription.httpFrom}</td>
-  <td>${TemplateHelper.dateOrNot(subscription.contentDelivered, 'Never')}</td>
+  <td>${TemplateHelper.dateFormat(subscription.contentDelivered, 'End of Time', 'Never', 'Never')}</td>
   <td>${subscription.deliveryAttemptsSinceSuccess}</td>
-  <td>${TemplateHelper.dateOrNot(subscription.deliveryNextAttempt, 'Next Publish')}</td>
+  <td>${TemplateHelper.dateFormat(subscription.deliveryNextAttempt, 'End of Time', 'Next Publish', 'Next Publish')}</td>
   <td>${subscription.id}</td>
 </tr>`;
 }
@@ -105,7 +105,7 @@ function renderSubscriptionRowHeader() {
   <th scope="col">Content Delivered</th>
   <th scope="col">Content Delivery Failures</th>
   <th scope="col">Next Delivery</th>
-  <th scope="col">ID</th>
+  <th scope="col">Internal Id</th>
 </tr>
 `;
 }

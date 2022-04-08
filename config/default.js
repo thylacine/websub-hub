@@ -48,7 +48,7 @@ const defaultOptions = {
 
   manager: {
     pageTitle: packageName, // title on html pages
-    logoUrl: '/static/logo.svg', // image to go with title
+    logoUrl: 'static/logo.svg', // image to go with title
     footerEntries: [ // common footers on all html pages
       '<a href="https://git.squeep.com/?p=websub-hub;a=tree">Development Repository</a> / <a href="https://github.com/thylacine/websub-hub/">GitHub mirror</a>',
       '<span class="copyright">&copy;<time datetime="2022">&#8559;&#8559;&#8553;&#8553;&#8544;&#8544;</time></span>',
