@@ -1,6 +1,6 @@
 {
   "name": "@squeep/websub-hub",
-  "version": "1.3.6",
+  "version": "1.3.7",
   "description": "A WebSub Hub server implementation.",
   "main": "server.js",
   "scripts": {
