@@ -43,7 +43,7 @@
     "iconv": "^3.0.1"
   },
   "optionalDependencies": {
-    "better-sqlite3": "^7.5.0",
+    "better-sqlite3": "^7.5.1",
     "pg-promise": "^10.11.1"
   },
   "devDependencies": {
