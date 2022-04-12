@@ -543,7 +543,10 @@ class Manager {
       ctx.count = count.count;
     });
 
-    res.end(this.infoContent(ctx));
+    const content = this.infoContent(ctx);
+    res.setHeader(Enum.Header.ETag, common.generateETag(undefined, undefined, content));
+    res.setHeader(Enum.Header.CacheControl, 'no-cache');
+    res.end(content);
     this.logger.info(_scope, 'finished', { ctx });
   }
 
