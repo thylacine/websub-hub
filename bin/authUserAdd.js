@@ -1,8 +1,10 @@
+#!/usr/bin/env node
+/* eslint-disable node/shebang */
 'use strict';
 
-const argon2 = require('argon2');
 const readline = require('readline');
 const stream = require('stream');
+const { Authenticator } = require('@squeep/authentication-module');
 const DB = require('../src/db');
 const Logger = require('../src/logger');
 const Config = require('../config');
@@ -10,6 +12,7 @@ const config = new Config(process.env.NODE_ENV);
 
 const logger = new Logger(config);
 const db = new DB(logger, config);
+const authenticator = new Authenticator(logger, db, config);
 
 const identifier = process.argv[2];
 
@@ -46,7 +49,7 @@ async function readPassword(prompt) {
 (async () => {
   await db.initialize();
   const password = await readPassword('password: ');
-  const credential = await argon2.hash(password, { type: argon2.argon2id });
+  const credential = await authenticator.authn.argon2.hash(password, { type: authenticator.authn.argon2.argon2id });
   console.log(`\t${identifier}:${credential}`);
   await db.context(async (dbCtx) => {
     const result = await db.authenticationUpsert(dbCtx, identifier, credential);
