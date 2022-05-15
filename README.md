@@ -26,7 +26,7 @@ An IndieAuth profile may be used to view any topics associated with that profile
 
 One way of deploying this server is behind nginx, with the pm2 package to manage the server process, and a local postgres database.  Some details on this are presented here as a rough guide to any parts of this stack which may be unfamiliar.
 
-- Have NodeJS 12-ish available.
+- Have NodeJS 14-ish available.
 - Have PostgreSQL available.
 - Clone the server repository.  
   ```git clone https://git.squeep.com/websub-hub```  
