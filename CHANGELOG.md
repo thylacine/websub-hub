@@ -2,6 +2,14 @@
 
 Releases and notable changes to this project are documented here.
 
+## [v1.3.8] - 2022-05-15
+
+### Fixed
+
+- Badge requests are allowed to be cached.
+- Dependency updates.
+- Minor fixes.
+
 ## [v1.3.7] - 2022-04-08
 
 ### Added
@@ -145,7 +153,8 @@ Releases and notable changes to this project are documented here.
 
 ---
 
-[Unreleased]: https://git.squeep.com/?p=websub-hub;a=commitdiff;h=HEAD;hp=v1.3.7
+[Unreleased]: https://git.squeep.com/?p=websub-hub;a=commitdiff;h=HEAD;hp=v1.3.8
+[v1.3.8]: https://git.squeep.com/?p=websub-hub;a=commitdiff;h=v1.3.8;hp=v1.3.7
 [v1.3.7]: https://git.squeep.com/?p=websub-hub;a=commitdiff;h=v1.3.7;hp=v1.3.6
 [v1.3.6]: https://git.squeep.com/?p=websub-hub;a=commitdiff;h=v1.3.6;hp=v1.3.5
 [v1.3.5]: https://git.squeep.com/?p=websub-hub;a=commitdiff;h=v1.3.5;hp=v1.3.4
