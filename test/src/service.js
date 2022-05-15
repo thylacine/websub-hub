@@ -108,19 +108,33 @@ describe('Service', function () {
   }); // handlerGetHistorySVG
 
   describe('handlerGetAdminOverview', function () {
-    it('covers', async function () {
+    it('covers authenticated', async function () {
+      service.authenticator.sessionRequired.resolves(false);
+      await service.handlerGetAdminOverview(req, res, ctx);
+      assert(service.authenticator.sessionRequired.called);
+      assert(service.manager.getAdminOverview.notCalled);
+    });
+    it('covers unauthenticated', async function () {
+      service.authenticator.sessionRequired.resolves(true);
       await service.handlerGetAdminOverview(req, res, ctx);
       assert(service.authenticator.sessionRequired.called);
       assert(service.manager.getAdminOverview.called);
-    })
+    });
   }); // handlerGetAdminOverview
 
   describe('handlerGetAdminTopicDetails', function () {
-    it('covers', async function () {
+    it('covers unauthenticated', async function () {
+      service.authenticator.sessionRequired.resolves(false);
+      await service.handlerGetAdminTopicDetails(req, res, ctx);
+      assert(service.authenticator.sessionRequired.called);
+      assert(service.manager.getTopicDetails.notCalled);
+    });
+    it('covers authenticated', async function () {
+      service.authenticator.sessionRequired.resolves(true);
       await service.handlerGetAdminTopicDetails(req, res, ctx);
       assert(service.authenticator.sessionRequired.called);
       assert(service.manager.getTopicDetails.called);
-    })
+    });
   }); // handlerGetAdminTopicDetails
 
   describe('handlerPostAdminProcess', function () {
