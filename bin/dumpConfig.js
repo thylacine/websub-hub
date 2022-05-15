@@ -1,3 +1,6 @@
+#!/usr/bin/env node
+/* eslint-disable node/shebang */
+
 'use strict';
 
 const Config = require('../config');

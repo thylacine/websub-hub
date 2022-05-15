@@ -12,7 +12,7 @@ stubLogger['_reset'] = () => {
   sinon.spy(stubLogger, 'debug');
   sinon.spy(stubLogger, 'error');
   sinon.spy(stubLogger, 'info');
-},
+};
 
 
 module.exports = stubLogger;

@@ -171,9 +171,9 @@ class Service extends Dingus {
 
     this.setResponseType(this.responseTypes, req, res, ctx);
 
-    await this.authenticator.sessionRequired(req, res, ctx, this.loginPath);
-
-    await this.manager.getAdminOverview(res, ctx);
+    if (await this.authenticator.sessionRequired(req, res, ctx, this.loginPath)) {
+      await this.manager.getAdminOverview(res, ctx);
+    }
   }
 
 
@@ -190,9 +190,9 @@ class Service extends Dingus {
 
     this.setResponseType(this.responseTypes, req, res, ctx);
 
-    await this.authenticator.sessionRequired(req, res, ctx, this.loginPath);
-
-    await this.manager.getTopicDetails(res, ctx);
+    if (await this.authenticator.sessionRequired(req, res, ctx, this.loginPath)) {
+      await this.manager.getTopicDetails(res, ctx);
+    }
   }
 
 
