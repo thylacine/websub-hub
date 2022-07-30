@@ -550,8 +550,9 @@ class Database {
    * Get topic data, without content.
    * @param {*} dbCtx 
    * @param {String} topicUrl
+   * @param {Boolean} applyDefaults
    */
-  async topicGetByUrl(dbCtx, topicUrl) {
+  async topicGetByUrl(dbCtx, topicUrl, applyDefaults = true) {
     this._notImplemented('topicGetByUrl', arguments);
   }
 

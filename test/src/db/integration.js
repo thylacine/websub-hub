@@ -153,12 +153,15 @@ describe('Database Integration', function () {
           const data = {
             topicId,
             leaseSecondsMin: 60,
-          }
+          };
           await db.context(async(dbCtx) => {
-            let topic = await db.topicGetByUrl(dbCtx, testData.topicSet.url);
+            const expected = await db.topicGetByUrl(dbCtx, testData.topicSet.url, true);
+            expected.leaseSecondsMin = data.leaseSecondsMin;
+            let topic = await db.topicGetByUrl(dbCtx, testData.topicSet.url, false);
             await db.topicUpdate(dbCtx, { ...topic, ...data });
             topic = await db.topicGetByUrl(dbCtx, testData.topicSet.url);
             assert.strictEqual(Number(topic.leaseSecondsMin), data.leaseSecondsMin);
+            assert.deepEqual(topic, expected);
           });
         });
         step('gets topic by id', async function () {

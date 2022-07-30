@@ -759,7 +759,7 @@ class DatabaseSQLite extends Database {
   }
 
 
-  topicGetByUrl(dbCtx, topicUrl) {
+  topicGetByUrl(dbCtx, topicUrl, applyDefaults = true) {
     const _scope = _fileScope('topicGetByUrl');
     this.logger.debug(_scope, 'called', { topicUrl });
 
@@ -767,7 +767,10 @@ class DatabaseSQLite extends Database {
     try {
       topic = this.statement.topicGetByUrl.get({ topicUrl });
       DatabaseSQLite._topicDataToNative(topic);
-      return this._topicDefaults(topic);
+      if (applyDefaults) {
+        topic = this._topicDefaults(topic);
+      }
+      return topic;
     } catch (e) {
       this.logger.error(_scope, 'failed', { error: e, topic, topicUrl });
       throw e;
