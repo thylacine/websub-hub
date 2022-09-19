@@ -302,7 +302,7 @@ class DatabaseSQLite extends Database {
         throw new DBErrors.UnexpectedResult('did not upsert authentication');
       }
     } catch (e) {
-      this.logger.error(_scope, 'failed', { error: e, identifier, scrubbedCredential })
+      this.logger.error(_scope, 'failed', { error: e, identifier, scrubbedCredential });
       throw e;
     }
   }
@@ -558,7 +558,7 @@ class DatabaseSQLite extends Database {
       httpRemoteAddr: null,
       httpFrom: null,
       ...data,
-    }
+    };
     this._subscriptionUpsertDataValidate(subscriptionData);
 
     let result;
@@ -827,10 +827,11 @@ class DatabaseSQLite extends Database {
 
   topicPublishHistory(dbCtx, topicId, days) {
     const _scope = _fileScope('topicPublishHistory');
-    this.logger.debug(_scope, 'called', { topicId, days })
+    this.logger.debug(_scope, 'called', { topicId, days });
 
     const events = this.statement.topicPublishHistory.all({ topicId, daysAgo: days });
     const history = Array.from({ length: days }, () => 0);
+    // eslint-disable-next-line security/detect-object-injection
     events.forEach(({ daysAgo, contentUpdates }) => history[daysAgo] = Number(contentUpdates));
 
     return history;

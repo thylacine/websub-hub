@@ -36,6 +36,16 @@ const Enum = common.mergeDeep(DingusEnum, {
     ImageSVG: 'image/svg+xml',
     TextXML: 'text/xml',
   },
+
+  Message : {
+    BeginningOfTime: 'Beginning of Time',
+    EndOfTime: 'End of Time',
+    Never: 'Never',
+    NextPublish: 'Next Publish',
+    NoSuchTopicId: 'no such topic id',
+    Pending: 'Pending',
+    Unknown: 'Unknown',
+  },
 });
 
 module.exports = common.freezeDeep(Enum);

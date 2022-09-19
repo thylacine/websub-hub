@@ -220,8 +220,8 @@ class Communication {
 
     const topic = await this.db.topicGetById(dbCtx, verification.topicId);
     if (!topic) {
-      this.logger.error(_scope, 'no such topic id', { verification, requestId });
-      throw new Errors.InternalInconsistencyError('no such topic id');
+      this.logger.error(_scope, Enum.Message.NoSuchTopicId, { verification, requestId });
+      throw new Errors.InternalInconsistencyError(Enum.Message.NoSuchTopicId);
     }
 
     if (!topic.isActive) {
@@ -438,8 +438,8 @@ class Communication {
 
     const topic = await this.db.topicGetById(dbCtx, topicId);
     if (topic === undefined) {
-      this.logger.error(_scope, 'no such topic id', logInfoData);
-      throw new Errors.InternalInconsistencyError('no such topic id');
+      this.logger.error(_scope, Enum.Message.NoSuchTopicId, logInfoData);
+      throw new Errors.InternalInconsistencyError(Enum.Message.NoSuchTopicId);
     }
 
     // Cull any expired subscriptions

@@ -83,6 +83,10 @@
       "error",
       "single"
     ],
+    "semi": [
+      "error",
+      "always"
+    ],
     "strict": "error",
     "vars-on-top": "error"
   }

@@ -377,7 +377,7 @@ class DatabasePostgres extends Database {
         throw new DBErrors.UnexpectedResult('did not upsert authentication');
       }
     } catch (e) {
-      this.logger.error(_scope, 'failed', { error: e, identifier, scrubbedCredential })
+      this.logger.error(_scope, 'failed', { error: e, identifier, scrubbedCredential });
       throw e;
     }
   }
