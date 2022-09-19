@@ -2,6 +2,13 @@
 
 Releases and notable changes to this project are documented here.
 
+## [v1.3.10] - TBD
+
+### Fixed
+
+- Fixed non-default topic lease durations issues with postgres.
+- Dependency updates.
+
 ## [v1.3.9] - 2022-06-28
 
 ### Fixed

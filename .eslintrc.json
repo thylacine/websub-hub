@@ -7,6 +7,7 @@
   "extends": [
     "eslint:recommended",
     "plugin:node/recommended",
+    "plugin:promise/recommended",
     "plugin:security/recommended",
     "plugin:sonarjs/recommended"
   ],
@@ -15,6 +16,7 @@
   },
   "plugins": [
     "node",
+    "promise",
     "security",
     "sonarjs"
   ],
