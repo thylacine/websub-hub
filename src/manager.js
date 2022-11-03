@@ -579,7 +579,7 @@ class Manager {
    * @param {object} ctx
    */
   async getHistorySVG(res, ctx) {
-    const _scope = _fileScope('getHist');
+    const _scope = _fileScope('getHistorySVG');
     this.logger.debug(_scope, 'called', { ctx });
 
     const days = Math.min(parseInt(ctx.queryParams.days) || this.options.manager.publishHistoryDays, 365);
@@ -658,8 +658,7 @@ class Manager {
     const _scope = _fileScope('getTopicDetails');
     this.logger.debug(_scope, 'called', { ctx });
 
-
-    ctx.publishSpan = 60;
+    ctx.publishSpan = 60; // FIXME: configurable
     const topicId = ctx.params.topicId;
     let publishHistory;
     await this.db.context(async (dbCtx) => {
@@ -668,6 +667,9 @@ class Manager {
       publishHistory = await this.db.topicPublishHistory(dbCtx, topicId, ctx.publishSpan);
     });
     ctx.publishCount = publishHistory.reduce((a, b) => a + b, 0);
+    ctx.subscriptionsDelivered = ctx.subscriptions.filter((subscription) => {
+      return subscription.latestContentDelivered >= ctx.topic.contentUpdated;
+    }).length;
     this.logger.debug(_scope, 'got topic details', { topic: ctx.topic, subscriptions: ctx.subscriptions, updates: ctx.publishCount });
 
     // Profile users can only see related topics.
