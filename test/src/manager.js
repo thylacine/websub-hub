@@ -207,7 +207,7 @@ describe('Manager', function () {
       manager.db.topicGetById.resolves({
         id: '56c557ce-e667-11eb-bd80-0025905f714a',
         created: new Date(),
-        url: 'https://example.com/',
+        url: 'https://example.com/topic',
         leaseSecondsPreferred: 123,
         leaseSecondsMin: 12,
         leaseSecondsMax: 123456789,
@@ -254,7 +254,7 @@ describe('Manager', function () {
     });
     it('covers matching profile', async function () {
       ctx.session = {
-        authenticatedProfile: 'https://example.com/profile',
+        authenticatedProfile: 'https://example.com/',
       };
       await manager.getTopicDetails(res, ctx);
       assert(ctx.topic);
@@ -366,6 +366,34 @@ describe('Manager', function () {
       assert(res.end.called);
     });
   }); // postRoot
+
+  describe('_profileControlsTopic', function () {
+    let profileUrlObj, topicUrlObj;
+    it('allows exact match', function () {
+      profileUrlObj = new URL('https://profile.example.com/');
+      topicUrlObj = new URL('https://profile.example.com/');
+      const result = Manager._profileControlsTopic(profileUrlObj, topicUrlObj);
+      assert.strictEqual(result, true);
+    });
+    it('allows descendent-path match', function () {
+      profileUrlObj = new URL('https://profile.example.com/');
+      topicUrlObj = new URL('https://profile.example.com/feed/atom');
+      const result = Manager._profileControlsTopic(profileUrlObj, topicUrlObj);
+      assert.strictEqual(result, true);
+    });
+    it('disallows non-descendent-path', function () {
+      profileUrlObj = new URL('https://profile.example.com/itsame');
+      topicUrlObj = new URL('https://profile.example.com/');
+      const result = Manager._profileControlsTopic(profileUrlObj, topicUrlObj);
+      assert.strictEqual(result, false);
+    });
+    it('disallows non-matched host', function () {
+      profileUrlObj = new URL('https://profile.example.com/itsame');
+      topicUrlObj = new URL('https://elsewhere.example.com/itsame/feed');
+      const result = Manager._profileControlsTopic(profileUrlObj, topicUrlObj);
+      assert.strictEqual(result, false);
+    });
+  }); // _profileControlsTopic
 
   describe('_getRootData', function () {
     it('extracts expected values', function () {

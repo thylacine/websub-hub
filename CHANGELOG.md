@@ -6,6 +6,7 @@ Releases and notable changes to this project are documented here.
 
 ### Fixed
 
+- Path prefix is now considered when determining whether an IndieAuth profile user can view a topic.
 - Fixed non-default topic lease durations issues with postgres.
 - Dependency updates.
 
