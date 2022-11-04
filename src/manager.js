@@ -579,7 +579,7 @@ class Manager {
    * @param {object} ctx
    */
   async getHistorySVG(res, ctx) {
-    const _scope = _fileScope('getHist');
+    const _scope = _fileScope('getHistorySVG');
     this.logger.debug(_scope, 'called', { ctx });
 
     const days = Math.min(parseInt(ctx.queryParams.days) || this.options.manager.publishHistoryDays, 365);
@@ -606,6 +606,21 @@ class Manager {
     this.logger.info(_scope, 'finished', { ctx });
   }
 
+
+  /**
+   * Determine if a profile url matches enough of a topic url to describe control over it.
+   * Topic must match hostname and start with the profile's path.
+   * @param {URL} profileUrlObj
+   * @param {URL} topicUrlObj
+   * @returns {Boolean}
+   */
+  static _profileControlsTopic(profileUrlObj, topicUrlObj) {
+    const hostnameMatches = profileUrlObj.hostname === topicUrlObj.hostname;
+    const pathIsPrefix = topicUrlObj.pathname.startsWith(profileUrlObj.pathname);
+    return hostnameMatches && pathIsPrefix;
+  }
+
+
   /**
    * GET request for authorized /admin information.
    * @param {http.ServerResponse} res
@@ -625,7 +640,7 @@ class Manager {
       const profileUrlObj = new URL(ctx.session.authenticatedProfile);
       ctx.topics = ctx.topics.filter((topic) => {
         const topicUrlObj = new URL(topic.url);
-        return (topicUrlObj.hostname === profileUrlObj.hostname);
+        return Manager._profileControlsTopic(profileUrlObj, topicUrlObj);
       });
     }
 
@@ -643,8 +658,7 @@ class Manager {
     const _scope = _fileScope('getTopicDetails');
     this.logger.debug(_scope, 'called', { ctx });
 
-
-    ctx.publishSpan = 60;
+    ctx.publishSpan = 60; // FIXME: configurable
     const topicId = ctx.params.topicId;
     let publishHistory;
     await this.db.context(async (dbCtx) => {
@@ -653,13 +667,16 @@ class Manager {
       publishHistory = await this.db.topicPublishHistory(dbCtx, topicId, ctx.publishSpan);
     });
     ctx.publishCount = publishHistory.reduce((a, b) => a + b, 0);
+    ctx.subscriptionsDelivered = ctx.subscriptions.filter((subscription) => {
+      return subscription.latestContentDelivered >= ctx.topic.contentUpdated;
+    }).length;
     this.logger.debug(_scope, 'got topic details', { topic: ctx.topic, subscriptions: ctx.subscriptions, updates: ctx.publishCount });
 
     // Profile users can only see related topics.
     if (ctx.session && ctx.session.authenticatedProfile) {
       const profileUrlObj = new URL(ctx.session.authenticatedProfile);
       const topicUrlObj = new URL(ctx.topic.url);
-      if (topicUrlObj.hostname !== profileUrlObj.hostname) {
+      if (!Manager._profileControlsTopic(profileUrlObj, topicUrlObj)) {
         ctx.topic = null;
         ctx.subscriptions = [];
       }

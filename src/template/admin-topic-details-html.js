@@ -49,8 +49,15 @@ module.exports = (ctx, options) => {
         <img title="Topic Publish History" src="${ctx.params.topicId}/history.svg">
       </section>`,
     `      <section class="subscriptions">
-        <p>${ctx.subscriptions.length ? ctx.subscriptions.length : 'no'} subscription${(ctx.subscriptions.length === 1) ? '' : 's'}</p>
-        <table>
+        <p>${ctx.subscriptions.length ? ctx.subscriptions.length : 'no'} subscription${(ctx.subscriptions.length === 1) ? '' : 's'}</p>`,
+    ...(ctx.subscriptions.length && [`
+        <label for="subscriptions-delivered">
+          Successful Deliveries of Latest Content
+        </label>
+        <progress id="subscriptions-delivered" max="${ctx.subscriptions.length}" value="${ctx.subscriptionsDelivered}">
+          ${ctx.subscriptionsDelivered} of ${ctx.subscriptions.length} (${Math.ceil(100 * ctx.subscriptions.length / ctx.subscriptionsDelivered)}%)
+        </progress>`] || []),
+    `        <table>
           <thead>`,
     th.renderSubscriptionRowHeader(),
     `          </thead>

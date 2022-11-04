@@ -1,6 +1,7 @@
 'use strict';
 
 const { TemplateHelper } = require('@squeep/html-template-helper');
+const { Message } = require('../enum');
 
 /**
  * Render a topic as a row of details.
@@ -18,17 +19,17 @@ function renderTopicRow(topic, subscribers, detailsLink = true) {
   return `<tr>
   <th scope="row">${detailsLink ? '<a href="topic/' + topic.id + '">' : ''}${topic.url}${detailsLink ? '</a>' : ''}</th>
   <td>${subscribers.length}</td>
-  <td>${TemplateHelper.dateFormat(topic.created, 'End of Time', 'Beginning of Time', 'Unknown')}</td>
+  <td>${TemplateHelper.dateFormat(topic.created, Message.EndOfTime, Message.BeginningOfTime, Message.Unknown)}</td>
   <td>${TemplateHelper.secondsToPeriod(topic.leaseSecondsPreferred)}</td>
   <td>${TemplateHelper.secondsToPeriod(topic.leaseSecondsMin)}</td>
   <td>${TemplateHelper.secondsToPeriod(topic.leaseSecondsMax)}</td>
   <td>${topic.publisherValidationUrl ? topic.publisherValidationUrl : 'None'}</td>
   <td>${topic.isActive}</td>
   <td>${topic.isDeleted}</td>
-  <td>${TemplateHelper.dateFormat(topic.lastPublish, 'End of Time', 'Never', 'Never')}</td>
-  <td>${TemplateHelper.dateFormat(topic.contentFetchNextAttempt, 'Next Publish', 'Pending', 'Next Publish')}</td>
+  <td>${TemplateHelper.dateFormat(topic.lastPublish, Message.EndOfTime, Message.Never, Message.Never)}</td>
+  <td>${TemplateHelper.dateFormat(topic.contentFetchNextAttempt, Message.NextPublish, Message.Pending, Message.NextPublish)}</td>
   <td>${topic.contentFetchAttemptsSinceSuccess}</td>
-  <td>${TemplateHelper.dateFormat(topic.contentUpdated, 'End of Time', 'Never', 'Never')}</td>
+  <td>${TemplateHelper.dateFormat(topic.contentUpdated, Message.EndOfTime, Message.Never, Message.Never)}</td>
   <td>${topic.contentType}</td>
   <td>${topic.id}</td>
 </tr>`;
@@ -73,16 +74,16 @@ function renderSubscriptionRow(subscription) {
   }
   return `<tr>
   <td scope="row">${subscription.callback}</td>
-  <td>${TemplateHelper.dateFormat(subscription.created, 'End of Time', 'Beginning of Time', 'Unknown')}</td>
-  <td>${TemplateHelper.dateFormat(subscription.verified, 'End of Time', 'Never', 'Never')}</td>
-  <td>${TemplateHelper.dateFormat(subscription.expires, 'Never', 'Beginning of Time', 'Never')}</td>
+  <td>${TemplateHelper.dateFormat(subscription.created, Message.EndOfTime, Message.BeginningOfTime, Message.Unknown)}</td>
+  <td>${TemplateHelper.dateFormat(subscription.verified, Message.EndOfTime, Message.Never, Message.Never)}</td>
+  <td>${TemplateHelper.dateFormat(subscription.expires, Message.Never, Message.BeginningOfTime, Message.Never)}</td>
   <td>${!!subscription.secret}</td>
   <td>${subscription.signatureAlgorithm}</td>
   <td>${subscription.httpRemoteAddr}</td>
   <td>${subscription.httpFrom}</td>
-  <td>${TemplateHelper.dateFormat(subscription.contentDelivered, 'End of Time', 'Never', 'Never')}</td>
+  <td>${TemplateHelper.dateFormat(subscription.contentDelivered, Message.EndOfTime, Message.Never, Message.Never)}</td>
   <td>${subscription.deliveryAttemptsSinceSuccess}</td>
-  <td>${TemplateHelper.dateFormat(subscription.deliveryNextAttempt, 'End of Time', 'Next Publish', 'Next Publish')}</td>
+  <td>${TemplateHelper.dateFormat(subscription.deliveryNextAttempt, Message.EndOfTime, Message.NextPublish, Message.NextPublish)}</td>
   <td>${subscription.id}</td>
 </tr>`;
 }

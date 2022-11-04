@@ -2,6 +2,14 @@
 
 Releases and notable changes to this project are documented here.
 
+## [v1.3.10] - 2022-11-04
+
+### Fixed
+
+- Path prefix is now considered when determining whether an IndieAuth profile user can view a topic.
+- Fixed non-default topic lease durations issues with postgres.
+- Dependency updates.
+
 ## [v1.3.9] - 2022-06-28
 
 ### Fixed

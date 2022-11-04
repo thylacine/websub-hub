@@ -57,7 +57,7 @@ const freezeDeep = (o) => {
     }
   });
   return o;
-}
+};
 
 
 /**
@@ -111,7 +111,7 @@ const attemptRetrySeconds = (attempt, retryBackoffSeconds = [60, 120, 360, 1440,
   let seconds = retryBackoffSeconds[attempt];
   seconds += Math.floor(Math.random() * seconds * jitter);
   return seconds;
-}
+};
 
 
 /**
@@ -122,7 +122,7 @@ const attemptRetrySeconds = (attempt, retryBackoffSeconds = [60, 120, 360, 1440,
 const arrayChunk = (array, per = 1) => {
   const nChunks = Math.ceil(array.length / per);
   return Array.from(Array(nChunks), (_, i) => array.slice(i * per, (i + 1) * per));
-}
+};
 
 
 /**
@@ -135,7 +135,7 @@ const stackSafePush = (dst, src) => {
   arrayChunk(src, jsEngineMaxArguments).forEach((items) => {
     Array.prototype.push.apply(dst, items);
   });
-}
+};
 
 
 /**

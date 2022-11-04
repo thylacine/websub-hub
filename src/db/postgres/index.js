@@ -377,7 +377,7 @@ class DatabasePostgres extends Database {
         throw new DBErrors.UnexpectedResult('did not upsert authentication');
       }
     } catch (e) {
-      this.logger.error(_scope, 'failed', { error: e, identifier, scrubbedCredential })
+      this.logger.error(_scope, 'failed', { error: e, identifier, scrubbedCredential });
       throw e;
     }
   }
@@ -789,14 +789,17 @@ class DatabasePostgres extends Database {
   }
 
 
-  async topicGetByUrl(dbCtx, topicUrl) {
+  async topicGetByUrl(dbCtx, topicUrl, applyDefaults = true) {
     const _scope = _fileScope('topicGetByUrl');
     this.logger.debug(_scope, 'called', { topicUrl });
 
     let topic;
     try {
       topic = await dbCtx.oneOrNone(this.statement.topicGetByUrl, { topicUrl });
-      return this._topicDefaults(topic);
+      if (applyDefaults) {
+        topic = this._topicDefaults(topic);
+      }
+      return topic;
     } catch (e) {
       this.logger.error(_scope, 'failed', { error: e, topic, topicUrl });
       throw e;

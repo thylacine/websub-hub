@@ -137,7 +137,7 @@ class Database {
    * @param {Object} data
    */
   _leaseDurationsValidate(data) {
-    const leaseProperties = Object.keys(this.topicLeaseDefaults)
+    const leaseProperties = Object.keys(this.topicLeaseDefaults);
     this._ensureTypes(data, leaseProperties, ['number', 'undefined', 'null']);
 
     // Populate defaults on a copy of values so we can check proper numerical ordering
@@ -550,8 +550,9 @@ class Database {
    * Get topic data, without content.
    * @param {*} dbCtx 
    * @param {String} topicUrl
+   * @param {Boolean} applyDefaults
    */
-  async topicGetByUrl(dbCtx, topicUrl) {
+  async topicGetByUrl(dbCtx, topicUrl, applyDefaults = true) {
     this._notImplemented('topicGetByUrl', arguments);
   }
 
