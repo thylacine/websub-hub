@@ -2,7 +2,7 @@
 
 Releases and notable changes to this project are documented here.
 
-## [v1.3.10] - TBD
+## [v1.3.10] - 2022-11-04
 
 ### Fixed
 
