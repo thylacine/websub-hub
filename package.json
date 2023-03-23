@@ -39,7 +39,7 @@
     "@squeep/web-linking": "^1.0.7",
     "axios": "^1.3.4",
     "feedparser": "^2.2.10",
-    "htmlparser2": "^8.0.1",
+    "htmlparser2": "^8.0.2",
     "iconv": "^3.0.1"
   },
   "optionalDependencies": {
@@ -51,7 +51,7 @@
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^6.1.1",
     "eslint-plugin-security": "^1.7.1",
-    "eslint-plugin-sonarjs": "^0.18.0",
+    "eslint-plugin-sonarjs": "^0.19.0",
     "html-minifier-lint": "^2.0.0",
     "mocha": "^10.2.0",
     "mocha-steps": "^1.3.0",
