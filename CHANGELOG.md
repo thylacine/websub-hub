@@ -2,6 +2,12 @@
 
 Releases and notable changes to this project are documented here.
 
+## [v1.3.11] - 2023-03-22
+
+### Fixed
+
+- Dependency updates.
+
 ## [v1.3.10] - 2022-11-04
 
 ### Fixed
@@ -167,7 +173,10 @@ Releases and notable changes to this project are documented here.
 
 ---
 
-[Unreleased]: https://git.squeep.com/?p=websub-hub;a=commitdiff;h=HEAD;hp=v1.3.8
+[Unreleased]: https://git.squeep.com/?p=websub-hub;a=commitdiff;h=HEAD;hp=v1.3.11
+[v1.3.11]: https://git.squeep.com/?p=websub-hub;a=commitdiff;h=v1.3.11;hp=v1.3.10
+[v1.3.10]: https://git.squeep.com/?p=websub-hub;a=commitdiff;h=v1.3.10;hp=v1.3.9
+[v1.3.9]: https://git.squeep.com/?p=websub-hub;a=commitdiff;h=v1.3.9;hp=v1.3.8
 [v1.3.8]: https://git.squeep.com/?p=websub-hub;a=commitdiff;h=v1.3.8;hp=v1.3.7
 [v1.3.7]: https://git.squeep.com/?p=websub-hub;a=commitdiff;h=v1.3.7;hp=v1.3.6
 [v1.3.6]: https://git.squeep.com/?p=websub-hub;a=commitdiff;h=v1.3.6;hp=v1.3.5

@@ -50,7 +50,7 @@ One way of deploying this server is behind nginx, with the pm2 package to manage
 - Prepare PostgreSQL with a user and database, using e.g. ```psql```.  
   > <pre>
   > CREATE ROLE websubhub WITH CREATEDB LOGIN PASSWORD 'mypassword';
-  > GRANT websubhub TO postgres
+  > GRANT websubhub TO postgres;
   > CREATE DATABASE websubhub OWNER=websubhub;
   > GRANT ALL PRIVILEGES ON DATABASE websubhub TO websubhub;
   > \c websubhub
