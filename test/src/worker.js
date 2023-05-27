@@ -131,6 +131,12 @@ describe('Worker', function () {
       stubCtx = {};
     });
     it('gets tasks', async function () {
+      /**
+       * In older versions, could just deepStrictEqual un-awaited promises for equality,
+       * but post 14 or so, async_id symbol properties are included in comparison, and
+       * in some executions of test suites these are somehow different in value so the test
+       * was failing.  So now we settle everything prior to comparison.
+       */
       const expected = [
         Promise.resolve('first'),
         Promise.reject('bad'),
@@ -138,7 +144,11 @@ describe('Worker', function () {
       ];
       worker.promiseGiver.resolves(expected);
       const result = await worker._getWork(stubCtx);
-      assert.deepStrictEqual(result, expected);
+
+      const expectedResolved = await Promise.allSettled(expected);
+      const resultResolved = await Promise.allSettled(result);
+      assert.deepStrictEqual(resultResolved, expectedResolved);
+
       assert.strictEqual(worker.inFlight.length, expected.length);
     });
     it('covers none wanted', async function () {

@@ -10,15 +10,17 @@ const stubDb = require('../stub-db');
 const stubLogger = require('../stub-logger');
 const Service = require('../../src/service');
 const Config = require('../../config');
+const { AsyncLocalStorage } = require('node:async_hooks');
 
 
 describe('Service', function () {
-  let service, options;
+  let service, options, asyncLocalStorage;
   let req, res, ctx;
 
   beforeEach(function () {
+    asyncLocalStorage = new AsyncLocalStorage();
     options = new Config('test');
-    service = new Service(stubLogger, stubDb, options);
+    service = new Service(stubLogger, stubDb, options, asyncLocalStorage);
     sinon.stub(service.manager);
     sinon.stub(service.sessionManager);
     sinon.stub(service.authenticator);
@@ -45,6 +47,17 @@ describe('Service', function () {
   it('instantiates', function () {
     assert(service);
   });
+
+  describe('preHandler', function () {
+    it('logs requestId', async () => {
+      sinon.stub(service.__proto__.__proto__, 'preHandler').resolves();
+      await service.asyncLocalStorage.run({}, async () => {
+        await service.preHandler(req, res, ctx);
+        const logObject = service.asyncLocalStorage.getStore();
+        assert('requestId' in logObject);
+      });
+    });
+  }); // preHandler
 
   describe('maybeIngestBody', function () {
     beforeEach(function () {

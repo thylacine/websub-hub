@@ -15,12 +15,12 @@ const path = require('path');
 const _fileScope = common.fileScope(__filename);
 
 class Service extends Dingus {
-  constructor(logger, db, options) {
+  constructor(logger, db, options, asyncLocalStorage) {
     super(logger, {
       ...options.dingus,
       ignoreTrailingSlash: false,
     });
-
+    this.asyncLocalStorage = asyncLocalStorage;
     this.manager = new Manager(logger, db, options);
     this.authenticator = new Authenticator(logger, db, options);
     this.sessionManager = new SessionManager(logger, this.authenticator, options);
@@ -67,6 +67,17 @@ class Service extends Dingus {
     this.on(['GET'], '/admin/logout', this.handlerGetAdminLogout.bind(this));
     this.on(['GET'], '/admin/_ia', this.handlerGetAdminIA.bind(this));
 
+  }
+
+
+  /**
+   * Rearrange logging data.
+   */
+  async preHandler(req, res, ctx) {
+    await super.preHandler(req, res, ctx);
+    const logObject = this.asyncLocalStorage.getStore();
+    logObject.requestId = ctx.requestId;
+    delete ctx.requestId;
   }
 
 
