@@ -33,10 +33,10 @@
   ],
   "dependencies": {
     "@squeep/api-dingus": "git+https://git.squeep.com/squeep-api-dingus/#v1.2.9",
-    "@squeep/authentication-module": "git+https://git.squeep.com/squeep-authentication-module/#v1.3.0",
+    "@squeep/authentication-module": "git+https://git.squeep.com/squeep-authentication-module/#v1.3.1",
     "@squeep/html-template-helper": "git+https://git.squeep.com/squeep-html-template-helper#v1.4.0",
     "@squeep/logger-json-console": "^2.0.1",
-    "@squeep/web-linking": "^1.0.7",
+    "@squeep/web-linking": "^1.0.8",
     "axios": "^1.4.0",
     "feedparser": "^2.2.10",
     "htmlparser2": "^9.0.0",
@@ -47,7 +47,7 @@
     "pg-promise": "^11.5.0"
   },
   "devDependencies": {
-    "eslint": "^8.41.0",
+    "eslint": "^8.42.0",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^6.1.1",
     "eslint-plugin-security": "^1.7.1",
