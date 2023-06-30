@@ -61,20 +61,31 @@ const freezeDeep = (o) => {
 
 
 /**
- * Pick out useful axios response fields.
+ * Pick out useful got response fields.
  * @param {*} res 
  * @returns 
  */
-const axiosResponseLogData = (res) => {
+const gotResponseLogData = (res) => {
   const data = common.pick(res, [
-    'status',
-    'statusText',
+    'statusCode',
+    'statusMessage',
     'headers',
-    'elapsedTimeMs',
-    'data',
+    'body',
+    'error',
   ]);
-  if (data.data) {
-    data.data = logTruncate(data.data, 100);
+  if (typeof res.body === 'string') {
+    data.body = logTruncate(data.body, 100);
+  } else if (res.body instanceof Buffer) {
+    data.body = `<Buffer ${res.body.byteLength} bytes>`;
+  }
+  if (res?.timings?.phases?.total) {
+    data.elapsedTimeMs = res.timings.phases.total;
+  }
+  if (res?.redirectUrls?.length) {
+    data.redirectUrls = res.redirectUrls;
+  }
+  if (res?.retryCount) {
+    data.retryCount = res.retryCount;
   }
   return data;
 };
@@ -155,7 +166,7 @@ module.exports = {
   ...common,
   arrayChunk,
   attemptRetrySeconds,
-  axiosResponseLogData,
+  gotResponseLogData,
   ensureArray,
   freezeDeep,
   logTruncate,

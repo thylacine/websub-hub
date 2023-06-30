@@ -354,7 +354,7 @@ class Manager {
 
     // Parse and validate all the topics in the request.
     data.publishTopics = await this._publishTopics(dbCtx, data, requestId);
-    if (!data.publishTopics || !data.publishTopics.length) {
+    if (!data?.publishTopics?.length) {
       const details = Manager._prettyDetails(['no valid topic urls to publish'], []);
       throw new ResponseError(Enum.ErrorResponse.BadRequest, details);
     }
@@ -636,7 +636,7 @@ class Manager {
     this.logger.debug(_scope, 'got topics', { topics: ctx.topics });
 
     // Profile users can only see related topics.
-    if (ctx.session && ctx.session.authenticatedProfile) {
+    if (ctx?.session?.authenticatedProfile) {
       const profileUrlObj = new URL(ctx.session.authenticatedProfile);
       ctx.topics = ctx.topics.filter((topic) => {
         const topicUrlObj = new URL(topic.url);
@@ -673,7 +673,7 @@ class Manager {
     this.logger.debug(_scope, 'got topic details', { topic: ctx.topic, subscriptions: ctx.subscriptions, updates: ctx.publishCount });
 
     // Profile users can only see related topics.
-    if (ctx.session && ctx.session.authenticatedProfile) {
+    if (ctx?.session?.authenticatedProfile) {
       const profileUrlObj = new URL(ctx.session.authenticatedProfile);
       const topicUrlObj = new URL(ctx.topic.url);
       if (!Manager._profileControlsTopic(profileUrlObj, topicUrlObj)) {
@@ -683,7 +683,7 @@ class Manager {
     }
 
     res.end(Template.adminTopicDetailsHTML(ctx, this.options));
-    this.logger.info(_scope, 'finished', { ctx, subscriptions: ctx.subscriptions.length, topic: ctx.topic && ctx.topic.id || ctx.topic });
+    this.logger.info(_scope, 'finished', { ctx, subscriptions: ctx.subscriptions.length, topic: ctx?.topic?.id || ctx.topic });
   }
 
 

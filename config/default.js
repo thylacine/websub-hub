@@ -60,6 +60,7 @@ const defaultOptions = {
   },
 
   communication: {
+    requestTimeoutMs: 120000,
     strictTopicHubLink: true, // If true, deletes topics which do not list us (dingus.selfBaseUrl) as a hub relation.
     retryBackoffSeconds: [60, 120, 360, 1440, 7200, 43200, 86400], // failed requests retry according to number of attempts
     claimTimeoutSeconds: 600, // how long until an in-progress task is deemed abandoned

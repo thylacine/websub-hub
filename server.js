@@ -17,7 +17,9 @@ const ADDR = process.env.LISTEN_ADDR || '127.0.0.1';
 (async function main () {
   let config, logger, db, service;
   try {
+    // This provides an async context store for persisting unique log data per request, id est a requestId.
     const asyncLocalStorage = new AsyncLocalStorage();
+
     config = new Config(process.env.NODE_ENV);
     logger = new Logger(config.logger, { nodeId: config.nodeId }, asyncLocalStorage);
     db = new DB(logger, config);
@@ -26,7 +28,7 @@ const ADDR = process.env.LISTEN_ADDR || '127.0.0.1';
 
     http.createServer(async (req, res) => {
       await asyncLocalStorage.run({}, async () => {
-        await service.dispatch(req, res);
+        return service.dispatch(req, res);
       });
     }).listen(PORT, ADDR, (err) => {
       if (err) {

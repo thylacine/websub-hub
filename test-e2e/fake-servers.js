@@ -46,7 +46,7 @@ class TopicFake extends Dingus {
     res.setHeader('Link', behavior.selfLink + (behavior.hubLink ? `, ${behavior.hubLink}` : ''));
     res.statusCode = behavior.statusCode;
     res.end(behavior.content);
-    this.logger.info({ method: req.method, statusCode: res.statusCode, url: req.url });
+    this.logger.info('TopicFake:getId', { method: req.method, statusCode: res.statusCode, url: req.url });
   }
 
   async putId(req, res, ctx) {
@@ -61,6 +61,7 @@ class TopicFake extends Dingus {
     };
     this.topicBehaviors.set(id, behavior);
     res.statusCode = 200;
+    this.logger.info('TopicFake:putId', { method: req.method, statusCode: res.statusCode, url: req.url });
     res.end();
   }
 
@@ -68,6 +69,7 @@ class TopicFake extends Dingus {
     this.setResponseType(this.responseTypes, req, res, ctx);
     this.topicBehaviors.delete(ctx.params.id);
     res.statusCode = 200;
+    this.logger.info('TopicFake:deleteId', { method: req.method, statusCode: res.statusCode, url: req.url });
     res.end();
   }
 
@@ -97,9 +99,9 @@ class SubscriberFake extends Dingus {
     this.setResponseType(this.responseTypes, req, res, ctx);
     const behavior = this.verifyBehaviors.get(ctx.params.id);
     res.statusCode = behavior ? behavior.statusCode : 404;
-    const response = (behavior && behavior.matchChallenge) ? ctx.queryParams['hub.challenge'] : (behavior && behavior.response);
+    const response = (behavior?.matchChallenge) ? ctx.queryParams['hub.challenge'] : (behavior?.response);
     res.end(response);
-    this.logger.info({ method: req.method, statusCode: res.statusCode, matchChallenge: !!(behavior && behavior.matchChallenge), url: req.url });
+    this.logger.info('SubscriberFake:getId', { method: req.method, statusCode: res.statusCode, matchChallenge: !!(behavior?.matchChallenge), url: req.url });
   }
 
   async postId(req, res, ctx) {
@@ -112,7 +114,7 @@ class SubscriberFake extends Dingus {
       behavior.content = ctx.rawBody;
     }
     res.end();
-    this.logger.info({ content: behavior && behavior.content, method: req.method, statusCode: res.statusCode, matchChallenge: !!(behavior && behavior.matchChallenge), url: req.url });
+    this.logger.info('SubscriberFake:postId', { content: behavior?.content, method: req.method, statusCode: res.statusCode, matchChallenge: !!(behavior?.matchChallenge), url: req.url });
   }
 
   async putVerify(req, res, ctx) {
@@ -129,6 +131,7 @@ class SubscriberFake extends Dingus {
     }
     res.statusCode = 200;
     res.end();
+    this.logger.info('SubscriberFake:putVerify', { method: req.method, statusCode: res.statusCode, url: req.url });
   }
 
   async putContent(req, res, ctx) {
@@ -139,6 +142,7 @@ class SubscriberFake extends Dingus {
     this.contentBehaviors.set(ctx.params.id, behavior);
     res.statusCode = 200;
     res.end();
+    this.logger.info('SubscriberFake:putContent', { method: req.method, statusCode: res.statusCode, url: req.url });
   }
 
   async deleteId(req, res, ctx) {
@@ -147,6 +151,7 @@ class SubscriberFake extends Dingus {
     this.verifyBehaviors.delete(ctx.params.id);
     res.statusCode = 200;
     res.end();
+    this.logger.info('SubscriberFake:deleteId', { method: req.method, statusCode: res.statusCode, url: req.url });
   }
 
 } // SubscriberFake

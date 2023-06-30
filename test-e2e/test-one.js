@@ -1,7 +1,6 @@
 'use strict';
 
-const assert = require('assert');
-const uuid = require('uuid');
+const crypto = require('crypto');
 const FakeServersClient = require('./fake-servers-client');
 
 const subscriberPort = process.env.FAKE_SUBSCRIBER_PORT || 9876;
@@ -14,14 +13,14 @@ const hubUrl = `http://${hubAddress}:${hubPort}/`;
 const client = new FakeServersClient(listenAddress, subscriberPort, topicPort);
 
 async function newTopic() {
-  const id = uuid.v4();
+  const id = crypto.randomUUID();
   await client.topicSet(id, { hubUrl });
   console.log('created fake topic', id);
   return id;
 }
 
 async function newSubscriber() {
-  const id = uuid.v4();
+  const id = crypto.randomUUID();
   await client.subscriberSetVerify(id);
   console.log('created fake subscriber', id);
   return id;
@@ -32,7 +31,7 @@ async function newSubscriber() {
   const subscriberId = await newSubscriber();
 
   const result = await client.subscribe(hubUrl, subscriberId, topicId);
-  console.log('subscribed', { status: result.status, headers: result.headers, data: result.data });
+  console.log('subscribed', { status: result.statusCode, headers: result.headers, body: result.body });
   
   console.log('done');
 })().catch((e) => {

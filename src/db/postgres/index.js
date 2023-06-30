@@ -68,6 +68,8 @@ class DatabasePostgres extends Database {
     // Log errors
     pgpInitOptions.error = (err, event) => {
       this.logger.error(_fileScope('pgp:error'), '', { err, event });
+
+      // TODO: close connection on err.code === '57P03' database shutting down
     };
 
     // Deophidiate column names in-place, log results

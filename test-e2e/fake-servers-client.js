@@ -4,20 +4,30 @@
  * Wrapper interface for controlling fake-servers.
  */
 
-const axios = require('axios');
-
 class FakeClient {
   constructor(host, subscriberPort, topicPort) {
     this.logger = console;
     this.host = host;
     this.subscriberPort = subscriberPort;
     this.topicPort = topicPort;
-    this.axios = axios.create({
-      validateStatus: (statusCode) => (Math.floor(statusCode / 100)) === 2,
-      headers: {
-        'User-Agent': 'FakeClient',
-      },
-    });
+    this.Got = undefined;
+    this.got = this._init.bind(this);
+  }
+
+  async _init(...args) {
+    if (!this.Got) {
+      // eslint-disable-next-line
+      this.Got = await import('got');
+      this.got = this.Got.got.extend({
+        headers: {
+          'User-Agent': 'FakeClient',
+        },
+        responseType: 'text',
+      });
+    }
+    if (args.length) {
+      return this.got(...args);
+    }
   }
 
   topicUrl(id) {
@@ -28,42 +38,43 @@ class FakeClient {
     return `http://${this.host}:${this.subscriberPort}/subscriber/${id}${extra}`;
   }
 
-  static _axiosRequestConfig(method, url, params = {}, headers = {}, data) {
-    const urlObj = new URL(url);
-    const config = {
+  static _requestConfig(method, url, params = {}, headers = {}, body = undefined) {
+    const gotConfig = {
       method,
-      url: `${urlObj.origin}${urlObj.pathname}`,
-      params: urlObj.searchParams,
+      url: new URL(url),
       headers,
-      ...(data && { data }),
-      responseType: 'text',
-      transformResponse: [ (res) => res ],
+      ...(body && { body }),
     };
-    Object.entries(params).map(([k, v]) => config.params.set(k, v));
-    return config;
+    Object.entries(params).forEach(([k, v]) => gotConfig.url.searchParams.set(k, v));
+    return gotConfig;
+  }
+
+  static _formData(obj) {
+    return Object.entries(obj)
+      .map((entry) => entry.map(encodeURIComponent).join('='))
+      .join('&')
+    ;
   }
 
   async subscribe(hubUrl, subscriberId, topicId, postData = {}) {
     const topicUrl = this.topicUrl(topicId);
     const subscriberUrl = this.subscriberUrl(subscriberId);
-    const data = {
+    const data = FakeClient._formData({
       'hub.callback': subscriberUrl,
       'hub.mode': 'subscribe',
       'hub.topic': topicUrl,
       'hub.lease_seconds': 60,
       'hub.secret': 'sharedSecret',
       ...postData,
-    };
-    const formData = new URLSearchParams(data).toString();
-    const headers = {
+    });
+    const config = FakeClient._requestConfig('POST', hubUrl, {}, {
       'Content-Type': 'application/x-www-form-urlencoded',
-    };
-  
+    }, data);
     try {
-      return this.axios(FakeClient._axiosRequestConfig('POST', hubUrl, {}, headers, formData));
-    } catch (e) {
-      this.logger.error('subscribe', e);
-      throw e;
+      return await this.got(config);
+    } catch (error) {
+      this.logger.error('subscribe', error, config);
+      throw error;
     }
   }
   
@@ -83,14 +94,15 @@ class FakeClient {
       contentType: 'text/plain',
     };
     const url = this.topicUrl(id);
+    const config = FakeClient._requestConfig('PUT', url, {
+      ...defaultBehavior,
+      ...behavior,
+    });
     try {
-      return this.axios(FakeClient._axiosRequestConfig('PUT', url, {
-        ...defaultBehavior,
-        ...behavior,
-      }));
-    } catch (e) {
-      this.logger.error('topicSet', e);
-      throw e;
+      return await this.got(config);
+    } catch (error) {
+      this.logger.error('topicSet', error, config);
+      throw error;
     }
   }
 
@@ -99,12 +111,13 @@ class FakeClient {
    * @param {String} id
    */
   async topicDelete(id) {
-    const url =this.topicUrl(id);
+    const url = this.topicUrl(id);
+    const config = FakeClient._requestConfig('DELETE', url);
     try {
-      return this.axios(FakeClient._axiosRequestConfig('DELETE', url));
-    } catch (e) {
-      this.logger.error('topicDelete', e);
-      throw e;
+      return await this.got(config);
+    } catch (error) {
+      this.logger.error('topicDelete', error, config);
+      throw error;
     }
   }
 
@@ -121,14 +134,15 @@ class FakeClient {
       matchChallenge: true,
     };
     const url = this.subscriberUrl(id, '/verify');
+    const config = FakeClient._requestConfig('PUT', url, {
+      ...defaultBehavior,
+      ...behavior,
+    });
     try {
-      return this.axios(FakeClient._axiosRequestConfig('PUT', url, {
-        ...defaultBehavior,
-        ...behavior,
-      }));
-    } catch (e) {
-      this.logger.error('subscriberSetVerify', e);
-      throw e;
+      return await this.got(config);
+    } catch (error) {
+      this.logger.error('subscriberSetVerify', error, config);
+      throw error;
     }
   }
 
@@ -138,19 +152,20 @@ class FakeClient {
    * @param {Object} behavior
    * @param {Number} behavior.statusCode
    */
-   async subscriberSetContent(id, behavior = {}) {
-     const defaultBehavior = {
-       statusCode: 200,
-     };
+  async subscriberSetContent(id, behavior = {}) {
+    const defaultBehavior = {
+      statusCode: 200,
+    };
     const url = this.subscriberUrl(id, '/content');
+    const config = FakeClient._requestConfig('PUT', url, {
+      ...defaultBehavior,
+      ...behavior,
+    });
     try {
-      return this.axios(FakeClient._axiosRequestConfig('PUT', url, {
-        ...defaultBehavior,
-        ...behavior,
-      }));
-    } catch (e) {
-      this.logger.error('subscriberSetContent', e);
-      throw e;
+      return await this.got(config);
+    } catch (error) {
+      this.logger.error('subscriberSetContent', error, config);
+      throw error;
     }
   }
 
@@ -160,11 +175,12 @@ class FakeClient {
    */
   async subscriberDelete(id) {
     const url = this.subscriberUrl(id);
+    const config = FakeClient._requestConfig('DELETE', url);
     try {
-      return this.axios(FakeClient._axiosRequestConfig('DELETE', url));
-    } catch (e) {
-      this.logger.error('subscriberDelete', e);
-      throw e;
+      return await this.got(config);
+    } catch (error) {
+      this.logger.error('subscriberDelete', error, config);
+      throw error;
     }
   }
 

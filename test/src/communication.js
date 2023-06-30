@@ -37,20 +37,23 @@ describe('Communication', function () {
     communication = new Communication(stubLogger, stubDb, options);
   });
 
-  describe('Axios timing coverage', function () {
-    const request = {};
-    const response = {
-      config: request,
-    };
-    it('tags request', function () {
-      communication.axios.interceptors.request.handlers[0].fulfilled(request);
-      assert(request.startTimestampMs);
+  describe('_init', function () {
+    it('covers', async function () {
+      await communication._init();
+      await communication._init();
+      assert(communication.Got);
+      assert(communication.got);
     });
-    it('tags response', function () {
-      communication.axios.interceptors.response.handlers[0].fulfilled(response);
-      assert(response.elapsedTimeMs);
+  });
+
+  describe('_onRetry', function () {
+    it('covers', function () {
+      const error = {};
+      const retryCount = 1;
+      communication._onRetry(error, retryCount);
+      assert(communication.logger.debug.called);
     });
-  }); // Axios timing coverage
+  });
 
   describe('userAgentString', function () {
     it('has default behavior', function () {
@@ -110,134 +113,8 @@ describe('Communication', function () {
     it('hashes', function () {
       const result = Communication.contentHash(content, algorithm);
       assert.strictEqual(result, expected);
-    })
+    });
   });
-
-  describe('Axios Configurations', function () {
-    let requestUrl, expectedUrl, topicUrl;
-    beforeEach(function () {
-      requestUrl = 'https://example.com/callback/?id=123';
-      expectedUrl = 'https://example.com/callback/';
-      topicUrl = 'http://example.com/blog/';
-    });
-    it('_axiosConfig', function () {
-      const method = 'GET';
-      const contentType = 'text/plain';
-      const body = undefined;
-      const params = {
-        'extra_parameter': 'foobar',
-      };
-      const expectedUrlObj = new URL('https://example.com/callback/?id=123&extra_parameter=foobar');
-      const expected = {
-        method,
-        url: 'https://example.com/callback/',
-        headers: {
-          'Content-Type': 'text/plain',
-        },
-        params: expectedUrlObj.searchParams,
-        responseType: 'text',
-      };
-      const result = Communication._axiosConfig(method, requestUrl, body, params, {
-        'Content-Type': contentType,
-      });
-      delete result.transformResponse;
-      assert.deepStrictEqual(result, expected);
-    });
-    it('_axiosConfig covers defaults', function () {
-      const method = 'OPTIONS';
-      const expectedUrlObj = new URL(requestUrl);
-      const expected = {
-        method,
-        url: expectedUrl,
-        headers: {},
-        params: expectedUrlObj.searchParams,
-        responseType: 'text',
-      };
-      const result = Communication._axiosConfig(method, requestUrl);
-      delete result.transformResponse;
-      assert.deepStrictEqual(result, expected);
-    });
-    it('covers null response transform', function () {
-      const result = Communication._axiosConfig('GET', 'https://example.com/', undefined, {}, {});
-      result.transformResponse[0]();
-    });
-    it('_intentVerifyAxiosConfig', function () {
-      const mode = 'subscribe';
-      const leaseSeconds = 864000;
-      const challenge = 'abcxyz';
-      const expectedUrlObj = new URL(`${requestUrl}&hub.mode=${mode}&hub.topic=${encodeURIComponent(topicUrl)}&hub.challenge=${challenge}&hub.lease_seconds=${leaseSeconds}`);
-      const expected = {
-        method: 'GET',
-        url: expectedUrl,
-        headers: {},
-        params: expectedUrlObj.searchParams,
-        responseType: 'text',
-      };
-      const result = Communication._intentVerifyAxiosConfig(requestUrl, topicUrl, mode, leaseSeconds, challenge);
-      delete result.transformResponse;
-      assert.deepStrictEqual(result, expected);
-    });
-    it('_intentDenyAxiosConfig', function () {
-      const reason = 'something';
-      const expectedUrlObj = new URL(`${requestUrl}&hub.mode=denied&hub.topic=${encodeURIComponent(topicUrl)}&hub.reason=${reason}`);
-      const expected = {
-        method: 'GET',
-        url: expectedUrl,
-        headers: {},
-        params: expectedUrlObj.searchParams,
-        responseType: 'text',
-      };
-      const result = Communication._intentDenyAxiosConfig(requestUrl, topicUrl, reason);
-      delete result.transformResponse;
-      assert.deepStrictEqual(result, expected);
-    });
-    it('_publisherValidationAxiosConfig', function () {
-      const topic = {
-        url: topicUrl,
-        publisherValidationUrl: 'https://example.com/publisher/',
-      };
-      const verification = {
-        callback: requestUrl,
-        topic: topicUrl,
-      };
-      const expectedUrlObj = new URL(topic.publisherValidationUrl);
-      const expected = {
-        method: 'POST',
-        url: topic.publisherValidationUrl,
-        data: {
-          callback: requestUrl,
-          topic: topicUrl,
-        },
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        params: expectedUrlObj.searchParams,
-        responseType: 'text',
-      };
-      const result = Communication._publisherValidationAxiosConfig(topic, verification);
-      delete result.transformResponse;
-      assert.deepStrictEqual(result, expected);
-    });
-    it('_topicFetchAxiosConfig', function () {
-      const topic = {
-        url: topicUrl,
-        contentType: 'text/plain',
-      };
-      const expectedUrlObj = new URL(topicUrl);
-      const expected = {
-        method: 'GET',
-        url: topicUrl,
-        params: expectedUrlObj.searchParams,
-        headers: {
-          Accept: 'text/plain, */*;q=0.9',
-        },
-        responseType: 'text',
-      };
-      const result = Communication._topicFetchAxiosConfig(topic);
-      delete result.transformResponse;
-      assert.deepStrictEqual(result, expected);
-    });
-  }); // Axios Configurations
 
   describe('verificationProcess', function () {
     const challenge = 'a_challenge';
@@ -263,13 +140,13 @@ describe('Communication', function () {
 
       sinon.stub(Communication, 'generateChallenge').resolves(challenge);
       sinon.stub(communication, 'publisherValidate').resolves(true);
-      sinon.stub(communication, 'axios').resolves({
-        status: 200,
-        statusText: 'OK',
+      sinon.stub(communication, 'got').resolves({
+        statusCode: 200,
+        statusMessage: 'OK',
         headers: {
           'content-type': 'text/plain',
         },
-        data: challenge,
+        body: challenge,
       });
 
       communication.db.verificationGetById.resolves(verification);
@@ -312,7 +189,7 @@ describe('Communication', function () {
       await communication.verificationProcess(dbCtx, callback, topicId, requestId);
 
       assert(communication.db.verificationRelease.called);
-      assert(!communication.axios.called);
+      assert(!communication.got.called);
     });
 
     it('denies subscription to deleted topic', async function () {
@@ -357,8 +234,8 @@ describe('Communication', function () {
     });
 
     it('handles request error', async function () {
-      communication.axios.restore();
-      sinon.stub(communication, 'axios').throws(new Error());
+      communication.got.restore();
+      sinon.stub(communication, 'got').rejects(new Error());
 
       await communication.verificationProcess(dbCtx, callback, topicId, requestId);
 
@@ -366,9 +243,9 @@ describe('Communication', function () {
     });
 
     it('handles 500 response', async function () {
-      communication.axios.restore();
-      sinon.stub(communication, 'axios').resolves({
-        status: 500,
+      communication.got.restore();
+      sinon.stub(communication, 'got').resolves({
+        statusCode: 500,
       });
 
       await communication.verificationProcess(dbCtx, callback, topicId, requestId);
@@ -377,9 +254,9 @@ describe('Communication', function () {
     });
 
     it('handles non-200 response', async function () {
-      communication.axios.restore();
-      sinon.stub(communication, 'axios').resolves({
-        status: 400,
+      communication.got.restore();
+      sinon.stub(communication, 'got').resolves({
+        statusCode: 400,
       });
 
       await communication.verificationProcess(dbCtx, callback, topicId, requestId);
@@ -426,14 +303,14 @@ describe('Communication', function () {
       communication.db.verificationGetById.restore();
       verification.mode = 'unsubscribe';
       sinon.stub(communication.db, 'verificationGetById').resolves(verification);
-      communication.axios.restore();
-      sinon.stub(communication, 'axios').resolves({
-        status: 200,
-        statusText: 'OK',
+      communication.got.restore();
+      sinon.stub(communication, 'got').resolves({
+        statusCode: 200,
+        statusMessage: 'OK',
         headers: {
           'content-type': 'text/plain',
         },
-        data: 'not the challenge',
+        body: 'not the challenge',
       });
 
       await communication.verificationProcess(dbCtx, callback, topicId, requestId);
@@ -470,9 +347,9 @@ describe('Communication', function () {
         httpRemoteAddr: '127.0.0.0',
       };
 
-      sinon.stub(communication, 'axios').resolves({
-        status: 200,
-        statusText: 'OK',
+      sinon.stub(communication, 'got').resolves({
+        statusCode: 200,
+        statusMessage: 'OK',
         headers: {
           'content-type': 'application/json',
         },
@@ -491,10 +368,10 @@ describe('Communication', function () {
     });
 
     it('succeeds with rejection', async function () {
-      communication.axios.restore();
-      sinon.stub(communication, 'axios').resolves({
-        status: 400,
-        statusText: 'Bad Request',
+      communication.got.restore();
+      sinon.stub(communication, 'got').resolves({
+        statusCode: 400,
+        statusMessage: 'Bad Request',
         headers: {
           'content-type': 'application/json',
         },
@@ -508,10 +385,10 @@ describe('Communication', function () {
     });
 
     it('defers on request server error', async function () {
-      communication.axios.restore();
-      sinon.stub(communication, 'axios').resolves({
-        status: 502,
-        statusText: 'Bad Gateway',
+      communication.got.restore();
+      sinon.stub(communication, 'got').resolves({
+        statusCode: 502,
+        statusMessage: 'Bad Gateway',
         headers: {
           'content-type': 'text/plain',
         },
@@ -523,8 +400,8 @@ describe('Communication', function () {
     });
 
     it('handles request error', async function () {
-      communication.axios.restore();
-      sinon.stub(communication, 'axios').throws(new Error());
+      communication.got.restore();
+      sinon.stub(communication, 'got').rejects(new Error());
 
       const result = await communication.publisherValidate(dbCtx, topic, verification);
 
@@ -546,16 +423,16 @@ describe('Communication', function () {
       requestId = '7d37ea20-4ef7-417e-a08d-c0ba71269ab1';
       topicId = '234ec6fb-f1cd-4ac3-8ea9-29ed42ae0e21';
 
-      sinon.stub(communication, 'axios').resolves({
-        status: 200,
-        statusText: 'OK',
+      sinon.stub(communication, 'got').resolves({
+        statusCode: 200,
+        statusMessage: 'OK',
         headers: {
           'content-type': 'text/plain',
           link: '<https://example.com/hub/>; rel="hub"',
           'last-modified': 'Thu, 18 Nov 2021 20:34:35 GMT',
           'etag': '"9c104-1673e-5d1161636d742"',
         },
-        data: 'Jackdaws love my big sphinx of quartz.',
+        body: 'Jackdaws love my big sphinx of quartz.',
       });
 
       communication.db.topicGetById.resolves(topic);
@@ -580,12 +457,12 @@ describe('Communication', function () {
 
       await communication.topicFetchProcess(dbCtx, topicId, requestId);
 
-      assert(!communication.axios.called);
+      assert(!communication.got.called);
     });
 
     it('handles request error', async function () {
-      communication.axios.restore();
-      sinon.stub(communication, 'axios').throws(new Error());
+      communication.got.restore();
+      sinon.stub(communication, 'got').rejects(new Error());
 
       await communication.topicFetchProcess(dbCtx, topicId, requestId);
 
@@ -593,10 +470,10 @@ describe('Communication', function () {
     });
 
     it('handles 500 response', async function () {
-      communication.axios.restore();
-      sinon.stub(communication, 'axios').resolves({
-        status: 500,
-        statusText: 'Internal Server Error',
+      communication.got.restore();
+      sinon.stub(communication, 'got').resolves({
+        statusCode: 500,
+        statusMessage: 'Internal Server Error',
         headers: {
           'content-type': 'text/plain',
         },
@@ -608,10 +485,10 @@ describe('Communication', function () {
     });
 
     it('handles bad response', async function () {
-      communication.axios.restore();
-      sinon.stub(communication, 'axios').resolves({
-        status: 404,
-        statusText: 'Not Found',
+      communication.got.restore();
+      sinon.stub(communication, 'got').resolves({
+        statusCode: 404,
+        statusMessage: 'Not Found',
         headers: {
           'content-type': 'text/plain',
         },
@@ -637,8 +514,8 @@ describe('Communication', function () {
       topic.httpLastModified = 'Thu, 18 Nov 2021 20:34:35 GMT';
       topic.httpEtag = '"9c104-1673e-5d1161636d742"';
       communication.db.topicGetById.resolves(topic);
-      communication.axios.resolves({
-        status: 304,
+      communication.got.resolves({
+        statusCode: 304,
       });
 
       await communication.topicFetchProcess(dbCtx, topicId, requestId);
@@ -655,15 +532,15 @@ describe('Communication', function () {
     });
 
     it('updates content with lax link enforcement', async function () {
-      communication.axios.restore();
-      sinon.stub(communication, 'axios').resolves({
-        status: 200,
-        statusText: 'OK',
+      communication.got.restore();
+      sinon.stub(communication, 'got').resolves({
+        statusCode: 200,
+        statusMessage: 'OK',
         headers: {
           'content-type': 'text/plain',
           link: '<https://example.com/other/hub/>; rel="hub"',
         },
-        data: 'Jackdaws love my big sphinx of quartz.',
+        body: 'Jackdaws love my big sphinx of quartz.',
       });
 
       communication.options.communication.strictTopicHubLink = false;
@@ -675,15 +552,15 @@ describe('Communication', function () {
     });
 
     it('deletes topic when hub relation unsatisfied', async function () {
-      communication.axios.restore();
-      sinon.stub(communication, 'axios').resolves({
-        status: 200,
-        statusText: 'OK',
+      communication.got.restore();
+      sinon.stub(communication, 'got').resolves({
+        statusCode: 200,
+        statusMessage: 'OK',
         headers: {
           'content-type': 'text/plain',
           link: '<https://example.com/other/hub/>; rel="hub"',
         },
-        data: 'Jackdaws love my big sphinx of quartz.',
+        body: 'Jackdaws love my big sphinx of quartz.',
       });
 
       await communication.topicFetchProcess(dbCtx, topicId, requestId);
@@ -714,13 +591,13 @@ describe('Communication', function () {
         signatureAlgorithm: 'sha512',
       };
 
-      sinon.stub(communication, 'axios').resolves({
-        status: 200,
-        statusText: 'OK',
+      sinon.stub(communication, 'got').resolves({
+        statusCode: 200,
+        statusMessage: 'OK',
         headers: {
           'content-type': 'text/plain',
         },
-        data: 'Jackdaws love my big sphinx of quartz.',
+        body: 'Jackdaws love my big sphinx of quartz.',
       });
 
       communication.db.topicGetContentById.resolves(topic);
@@ -756,8 +633,8 @@ describe('Communication', function () {
     });
 
     it('handles request error', async function () {
-      communication.axios.restore();
-      sinon.stub(communication, 'axios').throws();
+      communication.got.restore();
+      sinon.stub(communication, 'got').throws();
 
       await communication.subscriptionDeliveryProcess(dbCtx, subscriptionId, requestId);
 
@@ -765,10 +642,10 @@ describe('Communication', function () {
     });
 
     it('handles 5xx response', async function () {
-      communication.axios.restore();
-      sinon.stub(communication, 'axios').resolves({
-        status: 500,
-        statusText: 'Internal Server Error',
+      communication.got.restore();
+      sinon.stub(communication, 'got').resolves({
+        statusCode: 500,
+        statusMessage: 'Internal Server Error',
         headers: {
           'content-type': 'text/plain',
         },
@@ -780,10 +657,10 @@ describe('Communication', function () {
     });
 
     it('handles 4xx response', async function () {
-      communication.axios.restore();
-      sinon.stub(communication, 'axios').resolves({
-        status: 404,
-        statusText: 'Not Found',
+      communication.got.restore();
+      sinon.stub(communication, 'got').resolves({
+        statusCode: 404,
+        statusMessage: 'Not Found',
         headers: {
           'content-type': 'text/plain',
         },
@@ -795,10 +672,10 @@ describe('Communication', function () {
     });
 
     it('handles 410 response', async function () {
-      communication.axios.restore();
-      sinon.stub(communication, 'axios').resolves({
-        status: 410,
-        statusText: 'Gone',
+      communication.got.restore();
+      sinon.stub(communication, 'got').resolves({
+        statusCode: 410,
+        statusMessage: 'Gone',
         headers: {
           'content-type': 'text/plain',
         },

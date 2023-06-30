@@ -72,12 +72,19 @@ class Service extends Dingus {
 
   /**
    * Rearrange logging data.
+   * @param {http.ClientRequest} req
+   * @param {http.ServerResponse} res
+   * @param {Object} ctx
    */
   async preHandler(req, res, ctx) {
     await super.preHandler(req, res, ctx);
     const logObject = this.asyncLocalStorage.getStore();
-    logObject.requestId = ctx.requestId;
-    delete ctx.requestId;
+    // FIXME: for some reason, returning from the super.preHandler loses async context?
+    // Workaround until cause and solution are found.
+    if (logObject) {
+      logObject.requestId = ctx.requestId;
+      delete ctx.requestId;
+    }
   }
 
 

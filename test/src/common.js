@@ -23,47 +23,71 @@ describe('Common', function () {
     });
   }); // freezeDeep
 
-  describe('axiosResponseLogData', function () {
+  describe('gotResponseLogData', function () {
     it('covers', function () {
       const response = {
-        status: 200,
-        statusText: 'OK',
+        statusCode: 200,
+        statusMessage: 'OK',
         headers: {
           'Content-Type': 'text/plain',
         },
         otherData: 'blah',
-        data: 'Old Mother West Wind had stopped to talk with the Slender Fir Tree. "I\'ve just come across the Green Meadows," said Old Mother West Wind, “and there I saw the Best Thing in the World.”',
+        body: 'Old Mother West Wind had stopped to talk with the Slender Fir Tree. "I\'ve just come across the Green Meadows," said Old Mother West Wind, “and there I saw the Best Thing in the World.”',
+        timings: {
+          phases: {
+            total: 87,
+          },
+        },
+        retryCount: 2,
+        redirectUrls: ['https://example.com/clip/Thornton_Burgess'],
       };
       const expected = {
-        status: 200,
-        statusText: 'OK',
+        statusCode: 200,
+        statusMessage: 'OK',
         headers: {
           'Content-Type': 'text/plain',
         },
-        data: 'Old Mother West Wind had stopped to talk with the Slender Fir Tree. "I\'ve just come across the Green... (184 bytes)',
+        body: 'Old Mother West Wind had stopped to talk with the Slender Fir Tree. "I\'ve just come across the Green... (184 bytes)',
+        elapsedTimeMs: 87,
+        retryCount: 2,
+        redirectUrls: ['https://example.com/clip/Thornton_Burgess'],
       };
-      const result = common.axiosResponseLogData(response);
+      const result = common.gotResponseLogData(response);
+      assert.deepStrictEqual(result, expected);
+    });
+    it('covers buffer data', function () {
+      const response = {
+        statusCode: 200,
+        statusMessage: 'OK',
+        body: Buffer.from('Old Mother West Wind had stopped to talk with the Slender Fir Tree. "I\'ve just come across the Green Meadows," said Old Mother West Wind, “and there I saw the Best Thing in the World.”'),
+      };
+      const expected = {
+        statusCode: 200,
+        statusMessage: 'OK',
+        body: '<Buffer 188 bytes>',
+      };
+      const result = common.gotResponseLogData(response);
       assert.deepStrictEqual(result, expected);
     });
     it('covers no data', function () {
       const response = {
-        status: 200,
-        statusText: 'OK',
+        statusCode: 200,
+        statusMessage: 'OK',
         headers: {
           'Content-Type': 'text/plain',
         },
       };
       const expected = {
-        status: 200,
-        statusText: 'OK',
+        statusCode: 200,
+        statusMessage: 'OK',
         headers: {
           'Content-Type': 'text/plain',
         },
       };
-      const result = common.axiosResponseLogData(response);
+      const result = common.gotResponseLogData(response);
       assert.deepStrictEqual(result, expected);
     });
-  }); // axiosResponseLogData
+  }); // gotResponseLogData
 
   describe('topicLeaseDefaults', function () {
     it('supplies necessary properties', function () {
