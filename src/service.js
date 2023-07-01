@@ -79,11 +79,13 @@ class Service extends Dingus {
   async preHandler(req, res, ctx) {
     await super.preHandler(req, res, ctx);
     const logObject = this.asyncLocalStorage.getStore();
-    // FIXME: for some reason, returning from the super.preHandler loses async context?
+    // FIXME: for some reason, returning from the super.preHandler sometimes loses async context?
     // Workaround until cause and solution are found.
     if (logObject) {
       logObject.requestId = ctx.requestId;
       delete ctx.requestId;
+    } else {
+      this.logger.debug(_fileScope('preHandler'), 'lost async context', { req, ctx });
     }
   }
 
