@@ -65,7 +65,7 @@ describe('DatabasePostgres', function () {
     httpRemoteAddr = '127.0.0.1';
     httpFrom = 'user@example.com';
     wanted = 5;
-});
+  });
   afterEach(function () {
     sinon.restore();
   });
@@ -631,7 +631,7 @@ describe('DatabasePostgres', function () {
       const expected = new Error();
       sinon.stub(db.db, 'manyOrNone').throws(expected);
       try {
-        await db.subscriptionDeliveryClaim(dbCtx, wanted, claimTimeoutSeconds, claimant );
+        await db.subscriptionDeliveryClaim(dbCtx, wanted, claimTimeoutSeconds, claimant);
         assert.fail(noExpectedException);
       } catch (e) {
         assert.deepStrictEqual(e, expected);
@@ -650,7 +650,7 @@ describe('DatabasePostgres', function () {
         changes: 1,
         lastInsertRowid: 'c2e254c5-aa6e-4a8f-b1a1-e474b07392bb',
         duration: 11,
-      }
+      };
       sinon.stub(db.db, 'result').resolves(dbResult);
       const result = await db.subscriptionDeliveryClaimById(dbCtx, subscriptionId, claimTimeoutSeconds, claimant);
       assert.deepStrictEqual(result, expected);
@@ -1026,7 +1026,7 @@ describe('DatabasePostgres', function () {
         rowCount: 1,
         rows: [],
         duration: 10,
-      }
+      };
       const expected = {
         changes: 1,
         lastInsertRowid: undefined,
@@ -1048,7 +1048,7 @@ describe('DatabasePostgres', function () {
         rowCount: 1,
         rows: [],
         duration: 10,
-      }
+      };
       const expected = {
         changes: 1,
         lastInsertRowid: undefined,
@@ -1070,7 +1070,7 @@ describe('DatabasePostgres', function () {
         rowCount: 0,
         rows: [],
         duration: 10,
-      }
+      };
       sinon.stub(db.db, 'one').resolves(dbOne);
       sinon.stub(db.db, 'result').onCall(0).resolves(dbResult0).onCall(1).resolves(dbResult1);
       try {
@@ -1091,7 +1091,7 @@ describe('DatabasePostgres', function () {
         rowCount: 0,
         rows: [],
         duration: 10,
-      }
+      };
       sinon.stub(db.db, 'one').resolves(dbOne);
       sinon.stub(db.db, 'result').onCall(0).resolves(dbResult0).onCall(1).resolves(dbResult1);
       try {
@@ -1764,7 +1764,7 @@ describe('DatabasePostgres', function () {
         rowCount: 0,
         rows: [],
         duration: 10,
-      }
+      };
       sinon.stub(db.db, 'result').resolves(dbResult);
       try {
         await db.verificationUpdate(dbCtx, verificationId, data);
@@ -1790,7 +1790,7 @@ describe('DatabasePostgres', function () {
         rowCount: 1,
         rows: [],
         duration: 10,
-      }
+      };
       sinon.stub(db.db, 'result').resolves(dbResult);
       await db.verificationValidated(dbCtx, verificationId);
     });
@@ -1799,7 +1799,7 @@ describe('DatabasePostgres', function () {
         rowCount: 0,
         rows: [],
         duration: 10,
-      }
+      };
       sinon.stub(db.db, 'result').resolves(dbResult);
       try {
         await db.verificationValidated(dbCtx, verificationId);

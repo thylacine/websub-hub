@@ -398,7 +398,7 @@ describe('Manager', function () {
   describe('_getRootData', function () {
     it('extracts expected values', function () {
       req.getHeader.returns('user@example.com');
-      ctx = Object.assign({}, testData.validSubscribeCtx)
+      ctx = Object.assign({}, testData.validSubscribeCtx);
       const result = Manager._getRootData(req, ctx);
       assert.deepStrictEqual(result, testData.validRootData);
     });
@@ -791,7 +791,7 @@ describe('Manager', function () {
       assert(manager.db.topicFetchRequested.called);
       assert.strictEqual(res.statusCode, 202);
       assert(res.end.called);
-      assert(manager.communication.topicFetchClaimAndProcessById.called)
+      assert(manager.communication.topicFetchClaimAndProcessById.called);
     });
     it('covers no immediate processing', async function() {
       manager.options.manager.processImmediately = false;
@@ -803,7 +803,7 @@ describe('Manager', function () {
       assert(manager.db.topicFetchRequested.called);
       assert.strictEqual(res.statusCode, 202);
       assert(res.end.called);
-      assert(!manager.communication.topicFetchClaimAndProcessById.called)
+      assert(!manager.communication.topicFetchClaimAndProcessById.called);
     });
   }); // _publishRequest
 

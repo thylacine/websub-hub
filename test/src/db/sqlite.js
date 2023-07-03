@@ -237,7 +237,7 @@ describe('DatabaseSQLite', function () {
         contentFetchNextAttempt: now,
         contentUpdated: now,
         url: topic.url,
-      }
+      };
       const result = DB._topicDataToNative(topic);
       assert.deepStrictEqual(result, expected);
     });
@@ -881,7 +881,7 @@ describe('DatabaseSQLite', function () {
       const dbResult1 = {
         changes: 1,
         lastInsertRowid: undefined,
-      }
+      };
       const expected = {
         changes: 1,
         lastInsertRowid: undefined,
@@ -901,7 +901,7 @@ describe('DatabaseSQLite', function () {
       const dbResult1 = {
         changes: 1,
         lastInsertRowid: undefined,
-      }
+      };
       const expected = {
         changes: 1,
         lastInsertRowid: undefined,
@@ -921,7 +921,7 @@ describe('DatabaseSQLite', function () {
       const dbResult1 = {
         changes: 0,
         lastInsertRowid: undefined,
-      }
+      };
       sinon.stub(db.statement.topicAttempts, 'get').returns(dbGet);
       sinon.stub(db.statement.topicAttemptsIncrement, 'run').returns(dbResult0);
       sinon.stub(db.statement.topicContentFetchDone, 'run').returns(dbResult1);
@@ -941,7 +941,7 @@ describe('DatabaseSQLite', function () {
       const dbResult1 = {
         changes: 0,
         lastInsertRowid: undefined,
-      }
+      };
       sinon.stub(db.statement.topicAttempts, 'get').returns(dbGet);
       sinon.stub(db.statement.topicAttemptsIncrement, 'run').returns(dbResult0);
       sinon.stub(db.statement.topicContentFetchDone, 'run').returns(dbResult1);
@@ -1534,7 +1534,7 @@ describe('DatabaseSQLite', function () {
       DB._verificationDataToEngine(data);
       assert.strictEqual(data.isPublisherValidated, 0);
     });
-  }) // _verificationDataToEngine
+  }); // _verificationDataToEngine
 
   describe('verificationInsert', function () {
     let verification;
@@ -1625,7 +1625,7 @@ describe('DatabaseSQLite', function () {
       const dbResult = {
         changes: 0,
         lastInsertRowid: undefined,
-      }
+      };
       sinon.stub(db.statement.verificationUpdate, 'run').returns(dbResult);
       try {
         await db.verificationUpdate(dbCtx, verificationId, data);
@@ -1650,7 +1650,7 @@ describe('DatabaseSQLite', function () {
       const dbResult = {
         changes: 1,
         lastInsertRowid: undefined,
-      }
+      };
       sinon.stub(db.statement.verificationValidate, 'run').returns(dbResult);
       await db.verificationValidated(dbCtx, verificationId);
     });
@@ -1658,7 +1658,7 @@ describe('DatabaseSQLite', function () {
       const dbResult = {
         changes: 0,
         lastInsertRowid: undefined,
-      }
+      };
       sinon.stub(db.statement.verificationValidate, 'run').returns(dbResult);
       try {
         await db.verificationValidated(dbCtx, verificationId);

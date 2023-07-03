@@ -21,6 +21,7 @@ describe('Service', function () {
     asyncLocalStorage = new AsyncLocalStorage();
     options = new Config('test');
     service = new Service(stubLogger, stubDb, options, asyncLocalStorage);
+    stubLogger._reset();
     sinon.stub(service.manager);
     sinon.stub(service.sessionManager);
     sinon.stub(service.authenticator);
@@ -49,13 +50,19 @@ describe('Service', function () {
   });
 
   describe('preHandler', function () {
-    it('logs requestId', async () => {
+    it('logs requestId', async function () {
       sinon.stub(service.__proto__.__proto__, 'preHandler').resolves();
       await service.asyncLocalStorage.run({}, async () => {
         await service.preHandler(req, res, ctx);
         const logObject = service.asyncLocalStorage.getStore();
         assert('requestId' in logObject);
       });
+    });
+    it('covers weird async context failure', async function () {
+      sinon.stub(service.__proto__.__proto__, 'preHandler').resolves();
+      sinon.stub(service.asyncLocalStorage, 'getStore').returns();
+      await service.preHandler(req, res, ctx);
+      assert(service.logger.debug.called);
     });
   }); // preHandler
 
@@ -197,7 +204,7 @@ describe('Service', function () {
       await service.handlerGetAdminLogout(req, res, ctx);
       assert(service.sessionManager.getAdminLogout.called);
     });
-}); // handlerGetAdminLogout
+  }); // handlerGetAdminLogout
 
   describe('handlerGetAdminIA', function () {
     it('covers', async function () {

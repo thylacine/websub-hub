@@ -134,7 +134,7 @@ describe('Common', function () {
     it('covers default', function () {
       const result = common.attemptRetrySeconds(0);
       assert(result >= 60);
-      assert(result <= 60 * 1.618)
+      assert(result <= 60 * 1.618);
     });
   }); // attemptRetrySeconds
 

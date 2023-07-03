@@ -285,7 +285,7 @@ describe('Database Integration', function () {
           const data = {
             ...testData.subscriptionUpsert,
             topicId,
-          }
+          };
           await db.context(async (dbCtx) => {
             const result = await db.subscriptionUpsert(dbCtx, data);
             assert(result.lastInsertRowid);
@@ -364,7 +364,7 @@ describe('Database Integration', function () {
             ...testData.subscriptionUpsert,
             secret: 'newSecret',
             topicId,
-          }
+          };
           await db.context(async (dbCtx) => {
             const result = await db.subscriptionUpsert(dbCtx, data);
             assert(result.lastInsertRowid);
@@ -416,7 +416,7 @@ describe('Database Integration', function () {
         });
         step('delete expired subscriptions', async function() {
           await db.context(async (dbCtx) => {
-            await db.subscriptionDeleteExpired(dbCtx, topicId)
+            await db.subscriptionDeleteExpired(dbCtx, topicId);
             const subscription = await db.subscriptionGet(dbCtx, testData.subscriptionUpsert.callback, topicId);
             assert(!subscription);
           });

@@ -121,6 +121,7 @@ describe('SchemaVersionHelper', function () {
         .onCall(i++).returns(notDir) // 'init.sql'
         .onCall(i++).returns(isDir).onCall(i++).returns(isMig) // '1.0.1'
         .onCall(i++).returns(isDir).onCall(i++).returns(isMig) // '1.0.0'
+      ;
       const result = svh.allSchemaVersions('path');
       assert.deepStrictEqual(result, expected);
     });
@@ -137,7 +138,7 @@ describe('SchemaVersionHelper', function () {
         max: { major: 1, minor: 1, patch: 1 },
       };
       current = { major: 1, minor: 0, patch: 1 };
-      });
+    });
     it('covers', function () {
       const expected = ['1.1.0', '1.1.1'];
       fs.readdirSync.returns(['1.1.2', 'file.txt', '1.1.0', '1.1.1', 'init.sql', '1.0.1', '1.0.0']);
@@ -151,6 +152,7 @@ describe('SchemaVersionHelper', function () {
         .onCall(i++).returns(notDir) // 'init.sql'
         .onCall(i++).returns(isDir).onCall(i++).returns(isMig) // '1.0.1'
         .onCall(i++).returns(isDir).onCall(i++).returns(isMig) // '1.0.0'
+      ;
       const result = svh.unappliedSchemaVersions('path', current, supported);
       assert.deepStrictEqual(result, expected);
     });

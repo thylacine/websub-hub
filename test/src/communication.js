@@ -709,14 +709,14 @@ describe('Communication', function () {
     it('covers claim', async function () {
       communication.db.topicFetchClaimById.resolves({
         changes: 1,
-      })
+      });
       await communication.topicFetchClaimAndProcessById(dbCtx, topicId, requestId);
       assert(communication.topicFetchProcess.called);
     });
     it('covers no claim', async function () {
       communication.db.topicFetchClaimById.resolves({
         changes: 0,
-      })
+      });
       await communication.topicFetchClaimAndProcessById(dbCtx, topicId, requestId);
       assert(!communication.topicFetchProcess.called);
     });
@@ -733,14 +733,14 @@ describe('Communication', function () {
     it('covers claim', async function () {
       communication.db.verificationClaimById.resolves({
         changes: 1,
-      })
+      });
       await communication.verificationClaimAndProcessById(dbCtx, verificationId, requestId);
       assert(communication.verificationProcess.called);
     });
     it('covers no claim', async function () {
       communication.db.verificationClaimById.resolves({
         changes: 0,
-      })
+      });
       await communication.verificationClaimAndProcessById(dbCtx, verificationId, requestId);
       assert(!communication.verificationProcess.called);
     });

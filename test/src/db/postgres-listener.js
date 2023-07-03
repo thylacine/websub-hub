@@ -2,7 +2,7 @@
 'use strict';
 
 const assert = require('assert');
-const sinon = require('sinon');
+const sinon = require('sinon'); // eslint-disable-line node/no-unpublished-require
 const stubLogger = require('../../stub-logger');
 const Listener = require('../../../src/db/postgres/listener');
 
