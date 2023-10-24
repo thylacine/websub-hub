@@ -5,6 +5,10 @@
 const { name: packageName, version: packageVersion } = require('../package.json');
 const common = require('../src/common');
 const Enum = require('../src/enum');
+const roman = require('@squeep/roman');
+
+const currentYear = (new Date()).getFullYear();
+const romanYearHTML = roman.toRoman(currentYear, true);
 
 const defaultOptions = {
   // Uniquely identify this instance, used to tag work-in-progress.
@@ -51,7 +55,7 @@ const defaultOptions = {
     logoUrl: 'static/logo.svg', // image to go with title
     footerEntries: [ // common footers on all html pages
       '<a href="https://git.squeep.com/?p=websub-hub;a=tree">Development Repository</a> / <a href="https://github.com/thylacine/websub-hub/">GitHub mirror</a>',
-      '<span class="copyright">&copy;<time datetime="2022">&#8559;&#8559;&#8553;&#8553;&#8544;&#8544;</time></span>',
+      '<span class="copyright">&copy;<time datetime="${currentYear}">${romanYearHTML}</time></span>',
     ],
     publishHistoryDays: 60, // Number of days of update history to show on topic details page
     strictSecrets: false, // If true, reject requests with secrets but not over https
