@@ -39,13 +39,13 @@ class Communication {
 
   /**
    * Do a little dance to cope with ESM dynamic import.
-   * @param  {...any} args
-   * @returns {Promise<any>}
+   * @param  {...any} args arguments
+   * @returns {Promise<any>} got response
    */
   async _init(...args) {
     if (!this.Got) {
       // For some reason eslint is confused about import being supported here.
-      // eslint-disable-next-line
+       
       this.Got = await import('got');
       this.got = this.Got.got.extend({
         followRedirect: false, // Outgoing API calls should not encounter redirects
@@ -74,8 +74,8 @@ class Communication {
 
   /**
    * Take note of transient retries.
-   * @param {*} error
-   * @param {*} retryCount
+   * @param {*} error error
+   * @param {*} retryCount retry count
    */
   _onRetry(error, retryCount) {
     const _scope = _fileScope('_onRetry');
@@ -85,11 +85,11 @@ class Communication {
 
   /**
    * Construct a user-agent value.
-   * @param {Object} userAgentConfig
-   * @param {String=} userAgentConfig.product
-   * @param {String=} userAgentConfig.version
-   * @param {String=} userAgentConfig.implementation
-   * @returns {String}
+   * @param {object} userAgentConfig user agent config
+   * @param {string=} userAgentConfig.product product name (default package name)
+   * @param {string=} userAgentConfig.version version (default package version)
+   * @param {string=} userAgentConfig.implementation implementation (default spec supported)
+   * @returns {string} user agent string 'product/version (implementation)'
    */
   static userAgentString(userAgentConfig) {
     // eslint-disable-next-line security/detect-object-injection
@@ -105,9 +105,12 @@ class Communication {
 
 
   /**
+   * @alias {number} Integer
+   */
+  /**
    * Generate a random string.
-   * @param {Integer} bytes 
-   * @returns {Promise<String>}
+   * @param {Integer} bytes size of challenge
+   * @returns {Promise<string>} base64 randomness
    */
   static async generateChallenge(bytes = 30) {
     return (await common.randomBytesAsync(bytes)).toString('base64');
@@ -116,10 +119,10 @@ class Communication {
 
   /**
    * Generate the signature string for content.
-   * @param {Buffer} message 
-   * @param {Buffer} secret 
-   * @param {String} algorithm 
-   * @returns {String}
+   * @param {Buffer} message message to sign
+   * @param {Buffer} secret secret to sign with
+   * @param {string} algorithm algorithm to sign with
+   * @returns {string} signature string
    */
   static signature(message, secret, algorithm) {
     const hmac = crypto.createHmac(algorithm, secret)
@@ -131,9 +134,9 @@ class Communication {
 
   /**
    * Generate the hash for content.
-   * @param {Buffer} content 
-   * @param {String} algorithm 
-   * @returns {String}
+   * @param {Buffer} content content 
+   * @param {string} algorithm algorithm
+   * @returns {string} hash of content
    */
   static contentHash(content, algorithm) {
     return crypto.createHash(algorithm)
@@ -144,10 +147,10 @@ class Communication {
 
   /**
    * Attempt to verify a requested intent with client callback endpoint.
-   * @param {*} dbCtx
-   * @param {*} verificationId
-   * @param {String} requestId
-   * @returns {Boolean} whether to subsequently attempt next task if verification succeeds
+   * @param {*} dbCtx db context
+   * @param {*} verificationId verification id
+   * @param {string} requestId request id
+   * @returns {Promise<boolean>} whether to subsequently attempt next task if verification succeeds
    */
   async verificationProcess(dbCtx, verificationId, requestId) {
     const _scope = _fileScope('verificationProcess');
@@ -317,16 +320,20 @@ class Communication {
 
 
   /**
+   * @alias {object} TopicData
+   * @alias {object} VerificationData
+   */
+  /**
    * Attempt to verify a pending subscription request with publisher.
    * Updates (and persists) verification.
    * Returns boolean of status of publisher contact, and hence
    * whether to continue verification with client.
    *
    * This is not defined by the spec.  We opt to speak JSON here.
-   * @param {*} dbCtx
-   * @param {TopicData} topic
-   * @param {VerificationData} verification
-   * @returns {Boolean}
+   * @param {*} dbCtx db context
+   * @param {TopicData} topic topic
+   * @param {VerificationData} verification verification
+   * @returns {Promise<boolean>} true if successful contact with publisher
    */
   async publisherValidate(dbCtx, topic, verification) {
     const _scope = _fileScope('publisherValidate');
@@ -392,10 +399,10 @@ class Communication {
 
   /**
    * Retrieve content from a topic.
-   * @param {*} dbCtx
-   * @param {*} topicId
-   * @param {String} requestId
-   * @returns
+   * @param {*} dbCtx db context
+   * @param {*} topicId topic id
+   * @param {string} requestId request id
+   * @returns {Promise<void>}
    */
   async topicFetchProcess(dbCtx, topicId, requestId) {
     const _scope = _fileScope('topicFetchProcess');
@@ -440,7 +447,7 @@ class Communication {
     try {
       response = await this.got(updateRequestConfig);
     } catch (e) {
-      this.logger.error(_scope, 'update request failed', logInfoData);
+      this.logger.error(_scope, 'update request failed', { ...logInfoData, error: e });
       await this.db.topicFetchIncomplete(dbCtx, topicId, this.options.communication.retryBackoffSeconds);
       return;
     }
@@ -515,10 +522,10 @@ class Communication {
 
   /**
    * Attempt to deliver a topic's content to a subscription.
-   * @param {*} dbCtx 
-   * @param {String} callback 
-   * @param {*} topicId 
-   * @param {String} requestId 
+   * @param {*} dbCtx db context
+   * @param {string} subscriptionId subscription id
+   * @param {string} requestId request id
+   * @returns {Promise<void>}
    */
   async subscriptionDeliveryProcess(dbCtx, subscriptionId, requestId) {
     const _scope = _fileScope('subscriptionDeliveryProcess');
@@ -623,9 +630,10 @@ class Communication {
 
   /**
    * Claim and work a specific topic fetch task.
-   * @param {*} dbCtx 
-   * @param {*} id 
-   * @param {String} requestId 
+   * @param {*} dbCtx db context
+   * @param {string} topicId topic id
+   * @param {string} requestId request id
+   * @returns {Promise<void>}
    */
   async topicFetchClaimAndProcessById(dbCtx, topicId, requestId) {
     const _scope = _fileScope('topicFetchClaimAndProcessById');
@@ -641,10 +649,10 @@ class Communication {
 
   /**
    * Claim and work a specific verification confirmation task.
-   * @param {*} dbCtx
-   * @param {*} verificationId
-   * @param {String} requestId
-   * @returns 
+   * @param {*} dbCtx db context
+   * @param {*} verificationId verification id
+   * @param {string} requestId request id
+   * @returns {Promise<boolean>} whether to subsequently attempt next task if verification succeeds
    */
   async verificationClaimAndProcessById(dbCtx, verificationId, requestId) {
     const _scope = _fileScope('verificationClaimAndProcessById');
@@ -660,9 +668,9 @@ class Communication {
 
   /**
    * 
-   * @param {*} dbCtx
-   * @param {Number} wanted maximum tasks to claim
-   * @returns {Promise<void>[]}
+   * @param {*} dbCtx db context
+   * @param {number} wanted maximum tasks to claim
+   * @returns {Promise<void>[]} array of promises processing work
    */
   async workFeed(dbCtx, wanted) {
     const _scope = _fileScope('workFeed');

@@ -1,7 +1,7 @@
 /* eslint-disable security/detect-object-injection */
 'use strict';
 
-const sinon = require('sinon'); // eslint-disable-line node/no-unpublished-require
+const sinon = require('sinon');
 
 const spyFns = [
   'context',

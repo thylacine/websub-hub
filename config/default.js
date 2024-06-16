@@ -55,7 +55,7 @@ const defaultOptions = {
     logoUrl: 'static/logo.svg', // image to go with title
     footerEntries: [ // common footers on all html pages
       '<a href="https://git.squeep.com/?p=websub-hub;a=tree">Development Repository</a> / <a href="https://github.com/thylacine/websub-hub/">GitHub mirror</a>',
-      '<span class="copyright">&copy;<time datetime="${currentYear}">${romanYearHTML}</time></span>',
+      `<span class="copyright">&copy;<time datetime="${currentYear}">${romanYearHTML}</time></span>`,
     ],
     publishHistoryDays: 60, // Number of days of update history to show on topic details page
     strictSecrets: false, // If true, reject requests with secrets but not over https

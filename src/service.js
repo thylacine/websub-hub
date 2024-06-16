@@ -69,12 +69,15 @@ class Service extends Dingus {
 
   }
 
+  /**
+   * @typedef {import('node:http')} http
+   */
 
   /**
    * Rearrange logging data.
-   * @param {http.ClientRequest} req
-   * @param {http.ServerResponse} res
-   * @param {Object} ctx
+   * @param {http.ClientRequest} req request
+   * @param {http.ServerResponse} res response
+   * @param {object} ctx context
    */
   async preHandler(req, res, ctx) {
     await super.preHandler(req, res, ctx);
@@ -91,9 +94,9 @@ class Service extends Dingus {
 
 
   /**
-   * @param {http.ClientRequest} req
-   * @param {http.ServerResponse} res
-   * @param {Object} ctx
+   * @param {http.ClientRequest} req request
+   * @param {http.ServerResponse} res response
+   * @param {object} ctx context
    */
   async handlerPostRoot(req, res, ctx) {
     const _scope = _fileScope('handlerPostRoot');
@@ -107,9 +110,9 @@ class Service extends Dingus {
 
 
   /**
-   * @param {http.ClientRequest} req
-   * @param {http.ServerResponse} res
-   * @param {Object} ctx
+   * @param {http.ClientRequest} req request
+   * @param {http.ServerResponse} res response
+   * @param {object} ctx context
    */
   async handlerGetRoot(req, res, ctx) {
     const _scope = _fileScope('handlerGetRoot');
@@ -129,9 +132,9 @@ class Service extends Dingus {
 
 
   /**
-   * @param {http.ClientRequest} req
-   * @param {http.ServerResponse} res
-   * @param {Object} ctx
+   * @param {http.ClientRequest} req request
+   * @param {http.ServerResponse} res response
+   * @param {object} ctx context
    */
   async handlerGetHealthcheck(req, res, ctx) {
     const _scope = _fileScope('handlerGetHealthcheck');
@@ -146,9 +149,9 @@ class Service extends Dingus {
 
 
   /**
-   * @param {http.ClientRequest} req
-   * @param {http.ServerResponse} res
-   * @param {Object} ctx
+   * @param {http.ClientRequest} req request
+   * @param {http.ServerResponse} res response
+   * @param {object} ctx context
    */
   async handlerGetInfo(req, res, ctx) {
     const _scope = _fileScope('handlerGetInfo');
@@ -179,9 +182,9 @@ class Service extends Dingus {
 
 
   /**
-   * @param {http.ClientRequest} req
-   * @param {http.ServerResponse} res
-   * @param {Object} ctx
+   * @param {http.ClientRequest} req request
+   * @param {http.ServerResponse} res response
+   * @param {object} ctx context
    */
   async handlerGetAdminOverview(req, res, ctx) {
     const _scope = _fileScope('handlerGetAdminOverview');
@@ -198,9 +201,9 @@ class Service extends Dingus {
 
 
   /**
-   * @param {http.ClientRequest} req
-   * @param {http.ServerResponse} res
-   * @param {Object} ctx
+   * @param {http.ClientRequest} req request
+   * @param {http.ServerResponse} res response
+   * @param {object} ctx context
    */
   async handlerGetAdminTopicDetails(req, res, ctx) {
     const _scope = _fileScope('handlerGetAdminTopicDetails');
@@ -218,9 +221,10 @@ class Service extends Dingus {
 
   /**
    * If no body was sent, do not parse (and thus avoid possible unsupported media type error).
-   * @param {http.ClientRequest} req
-   * @param {http.ServerResponse} res
-   * @param {Object} ctx
+   * @param {http.ClientRequest} req request
+   * @param {http.ServerResponse} res response
+   * @param {object} ctx context
+   * @returns {Promise<object>} parsed body
    */
   async maybeIngestBody(req, res, ctx) {
     return super.ingestBody(req, res, ctx, {
@@ -230,9 +234,9 @@ class Service extends Dingus {
 
 
   /**
-   * @param {http.ClientRequest} req
-   * @param {http.ServerResponse} res
-   * @param {Object} ctx
+   * @param {http.ClientRequest} req request
+   * @param {http.ServerResponse} res response
+   * @param {object} ctx context
    */
   async handlerUpdateTopic(req, res, ctx) {
     const _scope = _fileScope('handlerUpdateTopic');
@@ -249,9 +253,9 @@ class Service extends Dingus {
 
 
   /**
-   * @param {http.ClientRequest} req
-   * @param {http.ServerResponse} res
-   * @param {Object} ctx
+   * @param {http.ClientRequest} req request
+   * @param {http.ServerResponse} res response
+   * @param {object} ctx context
    */
   async handlerUpdateSubscription(req, res, ctx) {
     const _scope = _fileScope('handlerUpdateSubscription');
@@ -268,9 +272,9 @@ class Service extends Dingus {
   
 
   /**
-   * @param {http.ClientRequest} req
-   * @param {http.ServerResponse} res
-   * @param {Object} ctx
+   * @param {http.ClientRequest} req request
+   * @param {http.ServerResponse} res response
+   * @param {object} ctx context
    */
   async handlerPostAdminProcess(req, res, ctx) {
     const _scope = _fileScope('handlerPostAdminProcess');
@@ -286,9 +290,9 @@ class Service extends Dingus {
 
   /**
    * Delegate login to authentication module.
-   * @param {http.ClientRequest} req
-   * @param {http.ServerResponse} res
-   * @param {Object} ctx
+   * @param {http.ClientRequest} req request
+   * @param {http.ServerResponse} res response
+   * @param {object} ctx context
    */
   async handlerGetAdminLogin(req, res, ctx) {
     const _scope = _fileScope('handlerGetAdminLogin');
@@ -304,9 +308,9 @@ class Service extends Dingus {
 
   /**
    * Delegate login to authentication module.
-   * @param {http.ClientRequest} req
-   * @param {http.ServerResponse} res
-   * @param {Object} ctx
+   * @param {http.ClientRequest} req request
+   * @param {http.ServerResponse} res response
+   * @param {object} ctx context
    */
   async handlerPostAdminLogin(req, res, ctx) {
     const _scope = _fileScope('handlerPostAdminLogin');
@@ -324,9 +328,9 @@ class Service extends Dingus {
 
   /**
    * Delegate login to authentication module.
-   * @param {http.ClientRequest} req
-   * @param {http.ServerResponse} res
-   * @param {Object} ctx
+   * @param {http.ClientRequest} req request
+   * @param {http.ServerResponse} res response
+   * @param {object} ctx context
    */
   async handlerGetAdminLogout(req, res, ctx) {
     const _scope = _fileScope('handlerGetAdminLogout');
@@ -342,9 +346,9 @@ class Service extends Dingus {
 
   /**
    * Delegate login to authentication module.
-   * @param {http.ClientRequest} req
-   * @param {http.ServerResponse} res
-   * @param {Object} ctx
+   * @param {http.ClientRequest} req request
+   * @param {http.ServerResponse} res response
+   * @param {object} ctx context
    */
   async handlerGetAdminIA(req, res, ctx) {
     const _scope = _fileScope('handlerGetAdminIA');

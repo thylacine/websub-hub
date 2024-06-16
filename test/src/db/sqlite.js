@@ -1,12 +1,8 @@
-/* eslint-disable sonarjs/no-identical-functions */
-/* eslint-env mocha */
-/* eslint-disable sonarjs/no-duplicate-string */
 'use strict';
 
 /* This provides implementation coverage, stubbing parts of better-sqlite3. */
 
-const assert = require('assert');
-// eslint-disable-next-line node/no-unpublished-require
+const assert = require('node:assert');
 const sinon = require('sinon');
 const DBStub = require('../../stub-db');
 const stubLogger = require('../../stub-logger');

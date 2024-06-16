@@ -19,11 +19,23 @@ const optionsDefaults = {
   maxItems: undefined,
 };
 
+/**
+ *
+ * @param {number} percent grey value
+ * @returns {string} rgb value
+ */
 function grey(percent) {
   const value = Math.round(95 * (1.0 - percent));
   return `rgb(${value}%, ${value}%, ${value}%)`;
 }
 
+/**
+ *
+ * @param {object} options options
+ * @param {number} width width
+ * @param {number} height height
+ * @returns {string} svg element
+ */
 function svgHeader(options, width, height) {
   return [
     `<svg
@@ -43,6 +55,12 @@ preserveAspectRatio="xMinYMin meet"`,
   ];
 }
 
+/**
+ *
+ * @param {options} options options
+ * @param {number} width width
+ * @returns {string} element
+ */
 function svgFrame(options, width) {
   if (!options.frameColor) {
     return '';
@@ -52,6 +70,12 @@ function svgFrame(options, width) {
 \t</g>\n`;
 }
 
+/**
+ *
+ * @param {object} options options
+ * @param {number} width width
+ * @returns {string} element
+ */
 function svgTicks(options, width) {
   if (!options.tickEvery) {
     return '';
@@ -68,6 +92,13 @@ function svgTicks(options, width) {
 \t</g>\n`;
 }
 
+/**
+ *
+ * @param {object} options options
+ * @param {number} width width
+ * @param {number} height height
+ * @returns {string} element
+ */
 function svgLabels(options, width, height) {
   const labels = [];
   if (!options.labelHeight) {
@@ -85,10 +116,21 @@ function svgLabels(options, width, height) {
   return labels;
 }
 
+/**
+ * @returns {string} element
+ */
 function svgFooter() {
   return '</svg>';
 }
 
+/**
+ *
+ * @param {object} options options
+ * @param {number} value value
+ * @param {number} index index
+ * @param {number} maxValue max value
+ * @returns {string} element
+ */
 function svgBar(options, value, index, maxValue) {
   const id = `i${index}`;
   const x = options.barWidth * index;
@@ -113,7 +155,10 @@ function svgBar(options, value, index, maxValue) {
 }
 
 module.exports = (items, options = {}) => {
-  options = Object.assign({}, optionsDefaults, options);
+  options = {
+    ...optionsDefaults,
+    ...options,
+  };
 
   const maxValue = items.reduce((a, b) => Math.max(a, b), 0);
   const hasLabel = !!options.labelX || !!options.labelZero;

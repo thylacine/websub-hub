@@ -1,10 +1,7 @@
-/* eslint-env mocha */
-/* eslint-disable capitalized-comments, sonarjs/no-duplicate-string */
-
 'use strict';
 
-const assert = require('assert');
-const sinon = require('sinon'); // eslint-disable-line node/no-unpublished-require
+const assert = require('node:assert');
+const sinon = require('sinon');
 
 const Communication = require('../../src/communication');
 const Config = require('../../config');

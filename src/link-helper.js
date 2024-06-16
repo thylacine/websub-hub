@@ -15,6 +15,12 @@ const { Iconv } = require('iconv');
 
 const _fileScope = common.fileScope(__filename);
 
+/**
+ * Helper for accessing headers
+ * @param {object} headers header object
+ * @param {string} header header name
+ * @returns {string} header content
+ */
 function getHeader(headers, header) {
   return headers[header.toLowerCase()];
 }
@@ -30,10 +36,10 @@ class LinkHelper {
 
   /**
    * Determine if this hub is listed in response data from url.
-   * @param {String} url
-   * @param {Object} headers
-   * @param {String|Buffer} body
-   * @returns {Boolean}
+   * @param {string} url content url
+   * @param {object} headers headers from accessing url
+   * @param {string | Buffer} body body from accessing url
+   * @returns {Promise<boolean>} url lists this hub
    */
   async validHub(url, headers, body) {
     const _scope = _fileScope('validHub');
@@ -98,14 +104,17 @@ class LinkHelper {
 
 
   /**
+   * @typedef {object} ContentType
+   * @property {string} mediaType media type
+   * @property {object} params map of parameters
+   */
+  /**
    * Convert a Content-Type string to normalized components.
    * RFC7231 §3.1.1
    * N.B. this non-parser implementation will not work if a parameter
    * value for some reason includes a ; or = within a quoted-string.
-   * @param {String} contentTypeHeader
-   * @returns {Object} contentType
-   * @returns {String} contentType.mediaType
-   * @returns {Object} contentType.params
+   * @param {string} contentTypeHeader content type header
+   * @returns {ContentType} contentType
    */
   static parseContentType(contentTypeHeader) {
     const [ mediaType, ...params ] = (contentTypeHeader || '').split(/ *; */);
@@ -113,7 +122,7 @@ class LinkHelper {
       mediaType: mediaType.toLowerCase() || Enum.ContentType.ApplicationOctetStream,
       params: params.reduce((obj, param) => {
         const [field, value] = param.split('=');
-        const isQuoted = value.charAt(0) === '"' && value.charAt(value.length - 1) === '"';
+        const isQuoted = value.startsWith('"') && value.endsWith('"');
         obj[field.toLowerCase()] = isQuoted ? value.slice(1, value.length - 1) : value;
         return obj;
       }, {}),
@@ -123,9 +132,9 @@ class LinkHelper {
 
   /**
    * Parse XML-ish feed content, extracting link elements into our own format.
-   * @param {String} feedurl
-   * @param {String} body
-   * @returns {Object[]}
+   * @param {string} feedurl feed url
+   * @param {string} body feed body
+   * @returns {Promise<object[]>} array of link elements
    */
   async linksFromFeedBody(feedurl, body) {
     const _scope = _fileScope('linksFromFeedBody');
@@ -179,7 +188,8 @@ class LinkHelper {
 
   /**
    * Parse HTML-ish content, extracting link elements into our own format.
-   * @param {String} body
+   * @param {string} body html body
+   * @returns {object[]} array of link elements
    */
   linksFromHTMLBody(body) {
     const _scope = _fileScope('linksFromHTMLBody');
@@ -207,18 +217,18 @@ class LinkHelper {
 
   /**
    * Attempt to resolve a relative target URI
-   * @param {String} uri
-   * @param {String} context
-   * @returns {String}
+   * @param {string} uri target
+   * @param {string} context base
+   * @returns {string} uri
    */
   absoluteURI(uri, context) {
     const _scope = _fileScope('absoluteURI');
     try {
       new URL(uri);
-    } catch (e) {
+    } catch (e) { // eslint-disable-line no-unused-vars
       try {
         uri = new URL(uri, context).href;
-      } catch (e) {
+      } catch (e) { // eslint-disable-line no-unused-vars
         this.logger.debug(_scope, 'could not resolve link URI', { uri, context });
       }
     }
@@ -228,8 +238,8 @@ class LinkHelper {
 
   /**
    * Return all link targets with a hub relation.
-   * @param {Object[]} links
-   * @returns {String[]}
+   * @param {object[]} links array of link objects
+   * @returns {string[]} array of hub targets
    */
   static locateHubTargets(links) {
     return links

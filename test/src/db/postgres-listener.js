@@ -1,8 +1,8 @@
 /* eslint-env mocha */
 'use strict';
 
-const assert = require('assert');
-const sinon = require('sinon'); // eslint-disable-line node/no-unpublished-require
+const assert = require('node:assert');
+const sinon = require('sinon');
 const stubLogger = require('../../stub-logger');
 const Listener = require('../../../src/db/postgres/listener');
 

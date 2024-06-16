@@ -70,7 +70,7 @@ class DatabaseSQLite extends Database {
     let metaExists = tableExists.get();
     if (metaExists === undefined) {
       const fPath = path.join(__dirname, 'sql', 'schema', 'init.sql');
-      // eslint-disable-next-line security/detect-non-literal-fs-filename
+       
       const fSql = fs.readFileSync(fPath, { encoding: 'utf8' });
       this.db.exec(fSql);
       metaExists = tableExists.get();
@@ -131,7 +131,7 @@ class DatabaseSQLite extends Database {
       };
     };
 
-    // eslint-disable-next-line security/detect-non-literal-fs-filename
+     
     for (const f of fs.readdirSync(sqlDir)) {
       const fPath = path.join(sqlDir, f);
       const { name: fName, ext: fExt } = path.parse(f);
@@ -241,7 +241,7 @@ class DatabaseSQLite extends Database {
         'verification_in_progress',
         'subscription',
         'subscription_delivery_in_progress',
-      ].map((table) => {
+      ].forEach((table) => {
         const result = this.db.prepare(`DELETE FROM ${table}`).run();
         this.logger.debug(_fileScope('_purgeTables'), 'success', { table, result });
       });
@@ -310,7 +310,8 @@ class DatabaseSQLite extends Database {
 
   /**
    * Converts engine subscription fields to native types.
-   * @param {Object} data
+   * @param {object} data subscription data
+   * @returns {object} data
    */
   static _subscriptionDataToNative(data) {
     if (data) {
@@ -704,7 +705,8 @@ class DatabaseSQLite extends Database {
 
   /**
    * Converts engine topic fields to native types.
-   * @param {Object} data
+   * @param {object} data topic
+   * @returns {object} topic data
    */
   static _topicDataToNative(data) {
     if (data) {
@@ -992,7 +994,7 @@ class DatabaseSQLite extends Database {
 
   /**
    * Converts engine verification fields to native types.
-   * @param {Object} data
+   * @param {object} data verification
    */
   static _verificationDataToNative(data) {
     if (data) {
@@ -1046,6 +1048,7 @@ class DatabaseSQLite extends Database {
 
   /**
    * Convert native verification fields to engine types.
+   * @param {object} data verification
    */
   static _verificationDataToEngine(data) {
     if (data) {

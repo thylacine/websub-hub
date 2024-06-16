@@ -1,7 +1,7 @@
 /* eslint-env mocha */
 'use strict';
 
-const assert = require('assert');
+const assert = require('node:assert');
 const th = require('../../../src/template/template-helper');
 
 describe('Template Helper', function () {

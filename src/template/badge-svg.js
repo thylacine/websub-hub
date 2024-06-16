@@ -13,6 +13,12 @@ const ctxDefaults = {
 };
 
 
+/**
+ *
+ * @param {number} n number
+ * @param {number} p precision
+ * @returns {number} rounded
+ */
 function fixedRound(n, p = 2) {
   return Number(n.toFixed(p));
 }
@@ -20,19 +26,21 @@ function fixedRound(n, p = 2) {
 
 /**
  * image/svg+xml;charset=utf-8 formatted badge with subscriber count for a topic
- * @param {Object} ctx - badge-specific context (not request context)
- * @param {String} label
- * @param {String} message
- * @param {String} accessibleText
- * @returns {String}
+ * @param {object} ctx - badge-specific context (not request context)
+ * @param {string} label label
+ * @param {string} message message
+ * @param {string} accessibleText accessible text
+ * @returns {string} svg element
  */
 module.exports = (ctx, label, message, accessibleText) => {
 
-  ctx = Object.assign({}, ctxDefaults, ctx, {
+  ctx = {
+    ...ctxDefaults,
+    ...ctx,
     label,
     message,
     accessibleText,
-  });
+  };
   ctx.verticalMargin = fixedRound(ctx.height * 0.69);
   ctx.labelWidth = fixedRound(ctx.label.length * ctx.charWidth);
   ctx.messageWidth = fixedRound(ctx.message.length * ctx.charWidth);

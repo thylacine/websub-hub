@@ -5,10 +5,10 @@ const { Message } = require('../enum');
 
 /**
  * Render a topic as a row of details.
- * @param {Object} topic
- * @param {Object[]} subscribers
- * @param {Boolean} detailsLink
- * @returns {String}
+ * @param {object} topic topic
+ * @param {object[]} subscribers subscribers
+ * @param {boolean} detailsLink link to details
+ * @returns {string} html
  */
 function renderTopicRow(topic, subscribers, detailsLink = true) {
   if (!topic) {
@@ -38,7 +38,7 @@ function renderTopicRow(topic, subscribers, detailsLink = true) {
 
 /**
  * Render the header row for topic details.
- * @returns {String}
+ * @returns {string} html
  */
 function renderTopicRowHeader() {
   return `<tr>
@@ -63,8 +63,8 @@ function renderTopicRowHeader() {
 
 /**
  * Render a subscription as a row of details.
- * @param {Object} subscription
- * @returns {String}
+ * @param {object} subscription subscription
+ * @returns {string} html
  */
 function renderSubscriptionRow(subscription) {
   if (!subscription) {
@@ -91,7 +91,7 @@ function renderSubscriptionRow(subscription) {
 
 /**
  * Render a row of headers for subscription details.
- * @returns {String}
+ * @returns {string} html
  */
 function renderSubscriptionRowHeader() {
   return `<tr>
@@ -114,7 +114,8 @@ function renderSubscriptionRowHeader() {
 
 /**
  * Escape some xml things in strings.
- * @param {String} string
+ * @param {string} string string to escape
+ * @returns {string} escaped
  */
 function xmlEscape(string) {
   if (typeof string === 'number') {

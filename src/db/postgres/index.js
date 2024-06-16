@@ -45,12 +45,13 @@ class DatabasePostgres extends Database {
     this.noWarnings = options.db.noWarnings;
 
     if (options.db.cacheEnabled) {
-      this.listener = new Listener(logger, this.db, Object.assign({}, options.db.listener, {
+      this.listener = new Listener(logger, this.db, {
+        ...options.db.listener,
         channel: 'topic_changed',
         dataCallback: this._topicChanged.bind(this),
         connectionEstablishedCallback: this._listenerEstablished.bind(this),
         connectionLostCallback: this._listenerLost.bind(this),
-      }));
+      });
     }
 
     // Log queries
@@ -58,7 +59,7 @@ class DatabasePostgres extends Database {
     if (queryLogLevel) {
       pgpInitOptions.query = (event) => {
         // Quell outgoing pings
-        if (event && event.query && event.query.startsWith('NOTIFY')) {
+        if (event?.query?.startsWith('NOTIFY')) {
           return;
         }
         this.logger[queryLogLevel](_fileScope('pgp:query'), '', { ...common.pick(event || {}, ['query', 'params']) });
@@ -256,7 +257,7 @@ class DatabasePostgres extends Database {
   /**
    * Receive notices when topic entry is updated.
    * Clear relevant cache entry.
-   * @param {String} payload
+   * @param {string} payload topic changed event
    */
   _topicChanged(payload) {
     const _scope = _fileScope('_topicChanged');
@@ -291,11 +292,12 @@ class DatabasePostgres extends Database {
 
   /**
    * Return a cached entry, if available.
-   * @param {*} key
+   * @param {*} key key
+   * @returns {object=} cached data
    */
   _cacheGet(key) {
     const _scope = _fileScope('_cacheGet');
-    if (this.cache && this.cache.has(key)) {
+    if (this.cache?.has(key)) {
       const cacheEntry = this.cache.get(key);
       this.logger.debug(_scope, 'found cache entry', { key, ...common.pick(cacheEntry, ['added', 'hits', 'lastHit']) });
       cacheEntry.hits += 1;
@@ -307,8 +309,8 @@ class DatabasePostgres extends Database {
 
   /**
    * Store an entry in cache, if available.
-   * @param {*} key
-   * @param {*} data
+   * @param {*} key key
+   * @param {*} data data
    */
   _cacheSet(key, data) {
     const _scope = _fileScope('_cacheSet');

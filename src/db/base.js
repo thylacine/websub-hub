@@ -26,9 +26,9 @@ class Database {
   /**
    * Turn a snake into a camel.
    * Used when translating SQL column names to JS object style.
-   * @param {String} snakeCase
-   * @param {String|RegExp} delimiter
-   * @returns {String}
+   * @param {string} snakeCase snake case string
+   * @param {string | RegExp} delimiter default '_'
+   * @returns {string} camelCaseString
    */
   static _camelfy(snakeCase, delimiter = '_') {
     if (!snakeCase || typeof snakeCase.split !== 'function') {
@@ -44,9 +44,9 @@ class Database {
 
   /**
    * Basic type checking of object properties.
-   * @param {Object} object
-   * @param {String[]} properties
-   * @param {String[]} types
+   * @param {object} object object
+   * @param {string[]} properties list of property names
+   * @param {string[]} types list of valid types for property names
    */
   _ensureTypes(object, properties, types) {
     const _scope = _fileScope('_ensureTypes');
@@ -73,8 +73,8 @@ class Database {
 
   /**
    * Interface methods need implementations.
-   * @param {String} method
-   * @param {arguments} args
+   * @param {string} method method name
+   * @param {arguments} args arguments
    */
   _notImplemented(method, args) {
     this.logger.error(_fileScope(method), 'abstract method called', Array.from(args));
@@ -88,7 +88,8 @@ class Database {
    * At the minimum, this will validate a compatible schema is present and usable.
    * Some engines will also perform other initializations or async actions which
    * are easier handled outside the constructor.
-  */
+   * @returns {Promise<void>}
+   */
   async initialize() {
     const _scope = _fileScope('initialize');
 
@@ -107,6 +108,7 @@ class Database {
 
   /**
    * Perform db connection healthcheck.
+   * @returns {Promise<void>}
    */
   async healthCheck() {
     this._notImplemented('healthCheck', arguments);
@@ -115,8 +117,8 @@ class Database {
 
   /**
    * Replace any NULL from topic DB entry with default values.
-   * @param {Object} topic
-   * @returns {Object}
+   * @param {object} topic topic entry
+   * @returns {object} updated topic entry
    */
   _topicDefaults(topic) {
     if (topic) {
@@ -134,7 +136,7 @@ class Database {
 
   /**
    * Ensures any lease durations in data are consistent.
-   * @param {Object} data
+   * @param {object} data topic data
    */
   _leaseDurationsValidate(data) {
     const leaseProperties = Object.keys(this.topicLeaseDefaults);
@@ -156,7 +158,7 @@ class Database {
 
   /**
    * Basic field validation for setting topic data.
-   * @param {Object} data
+   * @param {object} data topic data
    */
   _topicSetDataValidate(data) {
     this._ensureTypes(data, ['url'], ['string']);
@@ -167,7 +169,7 @@ class Database {
 
   /**
    * Basic field validation for setting topic content.
-   * @param {Object} data
+   * @param {object} data topic data
    */
   _topicSetContentDataValidate(data) {
     this._ensureTypes(data, ['content'], ['string', 'buffer']);
@@ -180,7 +182,7 @@ class Database {
 
   /**
    * Basic field validation for updating topic.
-   * @param {Object} data
+   * @param {object} data topic data
    */
   _topicUpdateDataValidate(data) {
     this._ensureTypes(data, ['publisherValidationUrl'], ['string', 'undefined', 'null']);
@@ -201,7 +203,7 @@ class Database {
 
   /**
    * Basic field validation for setting verification data.
-   * @param {Object} data
+   * @param {object} data topic data
    */
   _verificationDataValidate(data) {
     this._ensureTypes(data, ['topicId'], ['string', 'number']);
@@ -214,7 +216,7 @@ class Database {
 
   /**
    * Basic field validation for updating verification data.
-   * @param {Object} verification
+   * @param {object} data verification data
    */
   _verificationUpdateDataValidate(data) {
     this._ensureTypes(data, ['verificationId'], ['string', 'number']);
@@ -226,7 +228,7 @@ class Database {
 
   /**
    * Basic field validation for upserting subscription data.
-   * @param {Object} subscription
+   * @param {object} data subscription data
    */
   _subscriptionUpsertDataValidate(data) {
     this._ensureTypes(data, ['topicId'], ['string', 'number']);
@@ -236,6 +238,10 @@ class Database {
   }
 
 
+  /**
+   * Basic field validation for subscription update data.
+   * @param {object} data subscription data
+   */
   _subscriptionUpdateDataValidate(data) {
     this._ensureTypes(data, ['signatureAlgorithm'], ['string', 'null', 'undefined']);
     if (!common.validHash(data.signatureAlgorithm)) {
@@ -247,12 +253,14 @@ class Database {
   /* Interface methods */
 
   /**
+   * @typedef {object} CommonDBInfo
+   * @property {number} changes result changes
+   * @property {*} lastInsertRowid result row id
+   * @property {number} duration result duration
+   */
+  /**
    * Normalize query information to a common form from a specific backend.
-   * @param {*} result
-   * @returns {Object} info
-   * @returns {Number} info.changes
-   * @returns {*} info.lastInsertRowid
-   * @returns {Number} info.duration
+   * @param {*} result db result
    */
   _engineInfo(result) {
     this._notImplemented('engineInfo', arguments);
@@ -260,12 +268,15 @@ class Database {
 
 
   /**
+   * @typedef {object} SchemaVersion
+   * @property {number} major semver major
+   * @property {number} minor semver minor
+   * @property {number} patch semver patch
+   */
+  /**
    * Query the current schema version.
    * This is a standalone query function, as it is called before statements are loaded.
-   * @returns {Object} version
-   * @returns {Number} version.major
-   * @returns {Number} version.minor
-   * @returns {Number} version.patch
+   * @returns {SchemaVersion} schema version
    */
   async _currentSchema() {
     this._notImplemented('_currentSchema', arguments);
@@ -283,7 +294,7 @@ class Database {
 
   /**
    * Wrap a function call in a transaction context.
-   * @param {*} dbCtx
+   * @param {*} dbCtx db context
    * @param {Function} fn fn(txCtx)
    */
   async transaction(dbCtx, fn) {
@@ -293,8 +304,8 @@ class Database {
 
   /**
    * Store an authentication success event.
-   * @param {*} dbCtx
-   * @param {String} identifier
+   * @param {*} dbCtx db context
+   * @param {string} identifier authentication identifier
    */
   async authenticationSuccess(dbCtx, identifier) {
     this._notImplemented('authenticationSuccess', arguments);
@@ -303,8 +314,8 @@ class Database {
 
   /**
    * Fetch authentication data for identifier.
-   * @param {*} dbCtx
-   * @param {*} identifier
+   * @param {*} dbCtx db context
+   * @param {*} identifier authentication identifier
    */
   async authenticationGet(dbCtx, identifier) {
     this._notImplemented('authenticationGet', arguments);
@@ -313,9 +324,9 @@ class Database {
 
   /**
    * Create or update an authentication entity.
-   * @param {*} dbCtx
-   * @param {String} identifier
-   * @param {String} credential
+   * @param {*} dbCtx db context
+   * @param {string} identifier authentication identifier
+   * @param {string} credential authentication credential
    */
   async authenticationUpsert(dbCtx, identifier, credential) {
     this._notImplemented('authenticationUpsert', arguments);
@@ -324,8 +335,8 @@ class Database {
 
   /**
    * All subscriptions to a topic.
-   * @param {*} dbCtx
-   * @param {String} topicId
+   * @param {*} dbCtx db context
+   * @param {string} topicId topic id
    */
   async subscriptionsByTopicId(dbCtx, topicId) {
     this._notImplemented('subscriptionsByTopicId', arguments);
@@ -334,8 +345,8 @@ class Database {
 
   /**
    * Number of subscriptions to a topic.
-   * @param {*} dbCtx
-   * @param {String} topicUrl
+   * @param {*} dbCtx db context
+   * @param {string} topicUrl topic url
    */
   async subscriptionCountByTopicUrl(dbCtx, topicUrl) {
     this._notImplemented('subscriptionCountByTopicUrl', arguments);
@@ -344,9 +355,9 @@ class Database {
 
   /**
    * Remove an existing subscription.
-   * @param {*} dbCtx
-   * @param {String} callback
-   * @param {*} topicId
+   * @param {*} dbCtx db context
+   * @param {string} callback subscriber callback url
+   * @param {*} topicId topic id
    */
   async subscriptionDelete(dbCtx, callback, topicId) {
     this._notImplemented('subscriptionDelete', arguments);
@@ -355,8 +366,8 @@ class Database {
 
   /**
    * Remove any expired subscriptions to a topic.
-   * @param {*} dbCtx
-   * @param {*} topicId
+   * @param {*} dbCtx db context
+   * @param {*} topicId topic id
    */
   async subscriptionDeleteExpired(dbCtx, topicId) {
     this._notImplemented('subscriptionDeleteExpired', arguments);
@@ -364,11 +375,14 @@ class Database {
 
 
   /**
+   * @alias {number} Integer
+   */
+  /**
    * Claim subscriptions needing content updates attempted.
-   * @param {*} dbCtx 
-   * @param {Number} wanted maximum subscription updates to claim
+   * @param {*} dbCtx  db context
+   * @param {number} wanted maximum subscription updates to claim
    * @param {Integer} claimTimeoutSeconds age of claimed updates to reclaim
-   * @param {String} claimant
+   * @param {string} claimant worker claiming processing
    * @returns {Array} list of subscriptions
    */
   async subscriptionDeliveryClaim(dbCtx, wanted, claimTimeoutSeconds, claimant) {
@@ -378,10 +392,10 @@ class Database {
 
   /**
    * Claim a subscription delivery.
-   * @param {*} dbCtx 
-   * @param {*} subscriptionId 
-   * @param {*} claimTimeoutSeconds 
-   * @param {*} claimant 
+   * @param {*} dbCtx db context
+   * @param {*} subscriptionId subscription id
+   * @param {number} claimTimeoutSeconds duration of claim
+   * @param {*} claimant worker claiming processing
    */
   async subscriptionDeliveryClaimById(dbCtx, subscriptionId, claimTimeoutSeconds, claimant) {
     this._notImplemented('subscriptionDeliveryClaimById', arguments);
@@ -390,9 +404,9 @@ class Database {
 
   /**
    * A subscriber successfully received new topic content, update subscription.
-   * @param {*} dbCtx 
-   * @param {String} callback
-   * @param {*} topicId
+   * @param {*} dbCtx db context
+   * @param {string} callback subscriber callback url
+   * @param {*} topicId topic id
    */
   async subscriptionDeliveryComplete(dbCtx, callback, topicId) {
     this._notImplemented('subscriptionDeliveryComplete', arguments);
@@ -401,9 +415,9 @@ class Database {
 
   /**
    * A subscriber denied new topic content, remove subscription.
-   * @param {*} dbCtx 
-   * @param {String} callback
-   * @param {*} topicId
+   * @param {*} dbCtx db context
+   * @param {string} callback subscriber callback url
+   * @param {*} topicId topic id
    */
   async subscriptionDeliveryGone(dbCtx, callback, topicId) {
     this._notImplemented('subscriptionDeliveryGone', arguments);
@@ -412,10 +426,10 @@ class Database {
 
   /**
    * An attempt to deliver content to a subscriber did not complete, update delivery accordingly.
-   * @param {*} dbCtx 
-   * @param {String} callback
-   * @param {*} topicId
-   * @param {Number[]} retryDelays
+   * @param {*} dbCtx db context
+   * @param {string} callback subscriber callback url
+   * @param {*} topicId topic id
+   * @param {number[]} retryDelays list of retry delays
    */
   async subscriptionDeliveryIncomplete(dbCtx, callback, topicId, retryDelays) {
     this._notImplemented('subscriptionDeliveryIncomplete', arguments);
@@ -424,9 +438,9 @@ class Database {
 
   /**
    * Fetch subscription details
-   * @param {*} dbCtx
-   * @param {String} callback
-   * @param {*} topicId
+   * @param {*} dbCtx db context
+   * @param {string} callback subscriber callback url
+   * @param {*} topicId topic id
    */
   async subscriptionGet(dbCtx, callback, topicId) {
     this._notImplemented('subscriptionGet', arguments);
@@ -435,8 +449,8 @@ class Database {
   
   /**
    * Fetch subscription details
-   * @param {*} dbCtx 
-   * @param {*} subscriptionId 
+   * @param {*} dbCtx db context
+   * @param {*} subscriptionId subscription id
    */
   async subscriptionGetById(dbCtx, subscriptionId) {
     this._notImplemented('subscriptionGetById', arguments);
@@ -445,14 +459,14 @@ class Database {
 
   /**
    * Set subscription details
-   * @param {*} dbCtx
-   * @param {Object} data
-   * @param {String} data.callback
-   * @param {*} data.topicId
-   * @param {Number} data.leaseSeconds
-   * @param {String=} data.secret
-   * @param {String=} data.httpRemoteAddr
-   * @param {String=} data.httpFrom
+   * @param {*} dbCtx db context
+   * @param {object} data subscription data
+   * @param {string} data.callback subscriber callback url
+   * @param {*} data.topicId topic id
+   * @param {number} data.leaseSeconds lease seconds
+   * @param {string=} data.secret secret
+   * @param {string=} data.httpRemoteAddr subscriber info
+   * @param {string=} data.httpFrom subscriber info
    */
   async subscriptionUpsert(dbCtx, data) {
     this._notImplemented('subscriptionUpsert', arguments);
@@ -461,10 +475,10 @@ class Database {
 
   /**
    * Set some subscription fields
-   * @param {*} dbCtx
-   * @param {Object} data
-   * @param {*} data.subscriptionId
-   * @param {String} data.signatureAlgorithm
+   * @param {*} dbCtx db context
+   * @param {object} data subscription data
+   * @param {*} data.subscriptionId subscription id
+   * @param {string} data.signatureAlgorithm signature algorithm
    */
   async subscriptionUpdate(dbCtx, data) {
     this._notImplemented('subscriptionUpdate', arguments);
@@ -473,8 +487,8 @@ class Database {
 
   /**
    * Sets the isDeleted flag on a topic, and reset update time.
-   * @param {*} txCtx
-   * @param {*} topicId
+   * @param {*} dbCtx db context
+   * @param {*} topicId topic id
    */
   async topicDeleted(dbCtx, topicId) {
     this._notImplemented('topicDeleted', arguments);
@@ -483,10 +497,10 @@ class Database {
 
   /**
    * Claim topics to fetch updates for, from available.
-   * @param {*} dbCtx 
+   * @param {*} dbCtx db context
    * @param {Integer} wanted maximum topic fetches to claim
    * @param {Integer} claimTimeoutSeconds age of claimed topics to reclaim
-   * @param {String} claimant node id claiming these fetches
+   * @param {string} claimant node id claiming these fetches
    */
   async topicFetchClaim(dbCtx, wanted, claimTimeoutSeconds, claimant) {
     this._notImplemented('topicFetchClaim', arguments);
@@ -495,10 +509,10 @@ class Database {
 
   /**
    * Claim a topic to update.
-   * @param {*} dbCtx 
-   * @param {*} topicId 
+   * @param {*} dbCtx db context
+   * @param {*} topicId topic id
    * @param {Integer} claimTimeoutSeconds age of claimed topics to reclaim
-   * @param {String} claimant node id claiming these fetches
+   * @param {string} claimant node id claiming these fetches
    */
   async topicFetchClaimById(dbCtx, topicId, claimTimeoutSeconds, claimant) {
     this._notImplemented('topicFetchClaim', arguments);
@@ -507,8 +521,8 @@ class Database {
 
   /**
    * Reset publish state, and reset deliveries for subscribers.
-   * @param {*} dbCtx 
-   * @param {*} topicId
+   * @param {*} dbCtx db context
+   * @param {*} topicId topic id
    */
   async topicFetchComplete(dbCtx, topicId) {
     this._notImplemented('topicFetchComplete', arguments);
@@ -517,9 +531,9 @@ class Database {
 
   /**
    * Bump count of attempts and release claim on update.
-   * @param {*} dbCtx 
-   * @param {*} topicId
-   * @param {Number[]} retryDelays
+   * @param {*} dbCtx db context
+   * @param {*} topicId topic id
+   * @param {number[]} retryDelays retry delays
    */
   async topicFetchIncomplete(dbCtx, topicId, retryDelays) {
     this._notImplemented('topicFetchIncomplete', arguments);
@@ -528,9 +542,8 @@ class Database {
 
   /**
    * Set a topic as ready to be checked for an update.
-   * @param {*} dbCtx
-   * @param {*} topicId
-   * @returns {Boolean}
+   * @param {*} dbCtx db context
+   * @param {*} topicId topic id
    */
   async topicFetchRequested(dbCtx, topicId) {
     this._notImplemented('topicPublish', arguments);
@@ -539,7 +552,7 @@ class Database {
 
   /**
    * Get all data for all topics, including subscription count.
-   * @param {*} dbCtx
+   * @param {*} dbCtx db context
    */
   async topicGetAll(dbCtx) {
     this._notImplemented('topicGetAll', arguments);
@@ -548,9 +561,9 @@ class Database {
 
   /**
    * Get topic data, without content.
-   * @param {*} dbCtx 
-   * @param {String} topicUrl
-   * @param {Boolean} applyDefaults
+   * @param {*} dbCtx db context
+   * @param {string} topicUrl topic url
+   * @param {boolean} applyDefaults merge defaults into result
    */
   async topicGetByUrl(dbCtx, topicUrl, applyDefaults = true) {
     this._notImplemented('topicGetByUrl', arguments);
@@ -559,9 +572,9 @@ class Database {
 
   /**
    * Get topic data, without content.
-   * @param {*} dbCtx 
-   * @param {*} topicId
-   * @param {Boolean} applyDefaults
+   * @param {*} dbCtx db context
+   * @param {*} topicId topic id
+   * @param {boolean} applyDefaults merge defaults into result
    */
   async topicGetById(dbCtx, topicId, applyDefaults = true) {
     this._notImplemented('topicGetById', arguments);
@@ -570,10 +583,10 @@ class Database {
 
   /**
    * Returns topic data with content.
-   * @param {*} dbCx
-   * @param {*} topicId
+   * @param {*} dbCtx db context
+   * @param {*} topicId topic id
    */
-  async topicGetContentById(dbCx, topicId) {
+  async topicGetContentById(dbCtx, topicId) {
     this._notImplemented('topicGetContentById', arguments);
   }
 
@@ -581,7 +594,8 @@ class Database {
   /**
    * Attempt to delete a topic, which must be set isDeleted, if there
    * are no more subscriptions belaying its removal.
-   * @param {*} topicId
+   * @param {*} dbCtx db context
+   * @param {*} topicId topic id
    */
   async topicPendingDelete(dbCtx, topicId) {
     this._notImplemented('topicPendingDelete', arguments);
@@ -590,10 +604,10 @@ class Database {
 
   /**
    * Return an array of the counts of the last #days of topic updates.
-   * @param {*} dbCtx
-   * @param {*} topicId
-   * @param {Number} days
-   * @returns {Number[]}
+   * @param {*} dbCtx db context
+   * @param {*} topicId topic id
+   * @param {number} days days back to count
+   * @returns {number[]} updates in last days
    */
   async topicPublishHistory(dbCtx, topicId, days) {
     this._notImplemented('topicPublishHistory', arguments);
@@ -601,9 +615,12 @@ class Database {
 
 
   /**
+   * @alias {object} TopicData
+   */
+  /**
    * Create or update the basic parameters of a topic.
-   * @param {*} dbCtx 
-   * @param {TopicData} data
+   * @param {*} dbCtx db context
+   * @param {TopicData} data topic data
    */
   async topicSet(dbCtx, data) {
     this._notImplemented('topicSet', arguments);
@@ -612,13 +629,14 @@ class Database {
 
   /**
    * Updates a topic's content data and content update timestamp.
-   * @param {Object} data
-   * @param {*} data.topicId
-   * @param {String} data.content
-   * @param {String} data.contentHash
-   * @param {String=} data.contentType
-   * @param {String=} data.eTag
-   * @param {String=} data.lastModified
+   * @param {*} dbCtx db context
+   * @param {object} data topic data
+   * @param {*} data.topicId topic id
+   * @param {string} data.content content
+   * @param {string} data.contentHash content hash
+   * @param {string=} data.contentType content-type
+   * @param {string=} data.eTag etag header
+   * @param {string=} data.lastModified last modified header
    */
   async topicSetContent(dbCtx, data) {
     this._notImplemented('topicSetContent', arguments);
@@ -627,14 +645,14 @@ class Database {
 
   /**
    * Set some topic fields.
-   * @param {*} dbCtx
-   * @param {Object} data
-   * @param {*} data.topicId
-   * @param {Number=} data.leaseSecondsPreferred
-   * @param {Number=} data.leaseSecondsMin
-   * @param {Number=} data.leaseSecondsMax
-   * @param {String=} data.publisherValidationUrl
-   * @param {String=} data.contentHashAlgorithm
+   * @param {*} dbCtx db context
+   * @param {object} data topic data
+   * @param {*} data.topicId topic id
+   * @param {number=} data.leaseSecondsPreferred preferred topic lease seconds
+   * @param {number=} data.leaseSecondsMin min lease seconds
+   * @param {number=} data.leaseSecondsMax max lease seconds
+   * @param {string=} data.publisherValidationUrl publisher validation url
+   * @param {string=} data.contentHashAlgorithm content hash algorithm
    */
   async topicUpdate(dbCtx, data) {
     this._notImplemented('topicUpdate', arguments);
@@ -642,10 +660,14 @@ class Database {
 
 
   /**
+   * @alias {object} Verification
+   */
+  /**
    * Claim pending verifications for attempted resolution.
-   * @param {*} dbCtx 
+   * @param {*} dbCtx db context
    * @param {Integer} wanted maximum verifications to claim
    * @param {Integer} claimTimeoutSeconds age of claimed verifications to reclaim
+   * @param {*} claimant worker claiming processing
    * @returns {Verification[]} array of claimed verifications
    */
   async verificationClaim(dbCtx, wanted, claimTimeoutSeconds, claimant) {
@@ -655,10 +677,10 @@ class Database {
 
   /**
    * Claim a specific verification by id, if no other similar verification claimed.
-   * @param {*} dbCtx
-   * @param {*} verificationId
-   * @param {Number} claimTimeoutSeconds
-   * @param {String} claimant
+   * @param {*} dbCtx db context
+   * @param {*} verificationId verification id
+   * @param {number} claimTimeoutSeconds claim duration
+   * @param {string} claimant worker claiming processing
    */
   async verificationClaimById(dbCtx, verificationId, claimTimeoutSeconds, claimant) {
     this._notImplemented('verificationClaimById', arguments);
@@ -666,12 +688,12 @@ class Database {
 
 
   /**
-   * Remove the verification, any older
-   * verifications for that same client/topic, and the claim.
-   * @param {*} dbCtx
-   * @param {*} verificationId
-   * @param {String} callback
-   * @param {*} topicId
+   * Remove the verification, any older verifications for that same client/topic,
+   * and remove the claim.
+   * @param {*} dbCtx db context
+   * @param {*} verificationId verification id
+   * @param {string} callback subscriber callback url
+   * @param {*} topicId topic id
    */
   async verificationComplete(dbCtx, verificationId, callback, topicId) {
     this._notImplemented('verificationComplete', arguments);
@@ -680,8 +702,8 @@ class Database {
 
   /**
    * Get verification data.
-   * @param {*} dbCtx
-   * @param {*} verificationId
+   * @param {*} dbCtx db context
+   * @param {*} verificationId verification id
    */
   async verificationGetById(dbCtx, verificationId) {
     this._notImplemented('verificationGetById', arguments);
@@ -691,10 +713,9 @@ class Database {
   /**
    * Update database that a client verification was unable to complete.
    * This releases the delivery claim and reschedules for some future time.
-   * @param {*} dbCtx
-   * @param {String} callback client callback url
-   * @param {*} topicId internal topic id
-   * @param {Number[]} retryDelays
+   * @param {*} dbCtx db context
+   * @param {*} verificationId verification id
+   * @param {number[]} retryDelays retry delays
    */
   async verificationIncomplete(dbCtx, verificationId, retryDelays) {
     this._notImplemented('verificationIncomplete', arguments);
@@ -702,10 +723,12 @@ class Database {
 
 
   /**
+   * @alias {object} VerificationData
+   */
+  /**
    * Create a new pending verification.
-   * @param {*} dbCtx
-   * @param {VerificationData} data
-   * @param {Boolean} claim
+   * @param {*} dbCtx db context
+   * @param {VerificationData} verification verification data
    * @returns {*} verificationId
    */
   async verificationInsert(dbCtx, verification) {
@@ -715,9 +738,8 @@ class Database {
 
   /**
    * Relinquish the claim on a verification, without any other updates.
-   * @param {*} dbCtx
-   * @param {String} callback client callback url
-   * @param {*} topicId internal topic id
+   * @param {*} dbCtx db context
+   * @param {*} verificationId verification id
    */
   async verificationRelease(dbCtx, verificationId) {
     this._notImplemented('verificationRelease', arguments);
@@ -726,12 +748,12 @@ class Database {
 
   /**
    * Updates some fields of an existing (presumably claimed) verification.
-   * @param {*} dbCtx
-   * @param {*} verificationId
-   * @param {Object} data
-   * @param {String} data.mode
-   * @param {String} data.reason
-   * @param {Boolean} data.isPublisherValidated
+   * @param {*} dbCtx db context
+   * @param {*} verificationId verification id
+   * @param {object} data verification data
+   * @param {string} data.mode mode
+   * @param {string} data.reason reason
+   * @param {boolean} data.isPublisherValidated publisher validation result
    */
   async verificationUpdate(dbCtx, verificationId, data) {
     this._notImplemented('verificationUpdate', arguments);
@@ -740,8 +762,8 @@ class Database {
 
   /**
    * Sets the isPublisherValidated flag on a verification and resets the delivery
-   * @param {*} dbCtx
-   * @param {*} verificationId
+   * @param {*} dbCtx db context
+   * @param {*} verificationId verification id
    */
   async verificationValidated(dbCtx, verificationId) {
     this._notImplemented('verificationValidated', arguments);

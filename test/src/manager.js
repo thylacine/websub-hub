@@ -1,10 +1,7 @@
-/* eslint-env mocha */
-/* eslint-disable capitalized-comments, sonarjs/no-duplicate-string, sonarjs/no-identical-functions */
-
 'use strict';
 
-const assert = require('assert');
-const sinon = require('sinon'); // eslint-disable-line node/no-unpublished-require
+const assert = require('node:assert');
+const sinon = require('sinon');
 
 const Manager = require('../../src/manager');
 const Config = require('../../config');

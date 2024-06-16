@@ -1,7 +1,6 @@
-/* eslint-env mocha */
 'use strict';
 
-const assert = require('assert');
+const assert = require('node:assert');
 const common = require('../../src/common');
 
 describe('Common', function () {

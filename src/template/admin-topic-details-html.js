@@ -4,13 +4,13 @@ const th = require('./template-helper');
 
 /**
  * Show a topic with all of its subscribers.
- * @param {Object} ctx
- * @param {Object} ctx.topic
- * @param {Object[]} ctx.subscriptions
- * @param {Object} options
- * @param {Object} options.manager
- * @param {String} options.manager.pageTitle
- * @returns {String}
+ * @param {object} ctx context
+ * @param {object} ctx.topic topic
+ * @param {object[]} ctx.subscriptions subscriptions
+ * @param {object} options options
+ * @param {object} options.manager manager options
+ * @param {string} options.manager.pageTitle page title
+ * @returns {string} html
  */
 module.exports = (ctx, options) => {
   const pageTitle = `${options.manager.pageTitle} - Topic Details`;
@@ -62,7 +62,7 @@ module.exports = (ctx, options) => {
     th.renderSubscriptionRowHeader(),
     `          </thead>
           <tbody>`,
-    ...(ctx.subscriptions && ctx.subscriptions.map(th.renderSubscriptionRow)),
+    ...((ctx?.subscriptions || []).map(th.renderSubscriptionRow)),
     `          </tbody>
         </table>
       </section>`,

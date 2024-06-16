@@ -19,17 +19,18 @@ const randomBytesAsync = promisify(randomBytes);
 
 /**
  * The HMAC hashes we are willing to support.
- * @param {String} algorithm
- * @returns {Boolean}
+ * @param {string} algorithm potential sha* algorithm
+ * @returns {boolean} is supported
  */
 const validHash = (algorithm) => getHashes()
-  .filter((h) => h.match(/^sha[0-9]+$/))
+  .filter((h) => h.match(/^sha\d+$/))
   .includes(algorithm);
 
 
 /**
  * Return an array containing x if x is not an array.
- * @param {*} x
+ * @param {*} x possibly an array
+ * @returns {Array} x or [x]
  */
 const ensureArray = (x) => {
   if (x === undefined) {
@@ -44,13 +45,13 @@ const ensureArray = (x) => {
 
 /**
  * Recursively freeze an object.
- * @param {Object} o 
- * @returns {Object}
+ * @param {object} o object
+ * @returns {object} frozen object
  */
 const freezeDeep = (o) => {
   Object.freeze(o);
   Object.getOwnPropertyNames(o).forEach((prop) => {
-    if (Object.hasOwnProperty.call(o, prop)
+    if (Object.hasOwn(o, prop)
     &&  ['object', 'function'].includes(typeof o[prop])
     &&  !Object.isFrozen(o[prop])) {
       return freezeDeep(o[prop]);
@@ -62,8 +63,8 @@ const freezeDeep = (o) => {
 
 /**
  * Pick out useful got response fields.
- * @param {*} res 
- * @returns 
+ * @param {*} res response
+ * @returns {object} winnowed response
  */
 const gotResponseLogData = (res) => {
   const data = common.pick(res, [
@@ -93,7 +94,7 @@ const gotResponseLogData = (res) => {
 
 /**
  * Fallback values, if not configured.
- * @returns {Object}
+ * @returns {object} object
  */
 const topicLeaseDefaults = () => {
   return Object.freeze({
@@ -106,10 +107,10 @@ const topicLeaseDefaults = () => {
 
 /**
  * Pick from a range, constrained, with some fuzziness.
- * @param {Number} attempt
- * @param {Number[]} delays
- * @param {Number} jitter
- * @returns {Number}
+ * @param {number} attempt attempt number
+ * @param {number[]=} retryBackoffSeconds array of indexed delays
+ * @param {number=} jitter vary backoff by up to this fraction additional
+ * @returns {number} seconds to delay retry
  */
 const attemptRetrySeconds = (attempt, retryBackoffSeconds = [60, 120, 360, 1440, 7200, 43200, 86400], jitter = 0.618) => {
   const maxAttempt = retryBackoffSeconds.length - 1;
@@ -118,7 +119,7 @@ const attemptRetrySeconds = (attempt, retryBackoffSeconds = [60, 120, 360, 1440,
   } else if (attempt > maxAttempt) {
     attempt = maxAttempt;
   }
-  // eslint-disable-next-line security/detect-object-injection
+   
   let seconds = retryBackoffSeconds[attempt];
   seconds += Math.floor(Math.random() * seconds * jitter);
   return seconds;
@@ -127,8 +128,9 @@ const attemptRetrySeconds = (attempt, retryBackoffSeconds = [60, 120, 360, 1440,
 
 /**
  * Return array items split as an array of arrays of no more than per items each.
- * @param {Array} array
- * @param {Number} per
+ * @param {Array} array items
+ * @param {number} per chunk size
+ * @returns {Array[]} array of chunks
  */
 const arrayChunk = (array, per = 1) => {
   const nChunks = Math.ceil(array.length / per);
@@ -138,8 +140,8 @@ const arrayChunk = (array, per = 1) => {
 
 /**
  * Be paranoid about blowing the stack when pushing to an array.
- * @param {Array} dst
- * @param {Array} src
+ * @param {Array} dst destination array
+ * @param {Array} src source array
  */
 const stackSafePush = (dst, src) => {
   const jsEngineMaxArguments = 2**16; // Current as of Node 12
@@ -151,9 +153,9 @@ const stackSafePush = (dst, src) => {
 
 /**
  * Limit length of string to keep logs sane
- * @param {String} str 
- * @param {Number} len 
- * @returns {String}
+ * @param {string} str string
+ * @param {number} len max length
+ * @returns {string} truncated string
  */
 const logTruncate = (str, len) => {
   if (typeof str !== 'string' || str.toString().length <= len) {
