@@ -73,7 +73,7 @@ function renderSubscriptionRow(subscription) {
 </tr>`;
   }
   return `<tr>
-  <td scope="row">${subscription.callback}</td>
+  <td>${subscription.callback}</td>
   <td>${TemplateHelper.dateFormat(subscription.created, Message.EndOfTime, Message.BeginningOfTime, Message.Unknown)}</td>
   <td>${TemplateHelper.dateFormat(subscription.verified, Message.EndOfTime, Message.Never, Message.Never)}</td>
   <td>${TemplateHelper.dateFormat(subscription.expires, Message.Never, Message.BeginningOfTime, Message.Never)}</td>

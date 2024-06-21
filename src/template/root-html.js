@@ -31,7 +31,7 @@ function aboutSection() {
           This is a <a class="external" href="https://www.w3.org/TR/websub/">WebSub</a> Hub service.
         </p>
         <p>
-          It facilitates the timely distribution of new content from publishers to subscribers.  
+          It facilitates the timely distribution of new content from publishers to subscribers.
         </p>
         <aside>
           The typical use-case is where the content is a blog or news feed, but any type of content may be syndicated.
@@ -106,7 +106,7 @@ function usageSection(isPublicHub, hubURL) {
               </code>
             </figure>
           </li>
-        <ul>
+        </ul>
       </div>
       <div>
         <h3>Publishing Updates</h3>

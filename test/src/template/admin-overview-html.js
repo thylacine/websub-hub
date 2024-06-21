@@ -14,21 +14,21 @@ describe('Admin Overview HTML Template', function () {
     config = new Config('test');
   });
 
-  it('covers missing topics', function () {
+  it('covers missing topics', async function () {
     const result = template(ctx, config);
-    lintHtml(result);
+    await lintHtml(result);
     assert(result);
   });
-  it('covers single topic', function () {
+  it('covers single topic', async function () {
     ctx.topics = [{}];
     const result = template(ctx, config);
-    lintHtml(result);
+    await lintHtml(result);
     assert(result);
   });
-  it('covers plural topics', function () {
+  it('covers plural topics', async function () {
     ctx.topics = [{}, {}, {}];
     const result = template(ctx, config);
-    lintHtml(result);
+    await lintHtml(result);
     assert(result);
   });
 });

@@ -22,28 +22,28 @@ describe('Admin Topic Details HTML Template', function () {
     config = new Config('test');
   });
 
-  it('renders', function () {
+  it('renders', async function () {
     const result = template(ctx, config);
-    lintHtml(result);
+    await lintHtml(result);
     assert(result);
   });
-  it('covers null topic', function () {
+  it('covers null topic', async function () {
     ctx.topic = null;
     ctx.subscriptions = null;
     const result = template(ctx, config);
-    lintHtml(result);
+    await lintHtml(result);
     assert(result);
   });
-  it('covers missing subscriptions', function () {
+  it('covers missing subscriptions', async function () {
     delete ctx.subscriptions;
     const result = template(ctx, config);
-    lintHtml(result);
+    await lintHtml(result);
     assert(result);
   });
-  it('covers plural subscriptions', function () {
+  it('covers plural subscriptions', async function () {
     ctx.subscriptions = [{}, {}, {}];
     const result = template(ctx, config);
-    lintHtml(result);
+    await lintHtml(result);
     assert(result);
   });
 });

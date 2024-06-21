@@ -53,7 +53,7 @@
   "devDependencies": {
     "@squeep/eslint-config": "^1",
     "eslint": "^9",
-    "html-minifier-lint": "^2",
+    "html-validate": "^8",
     "mocha": "^10",
     "mocha-steps": "^1",
     "nyc": "^17",
