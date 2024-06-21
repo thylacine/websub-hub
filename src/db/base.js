@@ -12,9 +12,8 @@ const svh = require('./schema-version-helper');
 const _fileScope = common.fileScope(__filename);
 
 class Database {
-  constructor(logger = common.nullLogger, options = {}) {
+  constructor(logger, options = {}) {
     this.logger = logger;
-    common.ensureLoggerLevels(this.logger);
 
     // Store the merged config and default values for lease values.
     // N.B. breaking hierarchy of config options here
@@ -327,9 +326,32 @@ class Database {
    * @param {*} dbCtx db context
    * @param {string} identifier authentication identifier
    * @param {string} credential authentication credential
+   * @param {string=} otpKey authentication otp key
    */
-  async authenticationUpsert(dbCtx, identifier, credential) {
+  async authenticationUpsert(dbCtx, identifier, credential, otpKey) {
     this._notImplemented('authenticationUpsert', arguments);
+  }
+
+
+  /**
+   * Update an authentication entity's otp key.
+   * @param {*} dbCtx db context
+   * @param {string} identifier authentication identifier
+   * @param {string=} otpKey authentication otp key
+   */
+  async authenticationUpdateOTPKey(dbCtx, identifier, otpKey) {
+    this._notImplemented('authenticationUpdateKey', arguments);
+  }
+
+
+  /**
+   * Update an authentication entity's credential.
+   * @param {*} dbCtx db context
+   * @param {string} identifier authentication identifier
+   * @param {string} credential authentication credential
+   */
+  async authenticationUpdateCredential(dbCtx, identifier, credential) {
+    this._notImplemented('authenticationUpdateKey', arguments);
   }
 
 

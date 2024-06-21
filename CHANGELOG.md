@@ -2,6 +2,16 @@
 
 Releases and notable changes to this project are documented here.
 
+## [unreleased] - TBD
+
+### Added
+
+- Account credential management interface.
+
+### Fixed
+
+- Dependency updates.
+
 ## [v1.3.11] - 2023-03-22
 
 ### Fixed

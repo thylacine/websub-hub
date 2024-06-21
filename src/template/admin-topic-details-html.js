@@ -1,6 +1,7 @@
 'use strict';
 
 const th = require('./template-helper');
+const { sessionNavLinks } = require('@squeep/authentication-module');
 
 /**
  * Show a topic with all of its subscribers.
@@ -13,6 +14,7 @@ const th = require('./template-helper');
  * @returns {string} html
  */
 module.exports = (ctx, options) => {
+  const pagePathLevel = 2;
   const pageTitle = `${options.manager.pageTitle} - Topic Details`;
   const logoUrl = options.manager.logoUrl;
   const navLinks = [
@@ -27,11 +29,14 @@ module.exports = (ctx, options) => {
   }
 
   const htmlOptions = {
+    pageIdentifier: 'admin',
     pageTitle,
     logoUrl,
     navLinks,
     footerEntries,
   };
+  th.navLinks(pagePathLevel, ctx, htmlOptions);
+  sessionNavLinks(pagePathLevel, ctx, htmlOptions);
 
   const content = [
     `      <section class="topics">
@@ -68,5 +73,5 @@ module.exports = (ctx, options) => {
       </section>`,
   ];
 
-  return th.htmlPage(2, ctx, htmlOptions, content);
+  return th.htmlPage(pagePathLevel, ctx, htmlOptions, content);
 };

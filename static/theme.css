@@ -1,4 +1,3 @@
-* {}
 html {
 	height: 100vh;
 }
@@ -86,6 +85,9 @@ section + section {
 }
 .errors ul {
 	border: 1px solid red;
+}
+.otp-key-qr svg {
+	height: 30vh;
 }
 table {
 	border: 0;

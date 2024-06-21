@@ -5,6 +5,11 @@ const common = require('../src/common');
 const defaultEnvironment = 'development';
 const testEnvironment = 'test';
 
+/**
+ * Merge environment-specific config objects on top of defaults.
+ * @param {string=} environment from NODE_ENV
+ * @returns {object} config
+ */
 function Config(environment) {
   environment = environment || defaultEnvironment;
   const defaultConfig = require('./default');

@@ -164,6 +164,8 @@ const logTruncate = (str, len) => {
   return str.toString().slice(0, len) + `... (${str.toString().length} bytes)`;
 };
 
+const nop = () => undefined;
+
 module.exports = {
   ...common,
   arrayChunk,
@@ -172,6 +174,7 @@ module.exports = {
   ensureArray,
   freezeDeep,
   logTruncate,
+  nop,
   randomBytesAsync,
   stackSafePush,
   topicLeaseDefaults,

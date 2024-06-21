@@ -12,6 +12,8 @@ const stubFns = [
   'authenticationSuccess',
   'authenticationGet',
   'authenticationUpsert',
+  'authenticationUpdateCredential',
+  'authenticationUpdateOTPKey',
   'healthCheck',
   'initialize',
   'subscriptionsByTopicId',

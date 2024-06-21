@@ -134,7 +134,30 @@ function xmlEscape(string) {
   }[c]));
 }
 
+
+/**
+ * Add common site links to navigation header.
+ * @param {number} pagePathLevel depth from root
+ * @param {object} ctx context
+ * @param {object} options options
+ */
+function navLinks(pagePathLevel, ctx, options) {
+  if (!options.navLinks) {
+    options.navLinks = [];
+  }
+  const rootPath = '../'.repeat(pagePathLevel);
+
+  if (options.pageIdentifier !== 'admin') {
+    options.navLinks.push({
+      text: 'Admin',
+      href: `${rootPath}admin/`,
+    });
+  }
+}
+
+
 module.exports = Object.assign(Object.create(TemplateHelper), {
+  navLinks,
   xmlEscape,
   renderTopicRowHeader,
   renderTopicRow,

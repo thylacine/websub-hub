@@ -19,8 +19,8 @@ const schemaVersionsSupported = {
   },
   max: {
     major: 1,
-    minor: 0,
-    patch: 4,
+    minor: 1,
+    patch: 0,
   },
 };
 
@@ -48,7 +48,7 @@ class DatabaseSQLite extends Database {
     this.db = new SQLite(dbFilename, sqliteOptions);
     this.schemaVersionsSupported = schemaVersionsSupported;
     this.changesSinceLastOptimize = BigInt(0);
-    this.optimizeAfterChanges = options.db.connectionString.optimizeAfterChanges;
+    this.optimizeAfterChanges = options.db.optimizeAfterChanges;
     this.db.pragma('foreign_keys = on'); // Enforce consistency.
     this.db.pragma('journal_mode = WAL'); // Be faster, expect local filesystem.
     this.db.defaultSafeIntegers(true); // This probably isn't necessary, but by using these BigInts we keep weird floats out of the query logs.
@@ -290,16 +290,53 @@ class DatabaseSQLite extends Database {
   }
 
 
-  authenticationUpsert(dbCtx, identifier, credential) {
+  authenticationUpsert(dbCtx, identifier, credential, otpKey) {
     const _scope = _fileScope('authenticationUpsert');
+    const scrubbedCredential = '*'.repeat((credential || '').length);
+    const scrubbedOTPKey = '*'.repeat((otpKey || '').length) || null;
+    this.logger.debug(_scope, 'called', { identifier, scrubbedCredential, scrubbedOTPKey });
+
+    let result;
+    try {
+      result = this.statement.authenticationUpsert.run({ identifier, credential, otpKey });
+      if (result.changes != 1) {
+        throw new DBErrors.UnexpectedResult('did not upsert authentication');
+      }
+    } catch (e) {
+      this.logger.error(_scope, 'failed', { error: e, identifier, scrubbedCredential, scrubbedOTPKey });
+      throw e;
+    }
+  }
+
+
+  authenticationUpdateOTPKey(dbCtx, identifier, otpKey) {
+    const _scope = _fileScope('authenticationUpdateOTPKey');
+    const scrubbedOTPKey = '*'.repeat((otpKey || '').length) || null;
+    this.logger.debug(_scope, 'called', { identifier, scrubbedOTPKey });
+
+    let result;
+    try {
+      result = this.statement.authenticationUpdateOtpKey.run({ identifier, otpKey });
+      if (result.changes != 1) {
+        throw new DBErrors.UnexpectedResult('did not update authentication otp key');
+      }
+    } catch (e) {
+      this.logger.error(_scope, 'failed', { error: e, identifier, scrubbedOTPKey });
+      throw e;
+    }
+  }
+
+
+  authenticationUpdateCredential(dbCtx, identifier, credential) {
+    const _scope = _fileScope('authenticationUpdateCredential');
     const scrubbedCredential = '*'.repeat((credential || '').length);
     this.logger.debug(_scope, 'called', { identifier, scrubbedCredential });
 
     let result;
     try {
-      result = this.statement.authenticationUpsert.run({ identifier, credential });
+      result = this.statement.authenticationUpdateCredential.run({ identifier, credential });
       if (result.changes != 1) {
-        throw new DBErrors.UnexpectedResult('did not upsert authentication');
+        throw new DBErrors.UnexpectedResult('did not update authentication credential');
       }
     } catch (e) {
       this.logger.error(_scope, 'failed', { error: e, identifier, scrubbedCredential });

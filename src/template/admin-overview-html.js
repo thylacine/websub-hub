@@ -1,6 +1,7 @@
 'use strict';
 
 const th = require('./template-helper');
+const { sessionNavLinks } = require('@squeep/authentication-module');
 
 /**
  * Show a summary of all topics.
@@ -12,6 +13,7 @@ const th = require('./template-helper');
  * @returns {string} html
  */
 module.exports = (ctx, options) => {
+  const pagePathLevel = 1;
   const pageTitle = `${options.manager.pageTitle} - Topics`;
   const logoUrl = options.manager.logoUrl;
   const footerEntries = options.manager.footerEntries;
@@ -20,10 +22,13 @@ module.exports = (ctx, options) => {
   }
 
   const htmlOptions = {
+    pageIdentifier: 'admin',
     pageTitle,
     logoUrl,
     footerEntries,
   };
+  th.navLinks(pagePathLevel, ctx, htmlOptions);
+  sessionNavLinks(pagePathLevel, ctx, htmlOptions);
 
   const content = [
     `      <section class="topics">
@@ -39,5 +44,5 @@ module.exports = (ctx, options) => {
       </section>`,
   ];
 
-  return th.htmlPage(1, ctx, htmlOptions, content);
+  return th.htmlPage(pagePathLevel, ctx, htmlOptions, content);
 };

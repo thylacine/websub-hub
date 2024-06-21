@@ -1,9 +1,10 @@
 --
 INSERT INTO authentication
-	(identifier, credential)
+	(identifier, credential, otp_key)
 VALUES
-	(:identifier, :credential)
+	(:identifier, :credential, :otpKey)
 ON CONFLICT (identifier) DO UPDATE
 SET
 	identifier = :identifier,
-	credential = :credential
+	credential = :credential,
+	otp_key = :otpKey

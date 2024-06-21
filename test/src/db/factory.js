@@ -2,16 +2,16 @@
 
 const assert = require('node:assert');
 const sinon = require('sinon');
-const common = require('../../../src/common');
 const DB = require('../../../src/db');
 const DBErrors = require('../../../src/db/errors');
 const DatabasePostgres = require('../../../src/db/postgres');
 const DatabaseSQLite = require('../../../src/db/sqlite');
+const stubLogger = require('../../stub-logger');
 
 describe('DatabaseFactory', function () {
   let logger, options;
   beforeEach(function () {
-    logger = common.nullLogger;
+    logger = stubLogger,
     options = {
       db: {
         connectionString: '',

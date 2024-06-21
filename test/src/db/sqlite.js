@@ -43,6 +43,12 @@ describe('DatabaseSQLite', function () {
     sinon.restore();
   });
 
+  it('covers options', function () {
+    const xoptions = new Config('test');
+    delete xoptions.db.connectionString;
+    db = new DB(stubLogger, xoptions);
+  });
+
   // Ensure all interface methods are implemented
   describe('Implementation', function () {
     it('implements interface', async function () {
@@ -337,6 +343,36 @@ describe('DatabaseSQLite', function () {
   }); // authenticationGet
 
   describe('authenticationUpsert', function () {
+    let identifier, credential, otpKey;
+    beforeEach(function () {
+      identifier = 'username';
+      credential = '$z$foo';
+      otpKey = '12345678901234567890123456789012';
+    });
+    it('success', async function() {
+      const dbResult = {
+        changes: 1,
+        lastInsertRowid: undefined,
+      };
+      sinon.stub(db.statement.authenticationUpsert, 'run').returns(dbResult);
+      await db.authenticationUpsert(dbCtx, identifier, credential, otpKey);
+    });
+    it('failure', async function () {
+      const dbResult = {
+        changes: 0,
+        lastInsertRowid: undefined,
+      };
+      sinon.stub(db.statement.authenticationUpsert, 'run').returns(dbResult);
+      try {
+        await db.authenticationUpsert(dbCtx, identifier, credential, otpKey);
+        assert.fail(noExpectedException);
+      } catch (e) {
+        assert(e instanceof DBErrors.UnexpectedResult);
+      }
+    });
+  }); // authenticationUpsert
+
+  describe('authenticationUpdateCredential', function () {
     let identifier, credential;
     beforeEach(function () {
       identifier = 'username';
@@ -347,17 +383,46 @@ describe('DatabaseSQLite', function () {
         changes: 1,
         lastInsertRowid: undefined,
       };
-      sinon.stub(db.statement.authenticationUpsert, 'run').returns(dbResult);
-      await db.authenticationUpsert(dbCtx, identifier, credential);
+      sinon.stub(db.statement.authenticationUpdateCredential, 'run').returns(dbResult);
+      await db.authenticationUpdateCredential(dbCtx, identifier, credential);
     });
     it('failure', async function () {
       const dbResult = {
         changes: 0,
         lastInsertRowid: undefined,
       };
-      sinon.stub(db.statement.authenticationUpsert, 'run').returns(dbResult);
+      sinon.stub(db.statement.authenticationUpdateCredential, 'run').returns(dbResult);
       try {
-        await db.authenticationUpsert(dbCtx, identifier, credential);
+        await db.authenticationUpdateCredential(dbCtx, identifier, credential);
+        assert.fail(noExpectedException);
+      } catch (e) {
+        assert(e instanceof DBErrors.UnexpectedResult);
+      }
+    });
+  }); // authenticationUpdateCredential
+
+  describe('authenticationUpdateOTPKey', function () {
+    let identifier, otpKey;
+    beforeEach(function () {
+      identifier = 'username';
+      otpKey = '12345678901234567890123456789012';
+    });
+    it('success', async function() {
+      const dbResult = {
+        changes: 1,
+        lastInsertRowid: undefined,
+      };
+      sinon.stub(db.statement.authenticationUpdateOtpKey, 'run').returns(dbResult);
+      await db.authenticationUpdateOTPKey(dbCtx, identifier, otpKey);
+    });
+    it('failure', async function () {
+      const dbResult = {
+        changes: 0,
+        lastInsertRowid: undefined,
+      };
+      sinon.stub(db.statement.authenticationUpdateOtpKey, 'run').returns(dbResult);
+      try {
+        await db.authenticationUpdateOTPKey(dbCtx, identifier, otpKey);
         assert.fail(noExpectedException);
       } catch (e) {
         assert(e instanceof DBErrors.UnexpectedResult);
@@ -1040,6 +1105,12 @@ describe('DatabaseSQLite', function () {
       const expected = [];
       sinon.stub(db.statement.topicGetByUrl, 'get').returns(expected);
       const result = await db.topicGetByUrl(dbCtx, topicUrl);
+      assert.deepStrictEqual(result, expected);
+    });
+    it('success, no defaults', async function() {
+      const expected = [];
+      sinon.stub(db.statement.topicGetByUrl, 'get').returns(expected);
+      const result = await db.topicGetByUrl(dbCtx, topicUrl, false);
       assert.deepStrictEqual(result, expected);
     });
     it('failure', async function () {
