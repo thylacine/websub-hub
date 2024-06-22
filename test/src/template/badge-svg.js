@@ -1,9 +1,8 @@
 /* eslint-env mocha */
 'use strict';
 
-const assert = require('assert');
+const assert = require('node:assert');
 const template = require('../../../src/template/badge-svg');
-const Config = require('../../../config');
 
 describe('Badge SVG Template', function () {
   let ctx, label, message, accessibleText;

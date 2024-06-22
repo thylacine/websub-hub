@@ -1,7 +1,14 @@
 'use strict';
 
 const th = require('./template-helper');
+const { sessionNavLinks } = require('@squeep/authentication-module');
 
+/**
+ *
+ * @param {string} pageTitle page title
+ * @param {string} logoUrl logo url
+ * @returns {string} element
+ */
 function hAppSection(pageTitle, logoUrl) {
   return `      <section hidden class="h-app">
         <h2>h-app Information for IndieAuth Logins</h2>
@@ -14,6 +21,9 @@ function hAppSection(pageTitle, logoUrl) {
       </section>`;
 }
 
+/**
+ * @returns {string} element
+ */
 function aboutSection() {
   return `      <section class="about">
         <h2>What</h2>
@@ -21,7 +31,7 @@ function aboutSection() {
           This is a <a class="external" href="https://www.w3.org/TR/websub/">WebSub</a> Hub service.
         </p>
         <p>
-          It facilitates the timely distribution of new content from publishers to subscribers.  
+          It facilitates the timely distribution of new content from publishers to subscribers.
         </p>
         <aside>
           The typical use-case is where the content is a blog or news feed, but any type of content may be syndicated.
@@ -29,6 +39,12 @@ function aboutSection() {
       </section>`;
 }
 
+/**
+ *
+ * @param {boolean} isPublicHub is public hub
+ * @param {string} hubURL hub url
+ * @returns {string} html
+ */
 function usageSection(isPublicHub, hubURL) {
   const usageContent = isPublicHub ? `      <h2>Public Hub</h2>
       <p>
@@ -90,7 +106,7 @@ function usageSection(isPublicHub, hubURL) {
               </code>
             </figure>
           </li>
-        <ul>
+        </ul>
       </div>
       <div>
         <h3>Publishing Updates</h3>
@@ -121,6 +137,11 @@ ${usageContent}
       </section>`;
 }
 
+/**
+ *
+ * @param {string} contactHTML html
+ * @returns {string} html
+ */
 function contactSection(contactHTML) {
   let section = '';
   if (contactHTML) {
@@ -133,37 +154,37 @@ ${contactHTML}
 
 /**
  * 
- * @param {Object} ctx
- * @param {Object} options
- * @param {Object} options.manager
- * @param {String} options.adminContactHTML
- * @param {String} options.manager.pageTitle
- * @param {String} options.manager.publicHub
- * @param {Object} options.dingus
- * @param {String} options.dingus.selfBaseUrl
- * @returns {String}
+ * @param {object} ctx context
+ * @param {object} options options
+ * @param {object} options.manager manager options
+ * @param {string} options.adminContactHTML html
+ * @param {string} options.manager.pageTitle title
+ * @param {string} options.manager.publicHub is public
+ * @param {object} options.dingus dingus options
+ * @param {string} options.dingus.selfBaseUrl url
+ * @returns {string} html
  */
 module.exports = (ctx, options) => {
+  const pagePathLevel = 0;
   const pageTitle = options.manager.pageTitle;
   const isPublicHub = options.manager.publicHub;
   const contactHTML = options.adminContactHTML;
   const footerEntries = options.manager.footerEntries;
   const hubURL = options.dingus.selfBaseUrl || '<s>https://hub.example.com/</s>';
-  const navLinks = [{
-    href: 'admin/',
-    text: 'Admin',
-  }];
   const htmlOptions = {
+    pageIdentifier: 'root',
     pageTitle,
     logoUrl: options.manager.logoUrl,
     footerEntries,
-    navLinks,
+    navLinks: [],
   };
+  th.navLinks(pagePathLevel, ctx, htmlOptions);
+  sessionNavLinks(pagePathLevel, ctx, htmlOptions);
   const content = [
     aboutSection(),
     usageSection(isPublicHub, hubURL),
     contactSection(contactHTML),
     hAppSection(pageTitle, options.manager.logoUrl),
   ];
-  return th.htmlPage(0, ctx, htmlOptions, content);
+  return th.htmlPage(pagePathLevel, ctx, htmlOptions, content);
 };

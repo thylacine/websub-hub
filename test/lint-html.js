@@ -1,13 +1,9 @@
 'use strict';
 
-const assert = require('assert');
+const { makeHtmlLint } = require('@squeep/html-template-helper');
+const { HtmlValidate } = require('html-validate');
 const stubLogger = require('./stub-logger');
-const { lint } = require('html-minifier-lint'); // eslint-disable-line node/no-unpublished-require
-
-function lintHtml(html) {
-  const result = lint(html);
-  stubLogger.debug('lintHtml', '', { result, html });
-  assert(!result);
-}
+const htmlValidate = new HtmlValidate();
+const lintHtml = makeHtmlLint(stubLogger, htmlValidate);
 
 module.exports = lintHtml;

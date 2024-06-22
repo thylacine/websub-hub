@@ -1,5 +1,3 @@
-/* eslint-env mocha */
-/* eslint-disable sonarjs/no-identical-functions */
 'use strict';
 
 /**
@@ -16,8 +14,8 @@
  * 
  */
 
-const assert = require('assert');
-const { step } = require('mocha-steps'); // eslint-disable-line node/no-unpublished-require
+const assert = require('node:assert');
+const { step } = require('mocha-steps');
 const stubLogger = require('../../stub-logger');
 const DBErrors = require('../../../src/db/errors');
 const testData = require('../../test-data/db-integration');
@@ -85,33 +83,51 @@ describe('Database Integration', function () {
       });
 
       describe('Authentication', function () {
-        let identifier, credential;
+        let identifier, credential, otpKey;
         beforeEach(function () {
           identifier = 'username';
           credential = 'myEncryptedPassword';
+          otpKey = '1234567890123456789012';
         });
-        step('create auth entry', async function() {
+        step('create auth entry', async function () {
           await db.context(async (dbCtx) => {
             await db.authenticationUpsert(dbCtx, identifier, credential);
           });
         });
-        step('get auth entry', async function() {
+        step('get auth entry', async function () {
           await db.context(async (dbCtx) => {
             const authInfo = await db.authenticationGet(dbCtx, identifier);
             assert.strictEqual(authInfo.credential, credential);
           });
         });
-        step('valid auth event', async function() {
+        step('valid auth event', async function () {
           await db.context(async (dbCtx) => {
             await db.authenticationSuccess(dbCtx, identifier);
             const authInfo = await db.authenticationGet(dbCtx, identifier);
             assert.notStrictEqual(authInfo.lastAuthentication, undefined);
           });
         });
-        step('update auth entry', async function() {
+        step('update auth entry', async function () {
           await db.context(async (dbCtx) => {
             credential = 'myNewPassword';
-            await db.authenticationUpsert(dbCtx, identifier, credential);
+            await db.authenticationUpsert(dbCtx, identifier, credential, otpKey);
+            const authInfo = await db.authenticationGet(dbCtx, identifier);
+            assert.strictEqual(authInfo.credential, credential);
+            assert.strictEqual(authInfo.otpKey, otpKey);
+          });
+        });
+        step('update auth otp key', async function () {
+          await db.context(async (dbCtx) => {
+            const removedOTPKey = null;
+            await db.authenticationUpdateOTPKey(dbCtx, identifier, removedOTPKey);
+            const authInfo = await db.authenticationGet(dbCtx, identifier);
+            assert.strictEqual(authInfo.otpKey, removedOTPKey);
+          });
+        });
+        step('update credential', async function () {
+          await db.context(async (dbCtx) => {
+            credential = '$plain$anotherCredential';
+            await db.authenticationUpdateCredential(dbCtx, identifier, credential);
             const authInfo = await db.authenticationGet(dbCtx, identifier);
             assert.strictEqual(authInfo.credential, credential);
           });
@@ -285,7 +301,7 @@ describe('Database Integration', function () {
           const data = {
             ...testData.subscriptionUpsert,
             topicId,
-          }
+          };
           await db.context(async (dbCtx) => {
             const result = await db.subscriptionUpsert(dbCtx, data);
             assert(result.lastInsertRowid);
@@ -364,7 +380,7 @@ describe('Database Integration', function () {
             ...testData.subscriptionUpsert,
             secret: 'newSecret',
             topicId,
-          }
+          };
           await db.context(async (dbCtx) => {
             const result = await db.subscriptionUpsert(dbCtx, data);
             assert(result.lastInsertRowid);
@@ -416,7 +432,7 @@ describe('Database Integration', function () {
         });
         step('delete expired subscriptions', async function() {
           await db.context(async (dbCtx) => {
-            await db.subscriptionDeleteExpired(dbCtx, topicId)
+            await db.subscriptionDeleteExpired(dbCtx, topicId);
             const subscription = await db.subscriptionGet(dbCtx, testData.subscriptionUpsert.callback, topicId);
             assert(!subscription);
           });

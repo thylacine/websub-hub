@@ -1,24 +1,24 @@
-/* eslint-env mocha */
-/* eslint-disable capitalized-comments */
-
 'use strict';
 
-const assert = require('assert');
-const sinon = require('sinon'); // eslint-disable-line node/no-unpublished-require
+const assert = require('node:assert');
+const sinon = require('sinon');
 
 const stubDb = require('../stub-db');
 const stubLogger = require('../stub-logger');
 const Service = require('../../src/service');
 const Config = require('../../config');
+const { AsyncLocalStorage } = require('node:async_hooks');
 
 
 describe('Service', function () {
-  let service, options;
+  let service, options, asyncLocalStorage;
   let req, res, ctx;
 
   beforeEach(function () {
+    asyncLocalStorage = new AsyncLocalStorage();
     options = new Config('test');
-    service = new Service(stubLogger, stubDb, options);
+    service = new Service(stubLogger, stubDb, options, asyncLocalStorage);
+    stubLogger._reset();
     sinon.stub(service.manager);
     sinon.stub(service.sessionManager);
     sinon.stub(service.authenticator);
@@ -45,6 +45,23 @@ describe('Service', function () {
   it('instantiates', function () {
     assert(service);
   });
+
+  describe('preHandler', function () {
+    it('logs requestId', async function () {
+      sinon.stub(service.__proto__.__proto__, 'preHandler').resolves();
+      await service.asyncLocalStorage.run({}, async () => {
+        await service.preHandler(req, res, ctx);
+        const logObject = service.asyncLocalStorage.getStore();
+        assert('requestId' in logObject);
+      });
+    });
+    it('covers weird async context failure', async function () {
+      sinon.stub(service.__proto__.__proto__, 'preHandler').resolves();
+      sinon.stub(service.asyncLocalStorage, 'getStore').returns();
+      await service.preHandler(req, res, ctx);
+      assert(service.logger.debug.called);
+    });
+  }); // preHandler
 
   describe('maybeIngestBody', function () {
     beforeEach(function () {
@@ -171,6 +188,34 @@ describe('Service', function () {
     });
   }); // handlerGetAdminLogin
 
+  describe('handlerGetAdminSettings', function () {
+    it('covers logged in', async function () {
+      service.authenticator.sessionRequiredLocal.resolves(true);
+      await service.handlerGetAdminSettings(req, res, ctx);
+      assert(service.sessionManager.getAdminSettings.called);
+    });
+    it('covers not logged in', async function () {
+      service.authenticator.sessionRequiredLocal.resolves(false);
+      await service.handlerGetAdminSettings(req, res, ctx);
+      assert(service.sessionManager.getAdminSettings.notCalled);
+    });
+  }); // handlerGetAdminSettings
+
+  describe('handlerPostAdminSettings', function () {
+    it('covers logged in', async function () {
+      service.authenticator.sessionRequiredLocal.resolves(true);
+      sinon.stub(service, 'bodyData').resolves();
+      await service.handlerPostAdminSettings(req, res, ctx);
+      assert(service.sessionManager.postAdminSettings.called);
+    });
+    it('covers logged outo', async function () {
+      service.authenticator.sessionRequiredLocal.resolves(false);
+      sinon.stub(service, 'bodyData').resolves();
+      await service.handlerPostAdminSettings(req, res, ctx);
+      assert(service.sessionManager.postAdminSettings.notCalled);
+    });
+  }); // handlerPostAdminSettings
+
   describe('handlerPostAdminLogin', function () {
     it('covers', async function () {
       sinon.stub(service, 'bodyData').resolves();
@@ -184,7 +229,7 @@ describe('Service', function () {
       await service.handlerGetAdminLogout(req, res, ctx);
       assert(service.sessionManager.getAdminLogout.called);
     });
-}); // handlerGetAdminLogout
+  }); // handlerGetAdminLogout
 
   describe('handlerGetAdminIA', function () {
     it('covers', async function () {

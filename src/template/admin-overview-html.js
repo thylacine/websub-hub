@@ -1,17 +1,19 @@
 'use strict';
 
 const th = require('./template-helper');
+const { sessionNavLinks } = require('@squeep/authentication-module');
 
 /**
  * Show a summary of all topics.
- * @param {Object} ctx
- * @param {Object[]} ctx.topics
- * @param {Object} options
- * @param {Object} options.manager
- * @param {String} options.manager.pageTitle
- * @returns {String}
+ * @param {object} ctx context
+ * @param {object[]} ctx.topics topics
+ * @param {object} options options
+ * @param {object} options.manager manager options
+ * @param {string} options.manager.pageTitle page title
+ * @returns {string} html
  */
 module.exports = (ctx, options) => {
+  const pagePathLevel = 1;
   const pageTitle = `${options.manager.pageTitle} - Topics`;
   const logoUrl = options.manager.logoUrl;
   const footerEntries = options.manager.footerEntries;
@@ -20,10 +22,13 @@ module.exports = (ctx, options) => {
   }
 
   const htmlOptions = {
+    pageIdentifier: 'admin',
     pageTitle,
     logoUrl,
     footerEntries,
   };
+  th.navLinks(pagePathLevel, ctx, htmlOptions);
+  sessionNavLinks(pagePathLevel, ctx, htmlOptions);
 
   const content = [
     `      <section class="topics">
@@ -33,11 +38,11 @@ module.exports = (ctx, options) => {
     th.renderTopicRowHeader(),
     `          </thead>
         <tbody>`,
-    ...(ctx.topics && ctx.topics.map((topic) => th.renderTopicRow(topic, { length: topic.subscribers }))),
+    ...((ctx?.topics || []).map((topic) => th.renderTopicRow(topic, { length: topic.subscribers }))),
     `        </tbody>
         </table>
       </section>`,
   ];
 
-  return th.htmlPage(1, ctx, htmlOptions, content);
+  return th.htmlPage(pagePathLevel, ctx, htmlOptions, content);
 };

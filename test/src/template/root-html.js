@@ -1,7 +1,7 @@
 /* eslint-env mocha */
 'use strict';
 
-const assert = require('assert');
+const assert = require('node:assert');
 const template = require('../../../src/template/root-html');
 const Config = require('../../../config');
 const lintHtml = require('../../lint-html');
@@ -14,24 +14,24 @@ describe('Root HTML Template', function () {
     config = new Config('test');
   });
 
-  it('renders', function () {
+  it('renders', async function () {
     const result = template(ctx, config);
-    lintHtml(result);
+    await lintHtml(result);
     assert(result);
   });
 
-  it('covers options', function () {
+  it('covers options', async function () {
     delete config.dingus.selfBaseUrl;
     const result = template(ctx, config);
-    lintHtml(result);
+    await lintHtml(result);
     assert(result);
   });
 
-  it('covers options', function () {
+  it('covers options', async function () {
     config.adminContactHTML = '<div>support</div>';
     config.manager.publicHub = false;
     const result = template(ctx, config);
-    lintHtml(result);
+    await lintHtml(result);
     assert(result);
   });
 

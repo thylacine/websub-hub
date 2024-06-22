@@ -23,7 +23,10 @@ class PostgresListener {
     this.logger = logger;
     this.db = db;
 
-    this.options = Object.assign({}, defaultOptions, options);
+    this.options = {
+      ...defaultOptions,
+      ...options,
+    };
     this.notificationEventName = 'notification';
 
     this.connection = null;
@@ -83,7 +86,7 @@ class PostgresListener {
 
   /**
    * Notify callback.
-   * @param {Object} data
+   * @param {object} data listener notification
    */
   async _onNotification(data) {
     const _scope = _fileScope('_onNotification');
@@ -98,8 +101,8 @@ class PostgresListener {
 
   /**
    * Notify callback and attempt to reconnect.
-   * @param {*} error
-   * @param {*} event
+   * @param {*} error error
+   * @param {*} event event
    */
   async _onConnectionLost(error, event) {
     const _scope = _fileScope('_onConnectionLost');
@@ -122,8 +125,8 @@ class PostgresListener {
 
   /**
    * Schedule an attempt to establish a connection.
-   * @param {Number} delay
-   * @param {Number} retriesRemaining
+   * @param {number} delay reconnect delay
+   * @param {number} retriesRemaining retry countdown
    */
   async _reconnect(delay, retriesRemaining) {
     const _scope = _fileScope('_reconnect');

@@ -1,12 +1,8 @@
-/* eslint-disable sonarjs/no-identical-functions */
-/* eslint-env mocha */
-/* eslint-disable sonarjs/no-duplicate-string */
 'use strict';
 
 /* This provides implementation coverage, stubbing pg-promise. */
 
-const assert = require('assert');
-// eslint-disable-next-line node/no-unpublished-require
+const assert = require('node:assert');
 const sinon = require('sinon');
 const DBStub = require('../../stub-db');
 const stubLogger = require('../../stub-logger');
@@ -65,7 +61,7 @@ describe('DatabasePostgres', function () {
     httpRemoteAddr = '127.0.0.1';
     httpFrom = 'user@example.com';
     wanted = 5;
-});
+  });
   afterEach(function () {
     sinon.restore();
   });
@@ -490,10 +486,11 @@ describe('DatabasePostgres', function () {
   }); // authenticationGet
 
   describe('authenticationUpsert', function () {
-    let identifier, credential;
+    let identifier, credential, otpKey;
     beforeEach(function () {
       identifier = 'username';
       credential = '$z$foo';
+      otpKey = '12345678901234567890123456789012';
     });
     it('success', async function () {
       const dbResult = {
@@ -502,7 +499,7 @@ describe('DatabasePostgres', function () {
         duration: 22,
       };
       sinon.stub(db.db, 'result').resolves(dbResult);
-      await db.authenticationUpsert(dbCtx, identifier, credential);
+      await db.authenticationUpsert(dbCtx, identifier, credential, otpKey);
     });
     it('failure', async function() {
       credential = undefined;
@@ -513,13 +510,75 @@ describe('DatabasePostgres', function () {
       };
       sinon.stub(db.db, 'result').resolves(dbResult);
       try {
-        await db.authenticationUpsert(dbCtx, identifier, credential);
+        await db.authenticationUpsert(dbCtx, identifier, credential, otpKey);
         assert.fail(noExpectedException);
       } catch (e) {
         assert(e instanceof DBErrors.UnexpectedResult);
       }
     });
   }); // authenticationUpsert
+
+  describe('authenticationUpdateCredential', function () {
+    let identifier, credential;
+    beforeEach(function () {
+      identifier = 'username';
+    });
+    it('success', async function () {
+      const dbResult = {
+        rowCount: 1,
+        rows: undefined,
+        duration: 22,
+      };
+      sinon.stub(db.db, 'result').resolves(dbResult);
+      await db.authenticationUpdateCredential(dbCtx, identifier, credential);
+    });
+    it('failure', async function() {
+      credential = undefined;
+      const dbResult = {
+        rowCount: 0,
+        rows: undefined,
+        duration: 22,
+      };
+      sinon.stub(db.db, 'result').resolves(dbResult);
+      try {
+        await db.authenticationUpdateCredential(dbCtx, identifier, credential);
+        assert.fail(noExpectedException);
+      } catch (e) {
+        assert(e instanceof DBErrors.UnexpectedResult);
+      }
+    });
+  }); // authenticationUpdateCredential
+
+  describe('authenticationUpdateOTPKey', function () {
+    let identifier, otpKey;
+    beforeEach(function () {
+      identifier = 'username';
+      otpKey = '12345678901234567890123456789012';
+    });
+    it('success', async function () {
+      const dbResult = {
+        rowCount: 1,
+        rows: undefined,
+        duration: 22,
+      };
+      sinon.stub(db.db, 'result').resolves(dbResult);
+      await db.authenticationUpdateOTPKey(dbCtx, identifier, otpKey);
+    });
+    it('failure', async function() {
+      const dbResult = {
+        rowCount: 0,
+        rows: undefined,
+        duration: 22,
+      };
+      sinon.stub(db.db, 'result').resolves(dbResult);
+      try {
+        await db.authenticationUpdateOTPKey(dbCtx, identifier, otpKey);
+        assert.fail(noExpectedException);
+      } catch (e) {
+        assert(e instanceof DBErrors.UnexpectedResult);
+      }
+    });
+  }); // authenticationUpdateOTPKey
 
   describe('subscriptionsByTopicId', function () {
     it('success', async function () {
@@ -631,7 +690,7 @@ describe('DatabasePostgres', function () {
       const expected = new Error();
       sinon.stub(db.db, 'manyOrNone').throws(expected);
       try {
-        await db.subscriptionDeliveryClaim(dbCtx, wanted, claimTimeoutSeconds, claimant );
+        await db.subscriptionDeliveryClaim(dbCtx, wanted, claimTimeoutSeconds, claimant);
         assert.fail(noExpectedException);
       } catch (e) {
         assert.deepStrictEqual(e, expected);
@@ -650,7 +709,7 @@ describe('DatabasePostgres', function () {
         changes: 1,
         lastInsertRowid: 'c2e254c5-aa6e-4a8f-b1a1-e474b07392bb',
         duration: 11,
-      }
+      };
       sinon.stub(db.db, 'result').resolves(dbResult);
       const result = await db.subscriptionDeliveryClaimById(dbCtx, subscriptionId, claimTimeoutSeconds, claimant);
       assert.deepStrictEqual(result, expected);
@@ -1026,7 +1085,7 @@ describe('DatabasePostgres', function () {
         rowCount: 1,
         rows: [],
         duration: 10,
-      }
+      };
       const expected = {
         changes: 1,
         lastInsertRowid: undefined,
@@ -1048,7 +1107,7 @@ describe('DatabasePostgres', function () {
         rowCount: 1,
         rows: [],
         duration: 10,
-      }
+      };
       const expected = {
         changes: 1,
         lastInsertRowid: undefined,
@@ -1070,7 +1129,7 @@ describe('DatabasePostgres', function () {
         rowCount: 0,
         rows: [],
         duration: 10,
-      }
+      };
       sinon.stub(db.db, 'one').resolves(dbOne);
       sinon.stub(db.db, 'result').onCall(0).resolves(dbResult0).onCall(1).resolves(dbResult1);
       try {
@@ -1091,7 +1150,7 @@ describe('DatabasePostgres', function () {
         rowCount: 0,
         rows: [],
         duration: 10,
-      }
+      };
       sinon.stub(db.db, 'one').resolves(dbOne);
       sinon.stub(db.db, 'result').onCall(0).resolves(dbResult0).onCall(1).resolves(dbResult1);
       try {
@@ -1193,9 +1252,15 @@ describe('DatabasePostgres', function () {
 
   describe('topicGetByUrl', function () {
     it('success', async function() {
-      const expected = [];
+      const expected = { id: topicId };
       sinon.stub(db.db, 'oneOrNone').resolves(expected);
       const result = await db.topicGetByUrl(dbCtx, topicUrl);
+      assert.deepStrictEqual(result, expected);
+    });
+    it('success, no default', async function() {
+      const expected = { id: topicId };
+      sinon.stub(db.db, 'oneOrNone').resolves(expected);
+      const result = await db.topicGetByUrl(dbCtx, topicUrl, false);
       assert.deepStrictEqual(result, expected);
     });
     it('failure', async function () {
@@ -1764,7 +1829,7 @@ describe('DatabasePostgres', function () {
         rowCount: 0,
         rows: [],
         duration: 10,
-      }
+      };
       sinon.stub(db.db, 'result').resolves(dbResult);
       try {
         await db.verificationUpdate(dbCtx, verificationId, data);
@@ -1790,7 +1855,7 @@ describe('DatabasePostgres', function () {
         rowCount: 1,
         rows: [],
         duration: 10,
-      }
+      };
       sinon.stub(db.db, 'result').resolves(dbResult);
       await db.verificationValidated(dbCtx, verificationId);
     });
@@ -1799,7 +1864,7 @@ describe('DatabasePostgres', function () {
         rowCount: 0,
         rows: [],
         duration: 10,
-      }
+      };
       sinon.stub(db.db, 'result').resolves(dbResult);
       try {
         await db.verificationValidated(dbCtx, verificationId);

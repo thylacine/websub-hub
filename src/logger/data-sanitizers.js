@@ -2,14 +2,14 @@
 
 /**
  * Scrub credential from POST login body data.
- * @param {Object} data
- * @param {Boolean} sanitize
- * @returns {Boolean}
+ * @param {object} data data
+ * @param {boolean} sanitize perform sanitization
+ * @returns {boolean} needed sanitization
  */
 function sanitizePostCredential(data, sanitize = true) {
   let unclean = false;
 
-  const credentialLength = data && data.ctx && data.ctx.parsedBody && data.ctx.parsedBody.credential && data.ctx.parsedBody.credential.length;
+  const credentialLength = data?.ctx?.parsedBody?.credential?.length;
   if (credentialLength) {
     unclean = true;
   }

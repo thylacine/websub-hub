@@ -1,8 +1,7 @@
-/* eslint-env mocha */
 'use strict';
 
-const assert = require('assert');
-const sinon = require('sinon'); // eslint-disable-line node/no-unpublished-require
+const assert = require('node:assert');
+const sinon = require('sinon');
 const Logger = require('../../src/logger');
 const Config = require('../../config');
 

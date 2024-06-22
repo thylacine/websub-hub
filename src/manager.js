@@ -27,11 +27,14 @@ class Manager {
     this.communication = new Communication(logger, db, options);
   }
 
+  /**
+   * @typedef {import('node:http')} http
+   */
 
   /**
    * GET request for healthcheck.
-   * @param {http.ServerResponse} res
-   * @param {object} ctx
+   * @param {http.ServerResponse} res response
+   * @param {object} ctx context
    */
   async getHealthcheck(res, ctx) {
     const _scope = _fileScope('getHealthcheck');
@@ -46,9 +49,9 @@ class Manager {
 
   /**
    * GET request for root.
-   * @param {http.ClientRequest} req
-   * @param {http.ServerResponse} res
-   * @param {object} ctx
+   * @param {http.ClientRequest} req request
+   * @param {http.ServerResponse} res response
+   * @param {object} ctx context
    */
   async getRoot(req, res, ctx) {
     const _scope = _fileScope('getRoot');
@@ -60,25 +63,26 @@ class Manager {
   }
 
 
-  /** All the fields the root handler deals with.
+  /**
+   * All the fields the root handler deals with.
    * @typedef {object} RootData
-   * @property {string} callback - url
-   * @property {string} mode
-   * @property {string} topic
-   * @property {number} topicId
-   * @property {string} leaseSeconds
-   * @property {string} secret
-   * @property {string} httpRemoteAddr
-   * @property {string} httpFrom
-   * @property {boolean} isSecure
-   * @property {boolean} isPublisherValidated
+   * @property {string} callback url
+   * @property {string} mode mode
+   * @property {string} topic topic
+   * @property {number} topicId topic id
+   * @property {string} leaseSeconds lease seconds
+   * @property {string} secret secret
+   * @property {string} httpRemoteAddr remote address
+   * @property {string} httpFrom from
+   * @property {boolean} isSecure is secure
+   * @property {boolean} isPublisherValidated is published validated
    */
 
   /**
    * Extract api parameters.
-   * @param {http.ClientRequest} req 
-   * @param {Object} ctx
-   * @returns {RootData}
+   * @param {http.ClientRequest} req request
+   * @param {object} ctx context
+   * @returns {RootData} root data
    */
   static _getRootData(req, ctx) {
     const postData = ctx.parsedBody;
@@ -100,11 +104,12 @@ class Manager {
 
   /**
    * 
-   * @param {*} dbCtx
-   * @param {RootData} data
-   * @param {String[]} warn
-   * @param {String[]} err
-   * @param {String} requestId
+   * @param {*} dbCtx db context
+   * @param {RootData} data root data
+   * @param {string[]} warn warnings
+   * @param {string[]} err errors
+   * @param {string} requestId request id
+   * @returns {Promise<void>}
    */
   async _validateRootData(dbCtx, data, warn, err, requestId) {
     // These checks can modify data, so order matters.
@@ -118,10 +123,12 @@ class Manager {
    * Check that requested topic exists and values are in range.
    * Sets topic id, publisher validation state, and requested lease
    * seconds on data.
-   * @param {*} dbCtx
-   * @param {RootData} data
-   * @param {String[]} warn
-   * @param {String[]} err
+   * @param {*} dbCtx db context
+   * @param {RootData} data root data
+   * @param {string[]} warn warnings
+   * @param {string[]} err errors
+   * @param {string} requestId request id
+   * @returns {Promise<void>}
    */
   async _checkTopic(dbCtx, data, warn, err, requestId) {
     const _scope = _fileScope('_checkTopic');
@@ -135,7 +142,7 @@ class Manager {
 
         try {
           new URL(data.topic);
-        } catch (e) {
+        } catch (e) { // eslint-disable-line no-unused-vars
           err.push('invalid topic url (failed to parse url)');
           return;
         }
@@ -156,14 +163,12 @@ class Manager {
 
     if (data.leaseSeconds === undefined || isNaN(data.leaseSeconds)) {
       data.leaseSeconds = topic.leaseSecondsPreferred;
-    } else {
-      if (data.leaseSeconds > topic.leaseSecondsMax) {
-        data.leaseSeconds = topic.leaseSecondsMax;
-        warn.push(`requested lease too long, using ${data.leaseSeconds}`);
-      } else if (data.leaseSeconds < topic.leaseSecondsMin) {
-        data.leaseSeconds = topic.leaseSecondsMin;
-        warn.push(`requested lease too short, using ${data.leaseSeconds}`);
-      }
+    } else if (data.leaseSeconds > topic.leaseSecondsMax) {
+      data.leaseSeconds = topic.leaseSecondsMax;
+      warn.push(`requested lease too long, using ${data.leaseSeconds}`);
+    } else if (data.leaseSeconds < topic.leaseSecondsMin) {
+      data.leaseSeconds = topic.leaseSecondsMin;
+      warn.push(`requested lease too short, using ${data.leaseSeconds}`);
     }
 
     if (topic.publisherValidationUrl) {
@@ -174,9 +179,9 @@ class Manager {
 
   /**
    * Check data for valid callback url and scheme constraints.
-   * @param {RootData} data
-   * @param {String[]} warn
-   * @param {String[]} err
+   * @param {RootData} data root data
+   * @param {string[]} warn warnings
+   * @param {string[]} err errors
    */
   _checkCallbackAndSecrets(data, warn, err) {
     let isCallbackSecure = false;
@@ -187,7 +192,7 @@ class Manager {
       try {
         const c = new URL(data.callback);
         isCallbackSecure = (c.protocol.toLowerCase() === 'https:'); // Colon included because url module is weird
-      } catch (e) {
+      } catch (e) { // eslint-disable-line no-unused-vars
         err.push('invalid callback url (failed to parse url');
         return;
       }
@@ -214,11 +219,11 @@ class Manager {
   /**
    * Check mode validity and subscription requirements.
    * Publish mode is handled elsewhere in the flow.
-   * @param {*} dbCtx
-   * @param {RootData} data
-   * @param {String[]} warn
-   * @param {String[]} err
-   * @param {String} requestId
+   * @param {*} dbCtx db context
+   * @param {RootData} data root data
+   * @param {string[]} warn warnings
+   * @param {string[]} err errors
+   * @returns {Promise<void>}
    */
   async _checkMode(dbCtx, data, warn, err) {
     switch (data.mode) {
@@ -233,11 +238,10 @@ class Manager {
         }
         if (s === undefined) {
           err.push('not subscribed');
-        } else {
-          if (s.expires < currentEpoch) {
-            err.push('subscription already expired');
-          }
+        } else if (s.expires < currentEpoch) {
+          err.push('subscription already expired');
         }
+        
         break;
       }
 
@@ -251,7 +255,7 @@ class Manager {
   /**
    * Determine if a topic url is allowed to be created.
    * In the future, this may be more complicated.
-   * @returns {Boolean}
+   * @returns {boolean} is public hub
    */
   _newTopicCreationAllowed() {
     return this.options.manager.publicHub;
@@ -262,11 +266,10 @@ class Manager {
    * Check that a publish request's topic(s) are valid and exist,
    * returning an array with the results for each.
    * For a public-hub publish request, creates topics if they do not exist.
-   * @param {*} dbCtx
-   * @param {RootData} data
-   * @param {String[]} warn
-   * @param {String[]} err
-   * @param {String} requestId
+   * @param {*} dbCtx db context
+   * @param {RootData} data root data
+   * @param {string} requestId request id
+   * @returns {Promise<object[]>} results
    */
   async _publishTopics(dbCtx, data, requestId) {
     const _scope = _fileScope('_checkPublish');
@@ -289,7 +292,7 @@ class Manager {
       if (!topic && this._newTopicCreationAllowed()) {
         try {
           new URL(url);
-        } catch (e) {
+        } catch (e) { // eslint-disable-line no-unused-vars
           result.err.push('invalid topic url (failed to parse url)');
           return result;
         }
@@ -312,7 +315,9 @@ class Manager {
 
   /**
    * Render response for multi-topic publish requests.
-   * @param {Object[]} publishTopics
+   * @param {object} ctx context
+   * @param {object[]} publishTopics topics
+   * @returns {string} response content
    */
   static multiPublishContent(ctx, publishTopics) {
     const responses = publishTopics.map((topic) => ({
@@ -341,10 +346,10 @@ class Manager {
 
   /**
    * Process a publish request.
-   * @param {*} dbCtx
-   * @param {Object} data
-   * @param {http.ServerResponse} res
-   * @param {Object} ctx
+   * @param {*} dbCtx db context
+   * @param {object} data data
+   * @param {http.ServerResponse} res response
+   * @param {object} ctx context
    */
   async _publishRequest(dbCtx, data, res, ctx) {
     const _scope = _fileScope('_parsePublish');
@@ -354,7 +359,7 @@ class Manager {
 
     // Parse and validate all the topics in the request.
     data.publishTopics = await this._publishTopics(dbCtx, data, requestId);
-    if (!data.publishTopics || !data.publishTopics.length) {
+    if (!data?.publishTopics?.length) {
       const details = Manager._prettyDetails(['no valid topic urls to publish'], []);
       throw new ResponseError(Enum.ErrorResponse.BadRequest, details);
     }
@@ -389,7 +394,7 @@ class Manager {
     &&  validPublishTopics.length) {
       try {
         await Promise.all(validPublishTopics.map(async (topicResult) => this.communication.topicFetchClaimAndProcessById(dbCtx, topicResult.topicId, requestId)));
-      } catch (e) {
+      } catch (e) { // eslint-disable-line no-unused-vars
         this.logger.error(_scope, 'topicFetchClaimAndProcessById failed', { data, validPublishTopics, requestId });
         // Don't bother re-throwing, as we've already ended this response.
       }
@@ -399,9 +404,9 @@ class Manager {
 
   /**
    * Annotate any encountered issues.
-   * @param {String[]} err
-   * @param {String[]} warn
-   * @returns {String[]}
+   * @param {string[]} err errors
+   * @param {string[]} warn warnings
+   * @returns {string[]} rendered list of errors and warnings
    */
   static _prettyDetails(err, warn) {
     return [
@@ -413,9 +418,9 @@ class Manager {
 
   /**
    * POST request for root.
-   * @param {http.ClientRequest} req
-   * @param {http.ServerResponse} res
-   * @param {object} ctx
+   * @param {http.ClientRequest} req request
+   * @param {http.ServerResponse} res response
+   * @param {object} ctx context
    */
   async postRoot(req, res, ctx) {
     const _scope = _fileScope('postRoot');
@@ -463,7 +468,7 @@ class Manager {
       &&  id) {
         try {
           await this.communication.verificationClaimAndProcessById(dbCtx, id, requestId);
-        } catch (e) {
+        } catch (e) { // eslint-disable-line no-unused-vars
           this.logger.error(_scope, 'verificationClaimAndProcessById failed', { ...data, id, requestId });
           // Don't bother re-throwing, as we've already ended this response.
         }
@@ -474,15 +479,15 @@ class Manager {
 
   /**
    * Render topic info content.
-   * @param {Object} ctx
-   * @param {String} ctx.responseType
-   * @param {String} ctx.topicUrl
-   * @param {Number} ctx.count
-   * @returns {String}
+   * @param {object} ctx context
+   * @param {string} ctx.responseType response type
+   * @param {string} ctx.topicUrl topic url
+   * @param {number} ctx.count count of subscribers
+   * @returns {string} response content
    */
   // eslint-disable-next-line class-methods-use-this
   infoContent(ctx) {
-    // eslint-disable-next-line sonarjs/no-small-switch
+     
     switch (ctx.responseType) {
       case Enum.ContentType.ApplicationJson:
         return JSON.stringify({
@@ -501,8 +506,8 @@ class Manager {
 
   /**
    * GET request for /info?topic=url&format=type
-   * @param {http.ServerResponse} res
-   * @param {object} ctx
+   * @param {http.ServerResponse} res response
+   * @param {object} ctx context
    */
   async getInfo(res, ctx) {
     const _scope = _fileScope('getInfo');
@@ -530,7 +535,7 @@ class Manager {
 
     try {
       new URL(ctx.topicUrl);
-    } catch (e) {
+    } catch (e) { // eslint-disable-line no-unused-vars
       throw new ResponseError(Enum.ErrorResponse.BadRequest, 'invalid topic');
     }
 
@@ -553,9 +558,9 @@ class Manager {
 
   /**
    * label the bars of the topic update history graph
-   * @param {Number} index
-   * @param {Number} value
-   * @returns {String}
+   * @param {number} index index
+   * @param {number} value value
+   * @returns {string} caption
    */
   static _historyBarCaption(index, value) {
     let when;
@@ -569,14 +574,14 @@ class Manager {
       default:
         when = `${index} days ago`;
     }
-    return `${when}, ${value ? value : 'no'} update${value === 1 ? '': 's'}`;
+    return `${when}, ${value || 'no'} update${value === 1 ? '': 's'}`;
   }
 
 
   /**
    * GET SVG chart of topic update history
-   * @param {http.ServerResponse} res
-   * @param {object} ctx
+   * @param {http.ServerResponse} res response
+   * @param {object} ctx context
    */
   async getHistorySVG(res, ctx) {
     const _scope = _fileScope('getHistorySVG');
@@ -610,9 +615,9 @@ class Manager {
   /**
    * Determine if a profile url matches enough of a topic url to describe control over it.
    * Topic must match hostname and start with the profile's path.
-   * @param {URL} profileUrlObj
-   * @param {URL} topicUrlObj
-   * @returns {Boolean}
+   * @param {URL} profileUrlObj profile url
+   * @param {URL} topicUrlObj topic url
+   * @returns {boolean} profile is super-url of topic
    */
   static _profileControlsTopic(profileUrlObj, topicUrlObj) {
     const hostnameMatches = profileUrlObj.hostname === topicUrlObj.hostname;
@@ -623,8 +628,8 @@ class Manager {
 
   /**
    * GET request for authorized /admin information.
-   * @param {http.ServerResponse} res
-   * @param {object} ctx
+   * @param {http.ServerResponse} res response
+   * @param {object} ctx context
    */
   async getAdminOverview(res, ctx) {
     const _scope = _fileScope('getAdminOverview');
@@ -636,7 +641,7 @@ class Manager {
     this.logger.debug(_scope, 'got topics', { topics: ctx.topics });
 
     // Profile users can only see related topics.
-    if (ctx.session && ctx.session.authenticatedProfile) {
+    if (ctx?.session?.authenticatedProfile) {
       const profileUrlObj = new URL(ctx.session.authenticatedProfile);
       ctx.topics = ctx.topics.filter((topic) => {
         const topicUrlObj = new URL(topic.url);
@@ -651,8 +656,8 @@ class Manager {
 
   /**
    * GET request for authorized /admin/topic/:topicId information.
-   * @param {http.ServerResponse} res
-   * @param {object} ctx
+   * @param {http.ServerResponse} res response
+   * @param {object} ctx context
    */
   async getTopicDetails(res, ctx) {
     const _scope = _fileScope('getTopicDetails');
@@ -673,7 +678,7 @@ class Manager {
     this.logger.debug(_scope, 'got topic details', { topic: ctx.topic, subscriptions: ctx.subscriptions, updates: ctx.publishCount });
 
     // Profile users can only see related topics.
-    if (ctx.session && ctx.session.authenticatedProfile) {
+    if (ctx?.session?.authenticatedProfile) {
       const profileUrlObj = new URL(ctx.session.authenticatedProfile);
       const topicUrlObj = new URL(ctx.topic.url);
       if (!Manager._profileControlsTopic(profileUrlObj, topicUrlObj)) {
@@ -683,14 +688,14 @@ class Manager {
     }
 
     res.end(Template.adminTopicDetailsHTML(ctx, this.options));
-    this.logger.info(_scope, 'finished', { ctx, subscriptions: ctx.subscriptions.length, topic: ctx.topic && ctx.topic.id || ctx.topic });
+    this.logger.info(_scope, 'finished', { ctx, subscriptions: ctx.subscriptions.length, topic: ctx?.topic?.id || ctx.topic });
   }
 
 
   /**
    * PATCH and DELETE for updating topic data.
-   * @param {http.ServerResponse} res
-   * @param {Object} ctx
+   * @param {http.ServerResponse} res response
+   * @param {object} ctx context
    */
   async updateTopic(res, ctx) {
     const _scope = _fileScope('updateTopic');
@@ -773,8 +778,8 @@ class Manager {
 
   /**
    * PATCH and DELETE for updating subscription data.
-   * @param {http.ServerResponse} res
-   * @param {Object} ctx
+   * @param {http.ServerResponse} res response
+   * @param {object} ctx context
    */
   async updateSubscription(res, ctx) {
     const _scope = _fileScope('updateSubscription');
@@ -853,8 +858,8 @@ class Manager {
 
   /**
    * POST request for manually running worker.
-   * @param {http.ServerResponse} res
-   * @param {object} ctx
+   * @param {http.ServerResponse} res response
+   * @param {object} ctx context
    */
   async processTasks(res, ctx) {
     const _scope = _fileScope('processTasks');

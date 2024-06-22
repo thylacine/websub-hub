@@ -12,7 +12,7 @@
     "plugin:sonarjs/recommended"
   ],
   "parserOptions": {
-    "ecmaVersion": 2018
+    "ecmaVersion": "latest"
   },
   "plugins": [
     "node",

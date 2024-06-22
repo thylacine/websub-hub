@@ -10,17 +10,18 @@ const common = require('./common');
 const Enum = require('./enum');
 const Manager = require('./manager');
 const { Authenticator, SessionManager } = require('@squeep/authentication-module');
+const { initContext, navLinks } = require('./template/template-helper');
 const path = require('path');
 
 const _fileScope = common.fileScope(__filename);
 
 class Service extends Dingus {
-  constructor(logger, db, options) {
+  constructor(logger, db, options, asyncLocalStorage) {
     super(logger, {
       ...options.dingus,
       ignoreTrailingSlash: false,
     });
-
+    this.asyncLocalStorage = asyncLocalStorage;
     this.manager = new Manager(logger, db, options);
     this.authenticator = new Authenticator(logger, db, options);
     this.sessionManager = new SessionManager(logger, this.authenticator, options);
@@ -31,10 +32,10 @@ class Service extends Dingus {
     this.on('POST', '/', this.handlerPostRoot.bind(this));
 
     // Information page about service
-    this.on(['GET', 'HEAD'], '/', this.handlerGetRoot.bind(this));
+    this.on(['GET'], '/', this.handlerGetRoot.bind(this));
 
     // Give load-balancers something to check
-    this.on(['GET', 'HEAD'], '/healthcheck', this.handlerGetHealthcheck.bind(this));
+    this.on(['GET'], '/healthcheck', this.handlerGetHealthcheck.bind(this));
 
     // Public information about topics
     this.on('GET', '/info', this.handlerGetInfo.bind(this));
@@ -42,17 +43,17 @@ class Service extends Dingus {
 
     // These routes are intended for accessing static content during development.
     // In production, a proxy server would likely handle these first.
-    this.on(['GET', 'HEAD'], '/static', this.handlerRedirect.bind(this), `${options.dingus.proxyPrefix}/static/`);
-    this.on(['GET', 'HEAD'], '/static/', this.handlerGetStaticFile.bind(this), 'index.html');
-    this.on(['GET', 'HEAD'], '/static/:file', this.handlerGetStaticFile.bind(this));
-    this.on(['GET', 'HEAD'], '/favicon.ico', this.handlerGetStaticFile.bind(this), 'favicon.ico');
-    this.on(['GET', 'HEAD'], '/robots.txt', this.handlerGetStaticFile.bind(this), 'robots.txt');
+    this.on(['GET'], '/static', this.handlerRedirect.bind(this), `${options.dingus.proxyPrefix}/static/`);
+    this.on(['GET'], '/static/', this.handlerGetStaticFile.bind(this), 'index.html');
+    this.on(['GET'], '/static/:file', this.handlerGetStaticFile.bind(this));
+    this.on(['GET'], '/favicon.ico', this.handlerGetStaticFile.bind(this), 'favicon.ico');
+    this.on(['GET'], '/robots.txt', this.handlerGetStaticFile.bind(this), 'robots.txt');
 
     // Private informational endpoints
-    this.on(['GET', 'HEAD'], '/admin', this.handlerRedirect.bind(this), `${options.dingus.proxyPrefix}/admin/`);
-    this.on(['GET', 'HEAD'], '/admin/', this.handlerGetAdminOverview.bind(this));
-    this.on(['GET', 'HEAD'], '/admin/topic/:topicId', this.handlerGetAdminTopicDetails.bind(this));
-    this.on(['GET', 'HEAD'], '/admin/topic/:topicId/history.svg', this.handlerGetHistorySVG.bind(this));
+    this.on(['GET'], '/admin', this.handlerRedirect.bind(this), `${options.dingus.proxyPrefix}/admin/`);
+    this.on(['GET'], '/admin/', this.handlerGetAdminOverview.bind(this));
+    this.on(['GET'], '/admin/topic/:topicId', this.handlerGetAdminTopicDetails.bind(this));
+    this.on(['GET'], '/admin/topic/:topicId/history.svg', this.handlerGetHistorySVG.bind(this));
 
     // Private data-editing endpoints
     this.on(['PATCH', 'DELETE'], '/admin/topic/:topicId', this.handlerUpdateTopic.bind(this));
@@ -62,22 +63,51 @@ class Service extends Dingus {
     this.on('POST', '/admin/process', this.handlerPostAdminProcess.bind(this));
 
     // Admin login
-    this.on(['GET', 'HEAD'], '/admin/login', this.handlerGetAdminLogin.bind(this));
+    this.on(['GET'], '/admin/login', this.handlerGetAdminLogin.bind(this));
     this.on(['POST'], '/admin/login', this.handlerPostAdminLogin.bind(this));
     this.on(['GET'], '/admin/logout', this.handlerGetAdminLogout.bind(this));
     this.on(['GET'], '/admin/_ia', this.handlerGetAdminIA.bind(this));
+    this.on(['GET'], '/admin/settings', this.handlerGetAdminSettings.bind(this));
+    this.on(['POST'], '/admin/settings', this.handlerPostAdminSettings.bind(this));
 
+  }
+
+  /**
+   * @typedef {import('node:http')} http
+   */
+
+  /**
+   * Rearrange logging data.
+   * @param {http.ClientRequest} req request
+   * @param {http.ServerResponse} res response
+   * @param {object} ctx context
+   */
+  async preHandler(req, res, ctx) {
+    await super.preHandler(req, res, ctx);
+    ctx.url = req.url; // Persisted for logout redirect
+
+    const logObject = this.asyncLocalStorage.getStore();
+    // FIXME: for some reason, returning from the super.preHandler sometimes loses async context?
+    // Workaround until cause and solution are found.
+    if (logObject) {
+      logObject.requestId = ctx.requestId;
+      delete ctx.requestId;
+    } else {
+      this.logger.debug(_fileScope('preHandler'), 'lost async context', { req, ctx });
+    }
   }
 
 
   /**
-   * @param {http.ClientRequest} req
-   * @param {http.ServerResponse} res
-   * @param {Object} ctx
+   * @param {http.ClientRequest} req request
+   * @param {http.ServerResponse} res response
+   * @param {object} ctx context
    */
   async handlerPostRoot(req, res, ctx) {
     const _scope = _fileScope('handlerPostRoot');
     this.logger.debug(_scope, 'called', { req, ctx });
+
+    initContext(ctx);
 
     this.setResponseType(this.responseTypes, req, res, ctx);
     await this.ingestBody(req, res, ctx);
@@ -87,9 +117,9 @@ class Service extends Dingus {
 
 
   /**
-   * @param {http.ClientRequest} req
-   * @param {http.ServerResponse} res
-   * @param {Object} ctx
+   * @param {http.ClientRequest} req request
+   * @param {http.ServerResponse} res response
+   * @param {object} ctx context
    */
   async handlerGetRoot(req, res, ctx) {
     const _scope = _fileScope('handlerGetRoot');
@@ -98,7 +128,7 @@ class Service extends Dingus {
     ];
     this.logger.debug(_scope, 'called', { req, ctx });
 
-    Dingus.setHeadHandler(req, res, ctx);
+    initContext(ctx);
 
     this.setResponseType(responseTypes, req, res, ctx);
 
@@ -109,15 +139,13 @@ class Service extends Dingus {
 
 
   /**
-   * @param {http.ClientRequest} req
-   * @param {http.ServerResponse} res
-   * @param {Object} ctx
+   * @param {http.ClientRequest} req request
+   * @param {http.ServerResponse} res response
+   * @param {object} ctx context
    */
   async handlerGetHealthcheck(req, res, ctx) {
     const _scope = _fileScope('handlerGetHealthcheck');
     this.logger.debug(_scope, 'called', { req, ctx });
-  
-    Dingus.setHeadHandler(req, res, ctx);
 
     this.setResponseType(this.responseTypes, req, res, ctx);
 
@@ -126,17 +154,15 @@ class Service extends Dingus {
 
 
   /**
-   * @param {http.ClientRequest} req
-   * @param {http.ServerResponse} res
-   * @param {Object} ctx
+   * @param {http.ClientRequest} req request
+   * @param {http.ServerResponse} res response
+   * @param {object} ctx context
    */
   async handlerGetInfo(req, res, ctx) {
     const _scope = _fileScope('handlerGetInfo');
     this.logger.debug(_scope, 'called', { req, ctx });
 
     const responseTypes = [...this.responseTypes, Enum.ContentType.ImageSVG];
-
-    Dingus.setHeadHandler(req, res, ctx);
 
     this.setResponseType(responseTypes, req, res, ctx);
 
@@ -150,8 +176,6 @@ class Service extends Dingus {
 
     const responseTypes = [Enum.ContentType.ImageSVG];
 
-    Dingus.setHeadHandler(req, res, ctx);
-
     this.setResponseType(responseTypes, req, res, ctx);
 
     await this.manager.getHistorySVG(res, ctx);
@@ -159,15 +183,15 @@ class Service extends Dingus {
 
 
   /**
-   * @param {http.ClientRequest} req
-   * @param {http.ServerResponse} res
-   * @param {Object} ctx
+   * @param {http.ClientRequest} req request
+   * @param {http.ServerResponse} res response
+   * @param {object} ctx context
    */
   async handlerGetAdminOverview(req, res, ctx) {
     const _scope = _fileScope('handlerGetAdminOverview');
     this.logger.debug(_scope, 'called', { req, ctx });
 
-    Dingus.setHeadHandler(req, res, ctx);
+    initContext(ctx);
 
     this.setResponseType(this.responseTypes, req, res, ctx);
 
@@ -178,15 +202,15 @@ class Service extends Dingus {
 
 
   /**
-   * @param {http.ClientRequest} req
-   * @param {http.ServerResponse} res
-   * @param {Object} ctx
+   * @param {http.ClientRequest} req request
+   * @param {http.ServerResponse} res response
+   * @param {object} ctx context
    */
   async handlerGetAdminTopicDetails(req, res, ctx) {
     const _scope = _fileScope('handlerGetAdminTopicDetails');
     this.logger.debug(_scope, 'called', { req, ctx });
 
-    Dingus.setHeadHandler(req, res, ctx);
+    initContext(ctx);
 
     this.setResponseType(this.responseTypes, req, res, ctx);
 
@@ -198,9 +222,10 @@ class Service extends Dingus {
 
   /**
    * If no body was sent, do not parse (and thus avoid possible unsupported media type error).
-   * @param {http.ClientRequest} req
-   * @param {http.ServerResponse} res
-   * @param {Object} ctx
+   * @param {http.ClientRequest} req request
+   * @param {http.ServerResponse} res response
+   * @param {object} ctx context
+   * @returns {Promise<object>} parsed body
    */
   async maybeIngestBody(req, res, ctx) {
     return super.ingestBody(req, res, ctx, {
@@ -210,9 +235,9 @@ class Service extends Dingus {
 
 
   /**
-   * @param {http.ClientRequest} req
-   * @param {http.ServerResponse} res
-   * @param {Object} ctx
+   * @param {http.ClientRequest} req request
+   * @param {http.ServerResponse} res response
+   * @param {object} ctx context
    */
   async handlerUpdateTopic(req, res, ctx) {
     const _scope = _fileScope('handlerUpdateTopic');
@@ -229,9 +254,9 @@ class Service extends Dingus {
 
 
   /**
-   * @param {http.ClientRequest} req
-   * @param {http.ServerResponse} res
-   * @param {Object} ctx
+   * @param {http.ClientRequest} req request
+   * @param {http.ServerResponse} res response
+   * @param {object} ctx context
    */
   async handlerUpdateSubscription(req, res, ctx) {
     const _scope = _fileScope('handlerUpdateSubscription');
@@ -245,12 +270,12 @@ class Service extends Dingus {
     ctx.method = req.method;
     await this.manager.updateSubscription(res, ctx);
   }
-  
+
 
   /**
-   * @param {http.ClientRequest} req
-   * @param {http.ServerResponse} res
-   * @param {Object} ctx
+   * @param {http.ClientRequest} req request
+   * @param {http.ServerResponse} res response
+   * @param {object} ctx context
    */
   async handlerPostAdminProcess(req, res, ctx) {
     const _scope = _fileScope('handlerPostAdminProcess');
@@ -266,15 +291,15 @@ class Service extends Dingus {
 
   /**
    * Delegate login to authentication module.
-   * @param {http.ClientRequest} req
-   * @param {http.ServerResponse} res
-   * @param {Object} ctx
+   * @param {http.ClientRequest} req request
+   * @param {http.ServerResponse} res response
+   * @param {object} ctx context
    */
   async handlerGetAdminLogin(req, res, ctx) {
     const _scope = _fileScope('handlerGetAdminLogin');
     this.logger.debug(_scope, 'called', { req, ctx });
 
-    Dingus.setHeadHandler(req, res, ctx);
+    initContext(ctx);
 
     this.setResponseType(this.responseTypes, req, res, ctx);
 
@@ -284,13 +309,15 @@ class Service extends Dingus {
 
   /**
    * Delegate login to authentication module.
-   * @param {http.ClientRequest} req
-   * @param {http.ServerResponse} res
-   * @param {Object} ctx
+   * @param {http.ClientRequest} req request
+   * @param {http.ServerResponse} res response
+   * @param {object} ctx context
    */
   async handlerPostAdminLogin(req, res, ctx) {
     const _scope = _fileScope('handlerPostAdminLogin');
     this.logger.debug(_scope, 'called', { req, ctx });
+
+    initContext(ctx);
 
     this.setResponseType(this.responseTypes, req, res, ctx);
 
@@ -303,14 +330,57 @@ class Service extends Dingus {
 
 
   /**
+   * Delegate account settings to authentication module.
+   * @param {http.ClientRequest} req request
+   * @param {http.ServerResponse} res response
+   * @param {object} ctx context
+   */
+  async handlerGetAdminSettings(req, res, ctx) {
+    const _scope = _fileScope('handlerGetAdminSettings');
+    this.logger.debug(_scope, 'called', { req, ctx });
+
+    initContext(ctx);
+
+    this.setResponseType(this.responseTypes, req, res, ctx);
+
+    if (await this.authenticator.sessionRequiredLocal(req, res, ctx)) {
+      await this.sessionManager.getAdminSettings(res, ctx, navLinks);
+    }
+  }
+
+
+  /**
+   * Delegate account settings to authentication module.
+   * @param {http.ClientRequest} req request
+   * @param {http.ServerResponse} res response
+   * @param {object} ctx context
+   */
+  async handlerPostAdminSettings(req, res, ctx) {
+    const _scope = _fileScope('handlerPostAdminSettings');
+    this.logger.debug(_scope, 'called', { req, ctx });
+
+    initContext(ctx);
+
+    this.setResponseType(this.responseTypes, req, res, ctx);
+
+    if (await this.authenticator.sessionRequiredLocal(req, res, ctx)) {
+      await this.maybeIngestBody(req, res, ctx);
+      await this.sessionManager.postAdminSettings(res, ctx, navLinks);
+    }
+  }
+
+
+  /**
    * Delegate login to authentication module.
-   * @param {http.ClientRequest} req
-   * @param {http.ServerResponse} res
-   * @param {Object} ctx
+   * @param {http.ClientRequest} req request
+   * @param {http.ServerResponse} res response
+   * @param {object} ctx context
    */
   async handlerGetAdminLogout(req, res, ctx) {
     const _scope = _fileScope('handlerGetAdminLogout');
     this.logger.debug(_scope, 'called', { req, ctx });
+
+    initContext(ctx);
 
     this.setResponseType(this.responseTypes, req, res, ctx);
 
@@ -322,18 +392,17 @@ class Service extends Dingus {
 
   /**
    * Delegate login to authentication module.
-   * @param {http.ClientRequest} req
-   * @param {http.ServerResponse} res
-   * @param {Object} ctx
+   * @param {http.ClientRequest} req request
+   * @param {http.ServerResponse} res response
+   * @param {object} ctx context
    */
   async handlerGetAdminIA(req, res, ctx) {
     const _scope = _fileScope('handlerGetAdminIA');
     this.logger.debug(_scope, 'called', { req, ctx });
 
-    this.setResponseType(this.responseTypes, req, res, ctx);
+    initContext(ctx);
 
-    // Special case here, to see cookie before session established
-    ctx.cookie = req.getHeader(Enum.Header.Cookie);
+    this.setResponseType(this.responseTypes, req, res, ctx);
 
     await this.sessionManager.getAdminIA(res, ctx);
   }

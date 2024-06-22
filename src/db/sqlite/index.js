@@ -19,8 +19,8 @@ const schemaVersionsSupported = {
   },
   max: {
     major: 1,
-    minor: 0,
-    patch: 4,
+    minor: 1,
+    patch: 0,
   },
 };
 
@@ -48,7 +48,7 @@ class DatabaseSQLite extends Database {
     this.db = new SQLite(dbFilename, sqliteOptions);
     this.schemaVersionsSupported = schemaVersionsSupported;
     this.changesSinceLastOptimize = BigInt(0);
-    this.optimizeAfterChanges = options.db.connectionString.optimizeAfterChanges;
+    this.optimizeAfterChanges = options.db.optimizeAfterChanges;
     this.db.pragma('foreign_keys = on'); // Enforce consistency.
     this.db.pragma('journal_mode = WAL'); // Be faster, expect local filesystem.
     this.db.defaultSafeIntegers(true); // This probably isn't necessary, but by using these BigInts we keep weird floats out of the query logs.
@@ -70,7 +70,7 @@ class DatabaseSQLite extends Database {
     let metaExists = tableExists.get();
     if (metaExists === undefined) {
       const fPath = path.join(__dirname, 'sql', 'schema', 'init.sql');
-      // eslint-disable-next-line security/detect-non-literal-fs-filename
+       
       const fSql = fs.readFileSync(fPath, { encoding: 'utf8' });
       this.db.exec(fSql);
       metaExists = tableExists.get();
@@ -131,7 +131,7 @@ class DatabaseSQLite extends Database {
       };
     };
 
-    // eslint-disable-next-line security/detect-non-literal-fs-filename
+     
     for (const f of fs.readdirSync(sqlDir)) {
       const fPath = path.join(sqlDir, f);
       const { name: fName, ext: fExt } = path.parse(f);
@@ -241,7 +241,7 @@ class DatabaseSQLite extends Database {
         'verification_in_progress',
         'subscription',
         'subscription_delivery_in_progress',
-      ].map((table) => {
+      ].forEach((table) => {
         const result = this.db.prepare(`DELETE FROM ${table}`).run();
         this.logger.debug(_fileScope('_purgeTables'), 'success', { table, result });
       });
@@ -290,16 +290,53 @@ class DatabaseSQLite extends Database {
   }
 
 
-  authenticationUpsert(dbCtx, identifier, credential) {
+  authenticationUpsert(dbCtx, identifier, credential, otpKey) {
     const _scope = _fileScope('authenticationUpsert');
+    const scrubbedCredential = '*'.repeat((credential || '').length);
+    const scrubbedOTPKey = '*'.repeat((otpKey || '').length) || null;
+    this.logger.debug(_scope, 'called', { identifier, scrubbedCredential, scrubbedOTPKey });
+
+    let result;
+    try {
+      result = this.statement.authenticationUpsert.run({ identifier, credential, otpKey });
+      if (result.changes != 1) {
+        throw new DBErrors.UnexpectedResult('did not upsert authentication');
+      }
+    } catch (e) {
+      this.logger.error(_scope, 'failed', { error: e, identifier, scrubbedCredential, scrubbedOTPKey });
+      throw e;
+    }
+  }
+
+
+  authenticationUpdateOTPKey(dbCtx, identifier, otpKey) {
+    const _scope = _fileScope('authenticationUpdateOTPKey');
+    const scrubbedOTPKey = '*'.repeat((otpKey || '').length) || null;
+    this.logger.debug(_scope, 'called', { identifier, scrubbedOTPKey });
+
+    let result;
+    try {
+      result = this.statement.authenticationUpdateOtpKey.run({ identifier, otpKey });
+      if (result.changes != 1) {
+        throw new DBErrors.UnexpectedResult('did not update authentication otp key');
+      }
+    } catch (e) {
+      this.logger.error(_scope, 'failed', { error: e, identifier, scrubbedOTPKey });
+      throw e;
+    }
+  }
+
+
+  authenticationUpdateCredential(dbCtx, identifier, credential) {
+    const _scope = _fileScope('authenticationUpdateCredential');
     const scrubbedCredential = '*'.repeat((credential || '').length);
     this.logger.debug(_scope, 'called', { identifier, scrubbedCredential });
 
     let result;
     try {
-      result = this.statement.authenticationUpsert.run({ identifier, credential });
+      result = this.statement.authenticationUpdateCredential.run({ identifier, credential });
       if (result.changes != 1) {
-        throw new DBErrors.UnexpectedResult('did not upsert authentication');
+        throw new DBErrors.UnexpectedResult('did not update authentication credential');
       }
     } catch (e) {
       this.logger.error(_scope, 'failed', { error: e, identifier, scrubbedCredential });
@@ -310,7 +347,8 @@ class DatabaseSQLite extends Database {
 
   /**
    * Converts engine subscription fields to native types.
-   * @param {Object} data
+   * @param {object} data subscription data
+   * @returns {object} data
    */
   static _subscriptionDataToNative(data) {
     if (data) {
@@ -704,7 +742,8 @@ class DatabaseSQLite extends Database {
 
   /**
    * Converts engine topic fields to native types.
-   * @param {Object} data
+   * @param {object} data topic
+   * @returns {object} topic data
    */
   static _topicDataToNative(data) {
     if (data) {
@@ -992,7 +1031,7 @@ class DatabaseSQLite extends Database {
 
   /**
    * Converts engine verification fields to native types.
-   * @param {Object} data
+   * @param {object} data verification
    */
   static _verificationDataToNative(data) {
     if (data) {
@@ -1046,6 +1085,7 @@ class DatabaseSQLite extends Database {
 
   /**
    * Convert native verification fields to engine types.
+   * @param {object} data verification
    */
   static _verificationDataToEngine(data) {
     if (data) {

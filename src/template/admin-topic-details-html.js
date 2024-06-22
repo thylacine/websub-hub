@@ -1,18 +1,20 @@
 'use strict';
 
 const th = require('./template-helper');
+const { sessionNavLinks } = require('@squeep/authentication-module');
 
 /**
  * Show a topic with all of its subscribers.
- * @param {Object} ctx
- * @param {Object} ctx.topic
- * @param {Object[]} ctx.subscriptions
- * @param {Object} options
- * @param {Object} options.manager
- * @param {String} options.manager.pageTitle
- * @returns {String}
+ * @param {object} ctx context
+ * @param {object} ctx.topic topic
+ * @param {object[]} ctx.subscriptions subscriptions
+ * @param {object} options options
+ * @param {object} options.manager manager options
+ * @param {string} options.manager.pageTitle page title
+ * @returns {string} html
  */
 module.exports = (ctx, options) => {
+  const pagePathLevel = 2;
   const pageTitle = `${options.manager.pageTitle} - Topic Details`;
   const logoUrl = options.manager.logoUrl;
   const navLinks = [
@@ -27,11 +29,14 @@ module.exports = (ctx, options) => {
   }
 
   const htmlOptions = {
+    pageIdentifier: 'admin',
     pageTitle,
     logoUrl,
     navLinks,
     footerEntries,
   };
+  th.navLinks(pagePathLevel, ctx, htmlOptions);
+  sessionNavLinks(pagePathLevel, ctx, htmlOptions);
 
   const content = [
     `      <section class="topics">
@@ -46,7 +51,7 @@ module.exports = (ctx, options) => {
       </section>`,
     `      <section class="history">
         <p>Topic Publish History &mdash; ${ctx.publishCount} updates in the last ${ctx.publishSpan} days</p>
-        <img title="Topic Publish History" src="${ctx.params.topicId}/history.svg">
+        <img title="Topic Publish History" src="${ctx.params.topicId}/history.svg" alt="histogram of publish history">
       </section>`,
     `      <section class="subscriptions">
         <p>${ctx.subscriptions.length ? ctx.subscriptions.length : 'no'} subscription${(ctx.subscriptions.length === 1) ? '' : 's'}</p>`,
@@ -62,11 +67,11 @@ module.exports = (ctx, options) => {
     th.renderSubscriptionRowHeader(),
     `          </thead>
           <tbody>`,
-    ...(ctx.subscriptions && ctx.subscriptions.map(th.renderSubscriptionRow)),
+    ...((ctx?.subscriptions || []).map(th.renderSubscriptionRow)),
     `          </tbody>
         </table>
       </section>`,
   ];
 
-  return th.htmlPage(2, ctx, htmlOptions, content);
+  return th.htmlPage(pagePathLevel, ctx, htmlOptions, content);
 };
